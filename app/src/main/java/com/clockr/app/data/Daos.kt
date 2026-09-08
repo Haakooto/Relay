@@ -7,6 +7,24 @@ import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
+interface AlarmDao {
+    @Query("SELECT * FROM alarms ORDER BY hour, minute")
+    fun observeAll(): Flow<List<AlarmEntity>>
+
+    @Query("SELECT * FROM alarms WHERE id = :id LIMIT 1")
+    suspend fun findById(id: String): AlarmEntity?
+
+    @Query("SELECT * FROM alarms WHERE enabled = 1")
+    suspend fun getAllEnabled(): List<AlarmEntity>
+
+    @Upsert
+    suspend fun upsert(entity: AlarmEntity)
+
+    @Delete
+    suspend fun delete(entity: AlarmEntity)
+}
+
+@Dao
 interface SoundProfileDao {
     @Query("SELECT * FROM sound_profiles ORDER BY id")
     fun observeAll(): Flow<List<SoundProfileEntity>>

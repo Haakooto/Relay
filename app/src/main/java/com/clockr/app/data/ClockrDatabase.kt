@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [TimerDefEntity::class, ChainDefEntity::class, SoundProfileEntity::class],
+    entities = [TimerDefEntity::class, ChainDefEntity::class, SoundProfileEntity::class, AlarmEntity::class],
     version = 1,
     exportSchema = false,
 )
@@ -14,6 +14,7 @@ abstract class ClockrDatabase : RoomDatabase() {
     abstract fun timerDefDao(): TimerDefDao
     abstract fun chainDefDao(): ChainDefDao
     abstract fun soundProfileDao(): SoundProfileDao
+    abstract fun alarmDao(): AlarmDao
 
     companion object {
         @Volatile private var instance: ClockrDatabase? = null

@@ -1,5 +1,14 @@
 package com.clockr.app.util
 
+import java.time.DayOfWeek
+import java.time.format.TextStyle
+import java.util.Locale
+
+fun formatDays(days: Set<DayOfWeek>): String =
+    days.sorted().joinToString(", ") { it.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }
+
+fun formatTime(hour: Int, minute: Int): String = "%02d:%02d".format(hour, minute)
+
 fun formatDuration(totalSeconds: Long): String {
     val h = totalSeconds / 3600
     val m = (totalSeconds % 3600) / 60

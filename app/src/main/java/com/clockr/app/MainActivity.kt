@@ -1,9 +1,12 @@
 package com.clockr.app
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
@@ -27,6 +30,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.clockr.app.alarm.NotificationHelper
+import com.clockr.app.ui.screens.AlarmConfigScreen
 import com.clockr.app.ui.screens.AlarmsScreen
 import com.clockr.app.ui.screens.BlockConfigScreen
 import com.clockr.app.ui.screens.ClockScreen
@@ -44,9 +49,16 @@ private enum class Pane(val route: String, val label: String) {
 }
 
 class MainActivity : ComponentActivity() {
+    private val requestNotificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* no-op either way — alarms still schedule, just won't show a notification */ }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        NotificationHelper.ensureChannel(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
         setContent {
             ClockrTheme {
                 ClockrApp()
@@ -87,7 +99,9 @@ private fun ClockrApp() {
             startDestination = Pane.Timers.route,
             modifier = Modifier.padding(padding),
         ) {
-            composable(Pane.Alarms.route) { AlarmsScreen() }
+            composable(Pane.Alarms.route) {
+                AlarmsScreen(onAlarmClick = { alarmId -> navController.navigate("alarm_config/$alarmId") })
+            }
             composable(Pane.Timers.route) {
                 TimersScreen(onBlockClick = { blockId -> navController.navigate("block_config/$blockId") })
             }
@@ -100,6 +114,13 @@ private fun ClockrApp() {
             ) { backStackEntry ->
                 val blockId = backStackEntry.arguments?.getString("blockId") ?: return@composable
                 BlockConfigScreen(blockId = blockId, onBack = { navController.popBackStack() })
+            }
+            composable(
+                "alarm_config/{alarmId}",
+                arguments = listOf(navArgument("alarmId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val alarmId = backStackEntry.arguments?.getString("alarmId") ?: return@composable
+                AlarmConfigScreen(alarmId = alarmId, onBack = { navController.popBackStack() })
             }
         }
     }
