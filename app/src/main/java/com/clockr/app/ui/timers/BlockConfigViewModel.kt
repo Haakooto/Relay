@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.clockr.app.data.BlockRepository
 import com.clockr.app.data.ChainDefEntity
 import com.clockr.app.data.ClockrDatabase
+import com.clockr.app.data.SettingsRepository
 import com.clockr.app.data.TimerDefEntity
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.domain.TransitionMode
 import com.clockr.chainlang.ChainLangException
+import com.clockr.chainlang.SafetyLimits
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -45,6 +47,10 @@ data class BlockConfigUiState(
 class BlockConfigViewModel(application: Application, private val blockId: String) : AndroidViewModel(application) {
     private val db = ClockrDatabase.get(application)
     private val repository = BlockRepository(db)
+    private val settingsRepository = SettingsRepository(application)
+
+    private suspend fun currentLimits(): SafetyLimits =
+        SafetyLimits(maxPlanSize = settingsRepository.current().maxExecutionPlanSize)
 
     private val _uiState = MutableStateFlow(BlockConfigUiState())
     val uiState: StateFlow<BlockConfigUiState> = _uiState
@@ -137,7 +143,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
     private fun revalidateChain() = viewModelScope.launch {
         val expr = _uiState.value.contentExpr
         try {
-            val steps = repository.previewChainSteps(expr)
+            val steps = repository.previewChainSteps(expr, currentLimits())
             _uiState.value = _uiState.value.copy(
                 resolvedSteps = steps.map { ResolvedStepUi(it.first, it.second) },
                 error = null,
@@ -169,6 +175,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
                         transitionMode = state.transitionMode.name,
                         persistent = state.persistent,
                     ),
+                    currentLimits(),
                 )
             }
             _uiState.value = state.copy(error = null, saved = true)

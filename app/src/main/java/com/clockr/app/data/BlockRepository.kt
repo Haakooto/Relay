@@ -7,6 +7,7 @@ import com.clockr.chainlang.CycleChecker
 import com.clockr.chainlang.NowClock
 import com.clockr.chainlang.ResolvedBlockInfo
 import com.clockr.chainlang.ResolvedStep
+import com.clockr.chainlang.SafetyLimits
 import com.clockr.chainlang.UnknownReferenceException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -46,10 +47,11 @@ class BlockRepository(private val db: ClockrDatabase) : BlockResolver {
     }
 
     /** Same idea, for a Chain's content expression — each pair is (ref label or null, seconds). */
-    suspend fun previewChainSteps(source: String): List<Pair<String?, Long>> = withContext(Dispatchers.IO) {
-        ChainLang.run(source, NowClock.now(), resolver = this@BlockRepository)
-            .map { step -> (step as? BlockRefStep)?.refLabel to step.durationSeconds }
-    }
+    suspend fun previewChainSteps(source: String, limits: SafetyLimits = SafetyLimits()): List<Pair<String?, Long>> =
+        withContext(Dispatchers.IO) {
+            ChainLang.run(source, NowClock.now(), resolver = this@BlockRepository, limits = limits)
+                .map { step -> (step as? BlockRefStep)?.refLabel to step.durationSeconds }
+        }
 
     /**
      * Validates and saves a Timer definition: the duration expression itself must parse
@@ -65,8 +67,8 @@ class BlockRepository(private val db: ClockrDatabase) : BlockResolver {
      * content, then checks the *whole store's* reference graph is still a DAG including this
      * chain's edges before persisting (spec §6.6: cycle detection is mandatory, not optional).
      */
-    suspend fun saveChain(entity: ChainDefEntity): Unit = withContext(Dispatchers.IO) {
-        ChainLang.parseAndValidate(entity.contentExpr)
+    suspend fun saveChain(entity: ChainDefEntity, limits: SafetyLimits = SafetyLimits()): Unit = withContext(Dispatchers.IO) {
+        ChainLang.parseAndValidate(entity.contentExpr, limits)
         val directRefs = ChainLang.referencedLabels(entity.contentExpr)
 
         val otherChainsByLabel = db.chainDefDao().getAll()

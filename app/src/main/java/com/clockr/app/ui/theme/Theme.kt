@@ -30,9 +30,15 @@ private val DarkColors = darkColorScheme(
     onSurface = ClockrInkDark,
 )
 
+private val AmoledColors = DarkColors.copy(
+    background = androidx.compose.ui.graphics.Color.Black,
+    surface = androidx.compose.ui.graphics.Color.Black,
+)
+
 @Composable
 fun ClockrTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    amoled: Boolean = false,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
@@ -41,6 +47,7 @@ fun ClockrTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+        darkTheme && amoled -> AmoledColors
         darkTheme -> DarkColors
         else -> LightColors
     }

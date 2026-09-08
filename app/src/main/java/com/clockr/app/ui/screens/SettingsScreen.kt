@@ -5,40 +5,98 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.clockr.app.data.ThemeSetting
+import com.clockr.app.ui.settings.SettingsViewModel
 import com.clockr.app.ui.theme.ClockrTheme
-
-private val sampleSettings = listOf(
-    "Theme" to "System",
-    "Clock format" to "24h",
-    "First day of week" to "Monday",
-    "Default snooze" to "9 min",
-    "Haptics" to "On",
-    "Max execution-plan size" to "300 steps",
-)
+import java.time.DayOfWeek
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {
+    val viewModel: SettingsViewModel = viewModel()
+    val settings by viewModel.settings.collectAsState()
+
     Scaffold(modifier = modifier) { padding ->
         Column(
-            modifier = Modifier.padding(padding).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            sampleSettings.forEach { (label, value) ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text(label, style = MaterialTheme.typography.bodyLarge)
-                    Text(value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("Display", style = MaterialTheme.typography.titleLarge)
+
+            Text("Theme", style = MaterialTheme.typography.bodyLarge)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ThemeSetting.entries.forEach { option ->
+                    FilterChip(
+                        selected = settings.theme == option,
+                        onClick = { viewModel.setTheme(option) },
+                        label = { Text(option.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                    )
                 }
             }
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("24-hour clock", style = MaterialTheme.typography.bodyLarge)
+                Switch(checked = settings.clockFormat24h, onCheckedChange = viewModel::setClockFormat24h)
+            }
+
+            Text("First day of week", style = MaterialTheme.typography.bodyLarge)
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                DayOfWeek.entries.forEach { day ->
+                    FilterChip(
+                        selected = settings.firstDayOfWeek == day,
+                        onClick = { viewModel.setFirstDayOfWeek(day) },
+                        label = { Text(day.getDisplayName(TextStyle.SHORT, Locale.getDefault())) },
+                    )
+                }
+            }
+
+            OutlinedTextField(
+                value = settings.languageTag,
+                onValueChange = viewModel::setLanguageTag,
+                label = { Text("Language tag (blank = system default)") },
+                supportingText = { Text("e.g. \"en\", \"nb\", \"en-US\"") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            HorizontalDivider()
+
+            Text("Defaults", style = MaterialTheme.typography.titleLarge)
+
+            OutlinedTextField(
+                value = settings.defaultSnoozeMinutes.toString(),
+                onValueChange = { it.toIntOrNull()?.let(viewModel::setDefaultSnoozeMinutes) },
+                label = { Text("Default snooze length (minutes)") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Haptics", style = MaterialTheme.typography.bodyLarge)
+                Switch(checked = settings.haptics, onCheckedChange = viewModel::setHaptics)
+            }
+
+            OutlinedTextField(
+                value = settings.maxExecutionPlanSize.toString(),
+                onValueChange = { it.toIntOrNull()?.let(viewModel::setMaxExecutionPlanSize) },
+                label = { Text("Max execution-plan size (≤1000)") },
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

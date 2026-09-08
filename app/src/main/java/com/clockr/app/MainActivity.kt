@@ -19,9 +19,12 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -31,6 +34,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.clockr.app.alarm.NotificationHelper
+import com.clockr.app.data.ThemeSetting
 import com.clockr.app.ui.screens.AlarmConfigScreen
 import com.clockr.app.ui.screens.AlarmsScreen
 import com.clockr.app.ui.screens.BlockConfigScreen
@@ -38,6 +42,7 @@ import com.clockr.app.ui.screens.ClockScreen
 import com.clockr.app.ui.screens.SettingsScreen
 import com.clockr.app.ui.screens.StopwatchScreen
 import com.clockr.app.ui.screens.TimersScreen
+import com.clockr.app.ui.settings.SettingsViewModel
 import com.clockr.app.ui.theme.ClockrTheme
 
 private enum class Pane(val route: String, val label: String) {
@@ -60,7 +65,15 @@ class MainActivity : ComponentActivity() {
             requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
         setContent {
-            ClockrTheme {
+            val settingsViewModel: SettingsViewModel = viewModel()
+            val settings by settingsViewModel.settings.collectAsState()
+            val systemDark = isSystemInDarkTheme()
+            val darkTheme = when (settings.theme) {
+                ThemeSetting.SYSTEM -> systemDark
+                ThemeSetting.LIGHT -> false
+                ThemeSetting.DARK, ThemeSetting.AMOLED -> true
+            }
+            ClockrTheme(darkTheme = darkTheme, amoled = settings.theme == ThemeSetting.AMOLED) {
                 ClockrApp()
             }
         }
