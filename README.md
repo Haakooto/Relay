@@ -2,7 +2,7 @@
 
 Custom Android alarms / timers / stopwatch app — because the stock one is ugly and its timer can't chain.
 
-Full spec (stack, data model, timer/chain block system): https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d
+Full spec (stack, data model, timer/chain block system): [`docs/spec.html`](docs/spec.html) — open it directly in a browser, no sign-in needed. (Also mirrored at https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d, kept up to date the same way, but that one requires a claude.ai login.)
 
 ## Status
 

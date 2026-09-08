@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clockr Spec</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#EFEDE5;
+    --surface:#F8F7F1;
+    --surface-2:#E7E4D8;
+    --ink:#21201B;
+    --ink-soft:#5B584D;
+    --line:#D9D6C7;
+    --accent:#9C6414;
+    --accent-ink:#FBF4E7;
+    --teal:#2E6F66;
+    --code-bg:#1E211E;
+    --code-ink:#E7E3D3;
+    --code-soft:#A6A190;
+    --code-accent:#E8B96A;
+    --code-teal:#7FC4B8;
+    --danger:#A23B2E;
+    --shadow: 0 1px 2px rgba(30,28,20,0.06), 0 8px 24px -12px rgba(30,28,20,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15160F;
+      --surface:#1C1E17;
+      --surface-2:#262820;
+      --ink:#EDEAE0;
+      --ink-soft:#A9A491;
+      --line:#34362B;
+      --accent:#DDA84E;
+      --accent-ink:#231A05;
+      --teal:#5CB3A6;
+      --code-bg:#0F110D;
+      --code-ink:#E7E3D3;
+      --code-soft:#8D8A78;
+      --code-accent:#F0C57C;
+      --code-teal:#7FC4B8;
+      --danger:#E08472;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15160F;
+    --surface:#1C1E17;
+    --surface-2:#262820;
+    --ink:#EDEAE0;
+    --ink-soft:#A9A491;
+    --line:#34362B;
+    --accent:#DDA84E;
+    --accent-ink:#231A05;
+    --teal:#5CB3A6;
+    --code-bg:#0F110D;
+    --code-ink:#E7E3D3;
+    --code-soft:#8D8A78;
+    --code-accent:#F0C57C;
+    --code-teal:#7FC4B8;
+    --danger:#E08472;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  *{box-sizing:border-box;}
+  html{ background:var(--bg); color-scheme: light dark; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Public Sans', system-ui, sans-serif;
+    font-size:16px;
+    line-height:1.65;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, serif;
+    text-wrap:balance;
+    color:var(--ink);
+    margin:0 0 .4em;
+  }
+  a{color:var(--teal);}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-size:.72rem;
+    color:var(--accent);
+    font-weight:600;
+  }
+  code, .mono{ font-family:'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  /* ---- shell ---- */
+  .shell{ max-width:1180px; margin:0 auto; padding:0 clamp(1rem,3vw,3rem); }
+
+  .cover{
+    padding:clamp(2.5rem,6vw,4.5rem) 0 2.5rem;
+    border-bottom:1px solid var(--line);
+  }
+  .cover-top{
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    margin-bottom:2rem;
+  }
+  .wordmark{ display:flex; align-items:center; gap:.6rem; font-family:'IBM Plex Mono',monospace; font-weight:600; letter-spacing:.02em; }
+  .wordmark .dot{ width:.6rem; height:.6rem; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+  .meta-row{ display:flex; gap:1.5rem; font-family:'IBM Plex Mono',monospace; font-size:.78rem; color:var(--ink-soft); }
+  .cover h1{ font-size:clamp(2.4rem,5vw,3.6rem); font-weight:600; max-width:16ch; }
+  .cover p.tagline{ max-width:52ch; font-size:1.15rem; color:var(--ink-soft); margin:.6rem 0 0; }
+  .cover-note{
+    margin-top:1.6rem; padding:.85rem 1rem; background:var(--surface); border:1px solid var(--line);
+    border-radius:6px; font-size:.9rem; color:var(--ink-soft); max-width:60ch;
+  }
+  .cover-note strong{ color:var(--ink); }
+
+  /* tick divider — small clock-bezel motif between major sections */
+  .ticks{
+    display:flex; gap:5px; align-items:flex-end; height:14px; margin:3.2rem 0 1.6rem; opacity:.7;
+  }
+  .ticks span{ width:1px; background:var(--line); height:6px; flex:0 0 auto; }
+  .ticks span:nth-child(5n){ height:12px; background:var(--accent); opacity:.6; }
+  .ticks::after{ content:""; flex:1; border-bottom:1px solid var(--line); margin-bottom:6px; }
+
+  /* ---- layout: sidebar + content ---- */
+  .layout{ display:grid; grid-template-columns:220px minmax(0,1fr); gap:clamp(1.5rem,4vw,3.5rem); padding:2.5rem 0 5rem; align-items:start; }
+  nav.toc{ position:sticky; top:1.5rem; font-family:'IBM Plex Mono',monospace; font-size:.8rem; }
+  nav.toc .toc-label{ color:var(--ink-soft); text-transform:uppercase; letter-spacing:.1em; font-size:.68rem; margin-bottom:.8rem; display:block; }
+  nav.toc ol{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.55rem; counter-reset:toc; }
+  nav.toc li{ counter-increment:toc; }
+  nav.toc a{ color:var(--ink-soft); text-decoration:none; display:flex; gap:.5em; }
+  nav.toc a::before{ content:counter(toc,decimal-leading-zero); color:var(--accent); }
+  nav.toc a:hover{ color:var(--ink); }
+
+  main{ min-width:0; display:flex; flex-direction:column; gap:0; }
+  section{ scroll-margin-top:1.5rem; }
+  section > .eyebrow{ display:block; margin-bottom:.5rem; }
+  section h2{ font-size:1.7rem; margin-bottom:.9rem; }
+  section h3{ font-family:'Public Sans',sans-serif; font-weight:700; font-size:1.02rem; margin:1.6rem 0 .6rem; }
+  section p{ max-width:70ch; color:var(--ink); }
+  section p.lede{ color:var(--ink-soft); max-width:66ch; font-size:1.02rem; }
+
+  /* cards / entities */
+  .grid{ display:grid; gap:1rem; }
+  .grid.cols-2{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .grid.cols-3{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+  @media (max-width:760px){ .grid.cols-2,.grid.cols-3{ grid-template-columns:1fr; } .layout{ grid-template-columns:1fr; } nav.toc{ position:static; } }
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:1.1rem 1.2rem;
+  }
+  .card h4{ margin:0 0 .5rem; font-family:'IBM Plex Mono',monospace; font-size:.85rem; color:var(--accent); text-transform:uppercase; letter-spacing:.06em; }
+  .card ul{ margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:.35rem; }
+  .card li{ font-size:.88rem; display:flex; justify-content:space-between; gap:.6rem; border-bottom:1px dashed var(--line); padding-bottom:.35rem; }
+  .card li:last-child{ border-bottom:none; padding-bottom:0; }
+  .card li .fname{ color:var(--ink); }
+  .card li .ftype{ font-family:'IBM Plex Mono',monospace; font-size:.78rem; color:var(--ink-soft); white-space:nowrap; }
+  .card p.note{ margin:.6rem 0 0; font-size:.82rem; color:var(--ink-soft); }
+
+  /* tables */
+  .tablewrap{ overflow-x:auto; border:1px solid var(--line); border-radius:8px; }
+  table{ border-collapse:collapse; width:100%; font-size:.9rem; background:var(--surface); }
+  th,td{ text-align:left; padding:.6rem .8rem; border-bottom:1px solid var(--line); vertical-align:top; }
+  thead th{ font-family:'IBM Plex Mono',monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); background:var(--surface-2); }
+  tbody tr:last-child td{ border-bottom:none; }
+  td code{ background:var(--surface-2); padding:.1em .4em; border-radius:4px; font-size:.85em; }
+
+  /* code / grammar panel — instrument-panel treatment, same dark tone in both themes */
+  .panel{
+    background:var(--code-bg); color:var(--code-ink); border-radius:8px; padding:1.1rem 1.3rem;
+    font-family:'IBM Plex Mono',monospace; font-size:.85rem; line-height:1.7; overflow-x:auto; box-shadow:var(--shadow);
+  }
+  .panel .c1{ color:var(--code-accent); }
+  .panel .c2{ color:var(--code-teal); }
+  .panel .c3{ color:var(--code-soft); }
+
+  /* chain visualizer pills */
+  .chain{ display:flex; flex-wrap:wrap; gap:.5rem; margin:.9rem 0; align-items:center; }
+  .pill{
+    font-family:'IBM Plex Mono',monospace; font-size:.85rem; padding:.4rem .7rem; border-radius:999px;
+    border:1px solid var(--line); background:var(--surface); display:flex; align-items:center; gap:.4rem;
+  }
+  .pill .lab{ font-size:.65rem; text-transform:uppercase; letter-spacing:.06em; opacity:.75; }
+  .pill.work{ border-color:color-mix(in srgb, var(--accent) 50%, var(--line)); background:color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+  .pill.break{ border-color:color-mix(in srgb, var(--teal) 50%, var(--line)); background:color-mix(in srgb, var(--teal) 12%, var(--surface)); }
+  .pill.ref{ border-style:dashed; border-width:1.5px; font-weight:600; }
+  .pill.ref::before{ content:"↗"; opacity:.7; }
+  .pill.anon{ color:var(--ink-soft); }
+  .group{
+    display:flex; align-items:center; gap:.4rem; padding:.5rem; border:1.5px dashed var(--line);
+    border-radius:12px; position:relative; margin-top:.6rem;
+  }
+  .group .group-badge{
+    position:absolute; top:-.6rem; left:.6rem; background:var(--bg); padding:0 .4rem;
+    font-family:'IBM Plex Mono',monospace; font-size:.68rem; color:var(--accent); font-weight:700;
+  }
+  .block-total{ font-family:'IBM Plex Mono',monospace; font-size:.78rem; color:var(--ink-soft); margin-left:.3rem; }
+
+  .callout{
+    border-left:3px solid var(--accent); background:var(--surface); border-radius:0 8px 8px 0;
+    padding:.9rem 1.1rem; font-size:.92rem; color:var(--ink-soft); max-width:70ch;
+  }
+  .callout strong{ color:var(--ink); }
+  .callout.danger{ border-left-color:var(--danger); }
+
+  .swatches{ display:flex; gap:.7rem; flex-wrap:wrap; margin:.8rem 0; }
+  .swatch{ display:flex; flex-direction:column; gap:.4rem; align-items:flex-start; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--ink-soft); }
+  .swatch .chip{ width:64px; height:44px; border-radius:6px; border:1px solid var(--line); }
+
+  footer.doc{ border-top:1px solid var(--line); padding:2rem 0 3rem; color:var(--ink-soft); font-size:.85rem; font-family:'IBM Plex Mono',monospace; }
+</style>
+</head>
+<body>
+
+<div class="shell cover">
+  <div class="cover-top">
+    <div class="wordmark"><span class="dot"></span>CLOCKR</div>
+    <div class="meta-row">
+      <span>v0.4 — from the mockups</span>
+      <span>2026-09-08</span>
+      <span>Android · Kotlin · Compose</span>
+    </div>
+  </div>
+  <h1>A clock app worth keeping.</h1>
+  <p class="tagline">Full technical specification for a custom Android alarms / timers / stopwatch app — built because the stock one is ugly and the timer can't chain.</p>
+  <div class="cover-note">Rev 4: findings from actually looking at the mockups — stopwatches gained pause/resume/lap/restart and stay in the list whether running or not (in-memory, still not across an app kill); the Timer library card was decluttered to label + kind + total; both Timer and Chain editing now share one full-screen config-screen pattern.</div>
+</div>
+
+<div class="shell layout">
+  <nav class="toc">
+    <span class="toc-label">Contents</span>
+    <ol>
+      <li><a href="#stack">Stack &amp; platform</a></li>
+      <li><a href="#structure">App structure</a></li>
+      <li><a href="#data">Data model</a></li>
+      <li><a href="#alarms">Alarms</a></li>
+      <li><a href="#stopwatches">Stopwatches</a></li>
+      <li><a href="#timers">Timers &amp; chains</a></li>
+      <li><a href="#widgets">Widgets</a></li>
+      <li><a href="#settings">Settings</a></li>
+      <li><a href="#reliability">Permissions &amp; reliability</a></li>
+      <li><a href="#design">Visual direction</a></li>
+      <li><a href="#next">Open items &amp; next steps</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="stack">
+      <span class="eyebrow">01 — Foundation</span>
+      <h2>Stack &amp; platform</h2>
+      <p class="lede">Native, Android-only. No cross-platform framework — widgets, exact alarms, and foreground services all need native APIs, so Flutter/RN would just add a translation layer for no benefit.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>Language</td><td><code>Kotlin</code></td><td>Standard for modern Android</td></tr>
+            <tr><td>UI</td><td><code>Jetpack Compose</code></td><td>Declarative UI, shares theming logic with widgets</td></tr>
+            <tr><td>Widgets</td><td><code>Glance</code></td><td>Compose-based widget toolkit — same design tokens as the app</td></tr>
+            <tr><td>Persistence</td><td><code>Room</code></td><td>Local SQLite ORM; fully local, no sync layer needed</td></tr>
+            <tr><td>Alarms</td><td><code>AlarmManager</code> (exact)</td><td>Only reliable way to fire at a precise wall-clock time</td></tr>
+            <tr><td>Timers/chains</td><td>Foreground <code>Service</code> + <code>WorkManager</code> fallback</td><td>Survives Doze; shows a live notification with controls</td></tr>
+            <tr><td>Alarm sound picker</td><td><code>RingtoneManager</code> (<code>TYPE_ALARM</code>)</td><td>Reuses the system alarm-sound picker UI for free</td></tr>
+            <tr><td>Min SDK</td><td>33 (Android 13)</td><td>Single notification-permission code path; no legacy branches needed on your hardware</td></tr>
+            <tr><td>Target SDK</td><td>Latest stable (36)</td><td>Current Play requirements</td></tr>
+            <tr><td>Sync</td><td>None</td><td>Fully local by decision — no account, no backend</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="shell" style="padding:0;"><div class="ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div></div>
+
+    <section id="structure">
+      <span class="eyebrow">02 — Navigation</span>
+      <h2>App structure</h2>
+      <p class="lede">Five top-level panes in a bottom navigation bar. The stock app's mental model, not its execution.</p>
+      <div class="grid cols-3">
+        <div class="card"><h4>Alarms</h4><ul>
+          <li><span class="fname">List, sorted by next fire time</span></li>
+          <li><span class="fname">One-off and repeating, mixed</span></li>
+          <li><span class="fname">Swipe or toggle per alarm</span></li>
+        </ul></div>
+        <div class="card"><h4>Timers</h4><ul>
+          <li><span class="fname">Active runs front and center</span></li>
+          <li><span class="fname">Library of saved Timer / Chain blocks below</span></li>
+          <li><span class="fname">Quick-build + advanced editor</span></li>
+        </ul></div>
+        <div class="card"><h4>Stopwatch</h4><ul>
+          <li><span class="fname">List of concurrent running watches</span></li>
+          <li><span class="fname">Add with optional name + t₀</span></li>
+        </ul></div>
+        <div class="card"><h4>Clock</h4><ul>
+          <li><span class="fname">Live face with seconds, full customization preview</span></li>
+          <li><span class="fname">Default tap target for every home-screen widget</span></li>
+        </ul></div>
+        <div class="card"><h4>Settings</h4><ul>
+          <li><span class="fname">Theme, clock format, defaults</span></li>
+          <li><span class="fname">Widget presets management</span></li>
+        </ul></div>
+      </div>
+      <p style="margin-top:1rem"><span class="mono" style="color:var(--ink-soft)">Change from v0.1 —</span> the clock face is promoted from "hidden behind the widget tap" to its own pane, so it's reachable from the nav bar too, not just by tapping a widget.</p>
+    </section>
+
+    <div class="shell" style="padding:0;"><div class="ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div></div>
+
+    <section id="data">
+      <span class="eyebrow">03 — Persistence</span>
+      <h2>Data model</h2>
+      <p class="lede">Room entities. Everything local, nothing synced. <code>TimerDef</code> and <code>ChainDef</code> both implement a common <strong>RunnableBlock</strong> shape — id, label, persistent flag, own sound profile, computed total duration — which is what lets either one be started standalone <em>or</em> referenced from inside another chain.</p>
+      <div class="grid cols-3">
+        <div class="card"><h4>Alarm</h4><ul>
+          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
+          <li><span class="fname">time</span><span class="ftype">LocalTime</span></li>
+          <li><span class="fname">label</span><span class="ftype">String?</span></li>
+          <li><span class="fname">repeatDays</span><span class="ftype">Set&lt;DayOfWeek&gt;</span></li>
+          <li><span class="fname">oneOffAfterFire</span><span class="ftype">DELETE / MARK_DONE</span></li>
+          <li><span class="fname">done</span><span class="ftype">Boolean</span></li>
+          <li><span class="fname">deleteAfter</span><span class="ftype">enum / date / count</span></li>
+          <li><span class="fname">soundProfileId</span><span class="ftype">FK</span></li>
+          <li><span class="fname">snoozeMinutes</span><span class="ftype">Int</span></li>
+          <li><span class="fname">maxSnoozes</span><span class="ftype">Int?</span></li>
+          <li><span class="fname">enabled</span><span class="ftype">Boolean</span></li>
+        </ul></div>
+        <div class="card"><h4>TimerDef <span style="opacity:.6;font-weight:400;">— leaf</span></h4><ul>
+          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
+          <li><span class="fname">label</span><span class="ftype">String</span></li>
+          <li><span class="fname">duration</span><span class="ftype">DurationExpr</span></li>
+          <li><span class="fname">soundProfileId</span><span class="ftype">FK</span></li>
+          <li><span class="fname">persistent</span><span class="ftype">Boolean</span></li>
+        </ul><p class="note">Referenceable by label from any Chain once persistent.</p></div>
+        <div class="card"><h4>ChainDef <span style="opacity:.6;font-weight:400;">— composite</span></h4><ul>
+          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
+          <li><span class="fname">label</span><span class="ftype">String</span></li>
+          <li><span class="fname">persistent</span><span class="ftype">Boolean</span></li>
+          <li><span class="fname">defaultSoundProfileId</span><span class="ftype">FK</span></li>
+          <li><span class="fname">soundOverrides</span><span class="ftype">Map&lt;blockId,FK&gt;</span></li>
+          <li><span class="fname">transitionMode</span><span class="ftype">REQUIRE_INTERACTION / SEAMLESS</span></li>
+          <li><span class="fname">content</span><span class="ftype">List&lt;ChainElement&gt;</span></li>
+          <li><span class="fname">totalDuration</span><span class="ftype">computed, cached</span></li>
+        </ul></div>
+        <div class="card"><h4>ChainElement <span style="opacity:.6;font-weight:400;">— sealed</span></h4><ul>
+          <li><span class="fname">Anonymous(duration, note?)</span><span class="ftype">inherits chain default sound</span></li>
+          <li><span class="fname">FunctionGroup(fn, of)</span><span class="ftype">repeat / range / arange</span></li>
+          <li><span class="fname">Reference(blockId)</span><span class="ftype">→ TimerDef or ChainDef</span></li>
+        </ul><p class="note"><code>note</code> is a display-only tag on an Anonymous element (e.g. "lunch") — not a reusable label, doesn't create a block.</p></div>
+        <div class="card"><h4>Stopwatch <span style="opacity:.6;font-weight:400;">— in-memory only</span></h4><ul>
+          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
+          <li><span class="fname">name</span><span class="ftype">String?</span></li>
+          <li><span class="fname">t0</span><span class="ftype">Duration</span></li>
+          <li><span class="fname">accumulatedElapsed</span><span class="ftype">Duration</span></li>
+          <li><span class="fname">startedAt</span><span class="ftype">Instant?</span></li>
+          <li><span class="fname">laps</span><span class="ftype">List&lt;Duration&gt;</span></li>
+        </ul></div>
+        <div class="card"><h4>SoundProfile</h4><ul>
+          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
+          <li><span class="fname">ringtoneUri</span><span class="ftype">Uri</span></li>
+          <li><span class="fname">vibrationPattern</span><span class="ftype">enum</span></li>
+          <li><span class="fname">volume</span><span class="ftype">Float</span></li>
+        </ul></div>
+        <div class="card"><h4>WidgetConfig</h4><ul>
+          <li><span class="fname">id</span><span class="ftype">UUID (per instance)</span></li>
+          <li><span class="fname">style</span><span class="ftype">digital / analogue</span></li>
+          <li><span class="fname">showDate</span><span class="ftype">Boolean</span></li>
+          <li><span class="fname">palette</span><span class="ftype">colors, face, hands</span></li>
+          <li><span class="fname">background</span><span class="ftype">transparent/solid/gradient/image</span></li>
+          <li><span class="fname">shape</span><span class="ftype">enum + corner radius</span></li>
+        </ul></div>
+      </div>
+    </section>
+
+    <div class="shell" style="padding:0;"><div class="ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div></div>
+
+    <section id="alarms">
+      <span class="eyebrow">04 — Alarms</span>
+      <h2>Alarms</h2>
+      <div class="grid cols-2">
+        <div class="card"><h4>One-off</h4><ul>
+          <li><span class="fname">Fires once at a date + time</span></li>
+          <li><span class="fname">After firing: <em>Delete</em> or <em>Mark as done</em> — per-alarm toggle</span></li>
+          <li><span class="fname">Delete → removed immediately, no trace</span></li>
+          <li><span class="fname">Mark as done → stays in the list, greyed out with a "done" chip, until you toggle it back to active or delete it manually</span></li>
+        </ul></div>
+        <div class="card"><h4>Repeating</h4><ul>
+          <li><span class="fname">Day-of-week set (Mon–Sun)</span></li>
+          <li><span class="fname">"Delete after" — end date, or occurrence count</span></li>
+          <li><span class="fname">Email-rule style: "repeat until…" / "repeat N times"</span></li>
+        </ul></div>
+      </div>
+      <h3>Behavior</h3>
+      <ul>
+        <li>Snooze length and max-snooze count are <strong>per-alarm</strong>, not global.</li>
+        <li>Sound, vibration, and volume are per-alarm via the system alarm-sound picker.</li>
+        <li>If the alarm can't fire on time (device off, Doze denial, etc.) it fires late with a clear "this alarm was delayed" notice rather than silently skipping.</li>
+      </ul>
+    </section>
+
+    <div class="shell" style="padding:0;"><div class="ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div></div>
+
+    <section id="stopwatches">
+      <span class="eyebrow">05 — Stopwatches</span>
+      <h2>Stopwatches</h2>
+      <ul>
+        <li>Any number of stopwatches exist <strong>concurrently</strong>, each an independent card in a list — existence isn't tied to running. A stopwatch stays in the list, running or paused, until you explicitly delete it.</li>
+        <li>Per card: <strong>lap</strong> (while running), <strong>pause/resume</strong>, <strong>restart</strong> (reset to t₀), <strong>delete</strong>.</li>
+        <li>Optional name per stopwatch.</li>
+        <li>Optional <strong>t₀</strong> — a starting offset (e.g. <code>10:00</code>) instead of always counting from zero. Restart resets to t₀, not to zero.</li>
+        <li>State model: <code>accumulatedElapsed: Duration</code> plus <code>startedAt: Instant?</code> — elapsed is <code>accumulated</code> when paused, or <code>accumulated + (now − startedAt)</code> while running. Pausing folds the running segment into <code>accumulated</code> and clears <code>startedAt</code>.</li>
+        <li>Kept alive only for as long as the app process is — not backed by Room, doesn't survive an app kill/reboot. Matches how you actually use a stopwatch; if that ever needs to change, it's a one-line switch to a persisted entity, not a redesign.</li>
+      </ul>
+    </section>
+
+    <div class="shell" style="padding:0;"><div class="ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div></div>
+
+    <section id="timers">
+      <span class="eyebrow">06 — The hard part · reworked in v0.2</span>
+      <h2>Timers &amp; chains</h2>
+      <p class="lede">The core shift: a Timer or a Chain is no longer a one-shot expression that gets flattened and forgotten. Either one can be a <strong>named, persistent block</strong> that other chains reference by label — define "Work" once, reuse it everywhere, and editing it later ripples everywhere it's used.</p>
+
+      <h3>6.1 — Library &amp; config screen</h3>
+      <p>The Timers pane is a library list: each card shows only <strong>label, kind (Timer/Chain), and total duration</strong> — no content or sound details cluttering the list. Tapping a card pushes a full-screen <strong>config screen</strong> onto the nav stack (not a modal or bottom sheet), the same screen shape for both Timer and Chain. A Timer's config is short (label, duration, sound, persistent) and a Chain's is long (adds transition mode, default sound, overrides, content) — deliberately one pattern for both rather than two, even though it's more screen than a bare Timer strictly needs.</p>
+
+      <h3>6.2 — Timer (leaf block)</h3>
+      <p>Configuring a Timer means setting: a <strong>duration</strong>, a <strong>label</strong>, a <strong>sound profile</strong> (tune + vibration), and whether it's <strong>persistent</strong> (off by default).</p>
+      <ul>
+        <li>Creating a Timer always starts it immediately — persistent only decides whether the definition is <em>kept</em> afterward.</li>
+        <li><strong>Not persistent:</strong> starts immediately; if you choose "stop" when it ends, it's completely gone, no trace.</li>
+        <li><strong>Persistent:</strong> saved to the library <em>and</em> started immediately; "stop" just ends that run — the definition stays, ready to start again or be referenced by a chain.</li>
+      </ul>
+
+      <h3>6.3 — Chain (composite block)</h3>
+      <p>Configuring a Chain means setting: a <strong>label</strong>, <strong>persistent</strong>, a <strong>default sound profile</strong> (for anonymous content), optional <strong>sound-profile overrides</strong> (per referenced block, scoped to this chain only), a <strong>transition mode</strong>, and the <strong>content</strong> itself.</p>
+      <p>Content is an ordered list where each element is one of:</p>
+      <ul>
+        <li><strong>Anonymous</strong> — a bare duration (<code>3</code>, <code>30m</code>) with no identity of its own. Inherits the chain's default sound profile. May carry a display-only note ("lunch") that's just a label in the UI, not a reusable block.</li>
+        <li><strong>A function of anonymous timers</strong> — <code>range</code> / <code>arange</code> / <code>repeat</code>, exactly as before, expanding to more Anonymous elements (or to a repeated group of any element, including references).</li>
+        <li><strong>A reference</strong> — the label of an existing persistent Timer or Chain. Its duration and sound profile are looked up <em>live</em> from the source block, not copied in — so re-tuning "Work" updates every chain that references it, automatically. A reference keeps the source's own sound profile unless this chain explicitly overrides it.</li>
+      </ul>
+      <p>Every Chain also declares its <strong>transition mode</strong>: require an interaction to advance between steps, or sound the alert and continue immediately (seamless). This is the chain's own setting — it governs advancing between its steps regardless of what those steps are.</p>
+
+      <h3>6.4 — Expression grammar</h3>
+      <div class="panel"><pre style="margin:0;white-space:pre-wrap;">chain_content  = "(" element ("," element)* ")"
+element        = duration | ref | call | chain_content
+<span class="c2">ref</span>            = IDENT                               <span class="c3">// label of an existing persistent block, resolved live</span>
+call           = repeat_call | range_call | arange_call
+<span class="c1">repeat_call</span>    = "repeat" "(" int_expr "," element ")"
+<span class="c1">range_call</span>     = "range"  "(" int_expr "," int_expr ["," int_expr] ")"
+<span class="c1">arange_call</span>    = "arange" "(" int_expr "," int_expr ["," int_expr] ")"
+
+duration       = literal_duration | int_expr         <span class="c3">// bare number ⇒ minutes</span>
+literal_duration = (NUMBER "h")? (NUMBER "m")? (NUMBER "s")?
+
+int_expr       = int_term (("+" | "-") int_term)*
+int_term       = NUMBER | time_func | <span class="c2">"RANDOM"</span> "(" int_expr "," int_expr ")" | "(" int_expr ")"
+time_func      = ("MINUTE" | "HOUR" | "SECOND") "(" time_expr ")"
+time_expr      = "NOW" (("+" | "-") literal_duration)?</pre></div>
+      <p class="callout">Evaluation is still <strong>eager for durations</strong> (<code>NOW</code> resolves once, at start time) but <strong>lazy for references</strong>: a reference's duration and sound are read from the live source block each time it matters (display, start, total-duration calc) — that's what makes "editing Work updates every chain" true.</p>
+
+      <h3>6.5 — Worked example</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Block</th><th>Definition</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td><code>Work</code></td><td>TimerDef · 25m · persistent · sound: <em>sadsong</em></td><td>25m</td></tr>
+            <tr><td><code>Break</code></td><td>TimerDef · 5m · persistent · sound: <em>happysong</em></td><td>5m</td></tr>
+            <tr><td><code>Session</code></td><td>ChainDef · <code>repeat(4, (Work, Break))</code> · persistent</td><td>2h</td></tr>
+            <tr><td><code>Workday</code></td><td>ChainDef · <code>(Session, 30, Session, 60, Work)</code> · persistent · default sound: <em>joysong</em></td><td>5h 55m</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>All four are independently startable from the library. Visualized:</p>
+      <div class="group">
+        <span class="group-badge">Session — ×4 <span class="block-total">= 2h00m</span></span>
+        <div class="pill ref work">Work<span class="lab">25m</span></div>
+        <div class="pill ref break">Break<span class="lab">5m</span></div>
+      </div>
+      <div class="chain" style="margin-top:1.1rem;">
+        <div class="pill ref">Session<span class="lab">2h00m</span></div>
+        <div class="pill anon">30m</div>
+        <div class="pill ref">Session<span class="lab">2h00m</span></div>
+        <div class="pill anon">60m</div>
+        <div class="pill ref work">Work<span class="lab">25m</span></div>
+      </div>
+      <p class="mono" style="color:var(--ink-soft);font-size:.85rem;">Workday total: 5h 55m — recomputed live; retuning Work's 25m changes this number without touching Workday's own definition.</p>
+
+      <h3>6.6 — Safety limits</h3>
+      <p class="lede">A flat "100 links" cap stops making sense once chains legitimately run for hours across dozens of referenced steps. It's replaced by graph-shape limits instead of a raw count:</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Limit</th><th>Default</th><th>Configurable</th></tr></thead>
+          <tbody>
+            <tr><td>Reference graph must be a DAG</td><td>enforced, always</td><td>No</td></tr>
+            <tr><td>Max reference depth</td><td>20</td><td>No</td></tr>
+            <tr><td>Max resolved execution-plan size</td><td>300 steps</td><td>Yes, hard ceiling 1000</td></tr>
+            <tr><td>Max multiplier per <code>repeat</code>/<code>range</code>/<code>arange</code></td><td>200</td><td>No — use case above this isn't supported</td></tr>
+            <tr><td>Total duration</td><td>soft warning above 24h</td><td>Yes, threshold</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="callout danger"><strong>Cycle detection</strong> is mandatory, not optional: saving a reference that would make a block contain itself — directly (Work → Work) or indirectly (Workday → Session → Workday) — is rejected at save time, with the cycle path shown in the error. Without this, total-duration can't even be computed. Plan size is still checked symbolically before expansion, the same nesting-bomb hedge as before, just against the new, bigger cap.</p>
+
+      <h3>6.7 — On completion</h3>
+      <p>Whenever a run reaches a terminal point — a standalone Timer finishes, or the last step of a Chain finishes, with nothing to auto-advance to — three options appear: <strong>Stop</strong>, <strong>Restart</strong>, <strong>+1 minute</strong>, applied to whichever timer just hit zero.</p>
+      <ul>
+        <li>Mid-chain, between two steps, this prompt does <em>not</em> appear — the chain's transition mode (interaction-required / seamless) governs advancing instead.</li>
+        <li><strong>Stop</strong> on a non-persistent run discards it entirely. <strong>Stop</strong> on a persistent run just ends the active session; the definition stays in the library.</li>
+        <li><strong>Restart</strong> re-runs the whole thing from the top when the terminal step was the end of a chain — back to the chain's first step, not just its last leaf. For a standalone Timer (no chain involved) it just restarts that timer.</li>
+        <li><strong>+1 minute</strong> extends only the terminal step in place, whether standalone or the last leaf of a chain. Neither option changes the saved definition.</li>
+      </ul>
+    </section>
+
+    <div class="shell" style="padding:0;"><div class="ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div></div>
+
+    <section id="widgets">
+      <span class="eyebrow">07 — Home screen</span>
+      <h2>Widgets</h2>
+      <p class="lede">Built with Glance so they share the app's Compose theming directly. Multiple independent instances, each configured separately — nice-to-have, not a hard requirement.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Axis</th><th>Options</th></tr></thead>
+          <tbody>
+            <tr><td>Style</td><td>Digital or analogue, per instance</td></tr>
+            <tr><td>Date</td><td>On/off, format</td></tr>
+            <tr><td>Granularity</td><td>Minute (Android throttles widget updates; live seconds live in-app instead)</td></tr>
+            <tr><td>Colors</td><td>Face, hands/digits, text — independent</td></tr>
+            <tr><td>Font / digit style</td><td>System font, 7-segment, or custom face</td></tr>
+            <tr><td>Background</td><td>Transparent, solid, gradient, image</td></tr>
+            <tr><td>Shape / border</td><td>Corner radius, border weight &amp; color</td></tr>
+            <tr><td>Tap target</td><td>Opens the <strong>Clock</strong> pane (§02) directly</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="callout">No lock-screen version — Android removed third-party keyguard widgets in 5.0 and no OEM exposes an equivalent hook. Dropped per your call; effort goes into the home-screen widget instead.</p>
+    </section>
+
+    <div class="shell" style="padding:0;"><div class="ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div></div>
+
+    <section id="settings">
+      <span class="eyebrow">08 — Preferences</span>
+      <h2>Settings</h2>
+      <div class="grid cols-2">
+        <div class="card"><h4>Display</h4><ul>
+          <li><span class="fname">Theme</span><span class="ftype">light / dark / AMOLED</span></li>
+          <li><span class="fname">Clock format</span><span class="ftype">12h / 24h</span></li>
+          <li><span class="fname">First day of week</span><span class="ftype">any DayOfWeek</span></li>
+          <li><span class="fname">Language</span><span class="ftype">Locale, overrides system</span></li>
+        </ul></div>
+        <div class="card"><h4>Defaults</h4><ul>
+          <li><span class="fname">Default snooze length</span><span class="ftype">Int (min)</span></li>
+          <li><span class="fname">Default alarm/timer sound</span><span class="ftype">Uri</span></li>
+          <li><span class="fname">Haptics</span><span class="ftype">on / off</span></li>
+          <li><span class="fname">Max execution-plan size</span><span class="ftype">Int, ≤1000</span></li>
+          <li><span class="fname">Long-chain warning threshold</span><span class="ftype">Duration</span></li>
+        </ul></div>
+      </div>
+    </section>
+
+    <div class="shell" style="padding:0;"><div class="ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div></div>
+
+    <section id="reliability">
+      <span class="eyebrow">09 — Making it actually fire</span>
+      <h2>Permissions &amp; reliability</h2>
+      <ul>
+        <li><code>SCHEDULE_EXACT_ALARM</code> — required at 33+ for alarms to fire on time; requested with a plain-language rationale screen, not buried.</li>
+        <li><code>POST_NOTIFICATIONS</code> — requested once at first alarm/timer creation.</li>
+        <li>Foreground service + battery-optimization exemption prompt — needed once, so a seamless timer chain survives Doze and isn't killed mid-chain.</li>
+        <li>Dedicated notification channels per surface (alarms, timers, chain-transitions) so the user can tune importance/sound independently in system settings.</li>
+      </ul>
+    </section>
+
+    <div class="shell" style="padding:0;"><div class="ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div></div>
+
+    <section id="design">
+      <span class="eyebrow">10 — Starting point, not final</span>
+      <h2>Visual direction</h2>
+      <p class="lede">A seed token system for the <em>app itself</em> (distinct from this document's own palette) — Material 3 Expressive as a base, pushed further so it doesn't read as stock. Lock these tokens before building many screens; individual screen layouts stay easy to reskin since Compose separates logic from presentation.</p>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:#151513"></div>ink 151513</div>
+        <div class="swatch"><div class="chip" style="background:#F4F2EA"></div>paper F4F2EA</div>
+        <div class="swatch"><div class="chip" style="background:#C7501E"></div>accent C7501E</div>
+        <div class="swatch"><div class="chip" style="background:#2E6F66"></div>teal 2E6F66</div>
+        <div class="swatch"><div class="chip" style="background:#7A6A4F"></div>brass 7A6A4F</div>
+      </div>
+      <p>Suggested pairing: a display face with real character for large clock digits (not the system default), a plain workhorse for lists and settings, tabular numerals everywhere digits line up. Treat this as a proposal to react to — the mockups are where it actually gets pressure-tested.</p>
+    </section>
+
+    <div class="shell" style="padding:0;"><div class="ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div></div>
+
+    <section id="next">
+      <span class="eyebrow">11 — Where to go from here</span>
+      <h2>Open items &amp; next steps</h2>
+      <ul>
+        <li><strong>Name:</strong> Clockr — settled.</li>
+        <li><strong>Next:</strong> Compose-Preview mockups of the key screens (chain editor with references, widget config, clock face) before wiring any real logic.</li>
+        <li>The chain parser + reference-graph validator (cycle detection, depth, plan-size) is the riskiest piece of engineering here — worth prototyping standalone in plain Kotlin before it touches the UI.</li>
+        <li>Still open: exact wording/flow for the sound-override UI on a Chain (picking which referenced block to override, per chain); final default for the execution-plan-size cap.</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<footer class="doc"><div class="shell">Clockr — technical spec v0.4 · living document, expect revisions as screens get built</div></footer>
+</body>
+</html>

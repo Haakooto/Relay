@@ -21,11 +21,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.clockr.app.ui.screens.AlarmsScreen
+import com.clockr.app.ui.screens.BlockConfigScreen
 import com.clockr.app.ui.screens.ClockScreen
 import com.clockr.app.ui.screens.SettingsScreen
 import com.clockr.app.ui.screens.StopwatchScreen
@@ -85,10 +88,19 @@ private fun ClockrApp() {
             modifier = Modifier.padding(padding),
         ) {
             composable(Pane.Alarms.route) { AlarmsScreen() }
-            composable(Pane.Timers.route) { TimersScreen() }
+            composable(Pane.Timers.route) {
+                TimersScreen(onBlockClick = { blockId -> navController.navigate("block_config/$blockId") })
+            }
             composable(Pane.Stopwatch.route) { StopwatchScreen() }
             composable(Pane.Clock.route) { ClockScreen() }
             composable(Pane.Settings.route) { SettingsScreen() }
+            composable(
+                "block_config/{blockId}",
+                arguments = listOf(navArgument("blockId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val blockId = backStackEntry.arguments?.getString("blockId") ?: return@composable
+                BlockConfigScreen(blockId = blockId, onBack = { navController.popBackStack() })
+            }
         }
     }
 }

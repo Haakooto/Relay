@@ -1,7 +1,7 @@
 package com.clockr.app.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,23 +19,25 @@ import com.clockr.app.ui.theme.ClockrTheme
 
 /**
  * A block in the Timer/Chain library — a mockup stand-in for RunnableBlock (spec §03/§06).
+ * The card is a summary only; content, sound profile, transition mode etc. live one tap away
+ * in the config screen (spec §06 — same full-screen pattern for both Timer and Chain).
  */
-private data class BlockPreview(
+data class BlockPreview(
+    val id: String,
     val label: String,
     val kind: String,
     val total: String,
-    val detail: String,
 )
 
-private val sampleBlocks = listOf(
-    BlockPreview("Workday", "Chain", "5h 55m", "Session, 30m, Session, 60m, Work"),
-    BlockPreview("Session", "Chain", "2h 00m", "repeat(4, (Work, Break))"),
-    BlockPreview("Work", "Timer", "25m", "sadsong"),
-    BlockPreview("Break", "Timer", "5m", "happysong"),
+val sampleBlocks = listOf(
+    BlockPreview("workday", "Workday", "Chain", "5h 55m"),
+    BlockPreview("session", "Session", "Chain", "2h 00m"),
+    BlockPreview("work", "Work", "Timer", "25m"),
+    BlockPreview("break", "Break", "Timer", "5m"),
 )
 
 @Composable
-fun TimersScreen(modifier: Modifier = Modifier) {
+fun TimersScreen(modifier: Modifier = Modifier, onBlockClick: (String) -> Unit = {}) {
     Scaffold(modifier = modifier) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).padding(16.dp),
@@ -44,25 +46,22 @@ fun TimersScreen(modifier: Modifier = Modifier) {
             item {
                 Text("Library", style = MaterialTheme.typography.titleLarge)
             }
-            items(sampleBlocks) { block -> BlockCard(block) }
+            items(sampleBlocks) { block -> BlockCard(block, onClick = { onBlockClick(block.id) }) }
         }
     }
 }
 
 @Composable
-private fun BlockCard(block: BlockPreview) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(block.label, style = MaterialTheme.typography.titleLarge)
-                Text(block.total, style = MaterialTheme.typography.labelSmall)
-            }
+private fun BlockCard(block: BlockPreview, onClick: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(block.label, style = MaterialTheme.typography.titleLarge)
             Text(
-                "${block.kind} · ${block.detail}",
-                style = MaterialTheme.typography.bodyLarge,
+                "${block.kind} · ${block.total}",
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
