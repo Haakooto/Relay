@@ -9,6 +9,10 @@ data class NowClock(val hour: Int, val minute: Int, val second: Int) {
         val total = ((totalNow + delta) % 86400L + 86400L) % 86400L
         return NowClock((total / 3600L).toInt(), ((total % 3600L) / 60L).toInt(), (total % 60L).toInt())
     }
+
+    companion object {
+        fun now(): NowClock = java.time.LocalTime.now().let { NowClock(it.hour, it.minute, it.second) }
+    }
 }
 
 /** What the evaluator needs to know about a referenced persistent block — supplied by the store. */
