@@ -1,5 +1,6 @@
 package com.clockr.app.data
 
+import com.clockr.chainlang.BlockRefStep
 import com.clockr.chainlang.BlockResolver
 import com.clockr.chainlang.ChainLang
 import com.clockr.chainlang.CycleChecker
@@ -37,6 +38,17 @@ class BlockRepository(private val db: ClockrDatabase) : BlockResolver {
 
     suspend fun totalDurationSeconds(label: String): Long = withContext(Dispatchers.IO) {
         resolve(label).durationSeconds
+    }
+
+    /** For a config screen's live preview — parses/validates without persisting anything. */
+    suspend fun evalDurationPreview(source: String): Long = withContext(Dispatchers.IO) {
+        ChainLang.evalSingleDuration(source, NowClock.now())
+    }
+
+    /** Same idea, for a Chain's content expression — each pair is (ref label or null, seconds). */
+    suspend fun previewChainSteps(source: String): List<Pair<String?, Long>> = withContext(Dispatchers.IO) {
+        ChainLang.run(source, NowClock.now(), resolver = this@BlockRepository)
+            .map { step -> (step as? BlockRefStep)?.refLabel to step.durationSeconds }
     }
 
     /**

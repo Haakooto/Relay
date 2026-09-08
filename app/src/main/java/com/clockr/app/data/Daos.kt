@@ -26,6 +26,9 @@ interface TimerDefDao {
     @Query("SELECT * FROM timer_defs WHERE label = :label LIMIT 1")
     suspend fun findByLabel(label: String): TimerDefEntity?
 
+    @Query("SELECT * FROM timer_defs WHERE id = :id LIMIT 1")
+    suspend fun findById(id: String): TimerDefEntity?
+
     /** Blocking on purpose — used only by [com.clockr.app.data.BlockRepository]'s synchronous
      * chainlang `BlockResolver`, which must itself be called off the main thread. */
     @Query("SELECT * FROM timer_defs WHERE label = :label LIMIT 1")
@@ -52,6 +55,9 @@ interface ChainDefDao {
 
     @Query("SELECT * FROM chain_defs WHERE label = :label LIMIT 1")
     fun findByLabelBlocking(label: String): ChainDefEntity?
+
+    @Query("SELECT * FROM chain_defs WHERE id = :id LIMIT 1")
+    suspend fun findById(id: String): ChainDefEntity?
 
     @Upsert
     suspend fun upsert(entity: ChainDefEntity)
