@@ -1,8 +1,10 @@
 package com.clockr.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,88 +16,144 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.clockr.app.ui.stopwatch.StopwatchUi
+import com.clockr.app.ui.stopwatch.StopwatchViewModel
 import com.clockr.app.ui.theme.ClockrTheme
-
-private enum class StopwatchState { RUNNING, PAUSED }
-
-/**
- * Mockup stand-in for the Stopwatch entity (spec §03/§05): stays in the list — running or
- * paused — until explicitly removed. Not tied to being "running" to exist.
- */
-private data class StopwatchPreview(
-    val name: String?,
-    val t0: String,
-    val elapsed: String,
-    val state: StopwatchState,
-    val laps: Int,
-)
-
-private val sampleStopwatches = listOf(
-    StopwatchPreview("Interval run", t0 = "00:00", elapsed = "00:18:42", state = StopwatchState.RUNNING, laps = 3),
-    StopwatchPreview(null, t0 = "10:00", elapsed = "00:22:05", state = StopwatchState.PAUSED, laps = 0),
-    StopwatchPreview("Sourdough proof", t0 = "00:00", elapsed = "01:04:11", state = StopwatchState.PAUSED, laps = 1),
-)
+import com.clockr.app.util.formatElapsedClock
 
 @Composable
 fun StopwatchScreen(modifier: Modifier = Modifier) {
+    val viewModel: StopwatchViewModel = viewModel()
+    val stopwatches by viewModel.stopwatches.collectAsState()
+    val nowMillis by viewModel.nowMillis.collectAsState()
+    var showAddDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            FloatingActionButton(onClick = {}) { Icon(Icons.Default.Add, contentDescription = "New stopwatch") }
+            FloatingActionButton(onClick = { showAddDialog = true }) {
+                Icon(Icons.Default.Add, contentDescription = "New stopwatch")
+            }
         },
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier.padding(padding).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(sampleStopwatches) { sw -> StopwatchCard(sw) }
+        if (stopwatches.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Text(
+                    "No stopwatches running — tap + to start one",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.padding(padding).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                items(stopwatches, key = { it.id }) { sw ->
+                    StopwatchCard(
+                        sw = sw,
+                        nowMillis = nowMillis,
+                        onLap = { viewModel.lap(sw.id) },
+                        onTogglePause = { viewModel.togglePause(sw.id) },
+                        onRestart = { viewModel.restart(sw.id) },
+                        onDelete = { viewModel.delete(sw.id) },
+                    )
+                }
+            }
         }
+    }
+
+    if (showAddDialog) {
+        AddStopwatchDialog(
+            onDismiss = { showAddDialog = false },
+            onConfirm = { name, t0Minutes ->
+                viewModel.add(name, t0Minutes * 60)
+                showAddDialog = false
+            },
+        )
     }
 }
 
 @Composable
-private fun StopwatchCard(sw: StopwatchPreview) {
+private fun AddStopwatchDialog(onDismiss: () -> Unit, onConfirm: (String, Long) -> Unit) {
+    var name by remember { mutableStateOf("") }
+    var t0Text by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("New stopwatch") },
+        text = {
+            Column {
+                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name (optional)") })
+                OutlinedTextField(
+                    value = t0Text,
+                    onValueChange = { t0Text = it },
+                    label = { Text("Start from, minutes (optional)") },
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(name, t0Text.toLongOrNull() ?: 0L) }) { Text("Start") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
+}
+
+@Composable
+private fun StopwatchCard(
+    sw: StopwatchUi,
+    nowMillis: Long,
+    onLap: () -> Unit,
+    onTogglePause: () -> Unit,
+    onRestart: () -> Unit,
+    onDelete: () -> Unit,
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(sw.name ?: "Unnamed", style = MaterialTheme.typography.bodyLarge)
-                if (sw.t0 != "00:00") {
-                    Text("t₀ ${sw.t0}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-            Text(sw.elapsed, style = MaterialTheme.typography.displayLarge)
+            Text(sw.name ?: "Unnamed", style = MaterialTheme.typography.bodyLarge)
+            Text(formatElapsedClock(sw.elapsedSeconds(nowMillis)), style = MaterialTheme.typography.displayLarge)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    "${sw.laps} laps",
+                    "${sw.laps.size} laps",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Row {
-                    IconButton(onClick = {}, enabled = sw.state == StopwatchState.RUNNING) {
+                    IconButton(onClick = onLap, enabled = sw.isRunning) {
                         Icon(Icons.Default.Flag, contentDescription = "Lap")
                     }
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = onTogglePause) {
                         Icon(
-                            if (sw.state == StopwatchState.RUNNING) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (sw.state == StopwatchState.RUNNING) "Pause" else "Resume",
+                            if (sw.isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = if (sw.isRunning) "Pause" else "Resume",
                         )
                     }
-                    IconButton(onClick = {}) { Icon(Icons.Default.Replay, contentDescription = "Restart") }
-                    IconButton(onClick = {}) { Icon(Icons.Default.Close, contentDescription = "Delete") }
+                    IconButton(onClick = onRestart) { Icon(Icons.Default.Replay, contentDescription = "Restart") }
+                    IconButton(onClick = onDelete) { Icon(Icons.Default.Close, contentDescription = "Delete") }
                 }
             }
         }

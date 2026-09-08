@@ -9,6 +9,14 @@ fun formatDays(days: Set<DayOfWeek>): String =
 
 fun formatTime(hour: Int, minute: Int): String = "%02d:%02d".format(hour, minute)
 
+/** Always-padded HH:MM:SS, for a running stopwatch/timer display. */
+fun formatElapsedClock(totalSeconds: Long): String {
+    val h = totalSeconds / 3600
+    val m = (totalSeconds % 3600) / 60
+    val s = totalSeconds % 60
+    return "%02d:%02d:%02d".format(h, m, s)
+}
+
 fun formatDuration(totalSeconds: Long): String {
     val h = totalSeconds / 3600
     val m = (totalSeconds % 3600) / 60
