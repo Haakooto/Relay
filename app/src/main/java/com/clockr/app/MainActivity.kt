@@ -44,6 +44,8 @@ import com.clockr.app.ui.screens.StopwatchScreen
 import com.clockr.app.ui.screens.TimersScreen
 import com.clockr.app.ui.settings.SettingsViewModel
 import com.clockr.app.ui.theme.ClockrTheme
+import com.clockr.app.widget.EXTRA_OPEN_CLOCK
+import androidx.compose.runtime.LaunchedEffect
 
 private enum class Pane(val route: String, val label: String) {
     Alarms("alarms", "Alarms"),
@@ -73,16 +75,21 @@ class MainActivity : ComponentActivity() {
                 ThemeSetting.LIGHT -> false
                 ThemeSetting.DARK, ThemeSetting.AMOLED -> true
             }
+            val openClock = intent?.getBooleanExtra(EXTRA_OPEN_CLOCK, false) == true
             ClockrTheme(darkTheme = darkTheme, amoled = settings.theme == ThemeSetting.AMOLED) {
-                ClockrApp()
+                ClockrApp(openClock = openClock)
             }
         }
     }
 }
 
 @Composable
-private fun ClockrApp() {
+private fun ClockrApp(openClock: Boolean = false) {
     val navController = rememberNavController()
+
+    LaunchedEffect(openClock) {
+        if (openClock) navController.navigate(Pane.Clock.route)
+    }
 
     Scaffold(
         bottomBar = {

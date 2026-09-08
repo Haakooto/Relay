@@ -33,6 +33,21 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".widget.ClockrWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/clockr_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.WidgetTickReceiver"
+            android:exported="false" />
+
     </application>
 
 </manifest>
