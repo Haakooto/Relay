@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Card
@@ -19,6 +21,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -30,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -106,6 +110,7 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
     var label by remember { mutableStateOf(config.label) }
     var persistent by remember { mutableStateOf(config.persistent) }
     var transitionMode by remember { mutableStateOf(config.transitionMode) }
+    val content = remember { config.content.toMutableStateList() }
 
     Scaffold(
         topBar = {
@@ -113,7 +118,7 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                 title = { Text(config.label) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = { TextButton(onClick = onBack) { Text("Save") } },
@@ -182,7 +187,22 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
 
                 item { HorizontalDivider() }
                 item { Text("Content", style = MaterialTheme.typography.titleLarge) }
-                items(config.content) { row -> ContentRowView(row) }
+                itemsIndexed(content) { index, row ->
+                    ContentRowView(row, onRemove = { content.removeAt(index) })
+                }
+                item {
+                    OutlinedButton(
+                        onClick = {
+                            // Placeholder step — a real add-flow would open a picker for
+                            // anonymous duration vs. reference vs. repeat/range/arange (spec §6.3).
+                            content.add(ContentRow(RowKind.ANON, "new step", "1m"))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                        Text("Add step")
+                    }
+                }
             }
         }
     }
@@ -203,7 +223,7 @@ private fun SoundProfileRow(label: String, value: String) {
 }
 
 @Composable
-private fun ContentRowView(row: ContentRow) {
+private fun ContentRowView(row: ContentRow, onRemove: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -213,7 +233,17 @@ private fun ContentRowView(row: ContentRow) {
                     }
                     Text(row.groupBadge?.let { "${row.text}  $it" } ?: row.text, style = MaterialTheme.typography.bodyLarge)
                 }
-                Text(row.duration, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row {
+                    Text(
+                        row.duration,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(end = 4.dp),
+                    )
+                    IconButton(onClick = onRemove, modifier = Modifier.padding(0.dp)) {
+                        Icon(Icons.Default.Close, contentDescription = "Remove step")
+                    }
+                }
             }
             row.soundOverride?.let {
                 Text("override: $it", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
