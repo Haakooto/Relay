@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Clockr"
 include(":app")
+include(":chainlang")
