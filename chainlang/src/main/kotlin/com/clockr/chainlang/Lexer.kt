@@ -1,5 +1,8 @@
 package com.clockr.chainlang
 
+/** A lexed token plus whether at least one newline appeared in the whitespace right before it. */
+internal data class LexedToken(val token: Token, val pos: Int, val precededByNewline: Boolean)
+
 /**
  * Turns a chain expression (spec §6.4) into a flat token stream.
  *
@@ -7,36 +10,49 @@ package com.clockr.chainlang
  * already summed), while a bare `120` is a [Token.Number] — the "bare number ⇒ minutes" rule
  * from the spec is a parser/evaluator concern, not a lexer one, since a bare number also shows
  * up as a plain integer inside `range(...)`/`repeat(...)` arguments where it must NOT be scaled.
+ *
+ * Newlines are otherwise-ordinary whitespace everywhere in the grammar — `repeat(4,\n (Work,
+ * Break)\n)` parses exactly like the one-line form — except as an element separator inside
+ * `chain_content`, where one is exactly as good as a comma. Rather than a real `Newline` token
+ * (which would force every other grammar rule to explicitly tolerate it too), each token just
+ * carries whether a newline preceded it; only [Parser.parseChainContent] looks at that flag.
  */
 internal class Lexer(private val input: String) {
     private var pos = 0
 
-    fun tokenize(): List<Pair<Token, Int>> {
-        val tokens = mutableListOf<Pair<Token, Int>>()
+    fun tokenize(): List<LexedToken> {
+        val tokens = mutableListOf<LexedToken>()
         while (true) {
-            skipWhitespace()
+            val precededByNewline = skipWhitespace()
             val start = pos
             if (pos >= input.length) {
-                tokens += Token.Eof to start
+                tokens += LexedToken(Token.Eof, start, precededByNewline)
                 break
             }
             val c = input[pos]
-            when {
-                c == '(' -> { pos++; tokens += Token.LParen to start }
-                c == ')' -> { pos++; tokens += Token.RParen to start }
-                c == ',' -> { pos++; tokens += Token.Comma to start }
-                c == '+' -> { pos++; tokens += Token.Plus to start }
-                c == '-' -> { pos++; tokens += Token.Minus to start }
-                c.isDigit() -> tokens += lexNumberOrDuration() to start
-                c.isLetter() -> tokens += lexIdent() to start
+            val token = when {
+                c == '(' -> { pos++; Token.LParen }
+                c == ')' -> { pos++; Token.RParen }
+                c == ',' -> { pos++; Token.Comma }
+                c == '+' -> { pos++; Token.Plus }
+                c == '-' -> { pos++; Token.Minus }
+                c.isDigit() -> lexNumberOrDuration()
+                c.isLetter() -> lexIdent()
                 else -> throw ChainSyntaxException("unexpected character '$c'", start)
             }
+            tokens += LexedToken(token, start, precededByNewline)
         }
         return tokens
     }
 
-    private fun skipWhitespace() {
-        while (pos < input.length && input[pos].isWhitespace()) pos++
+    /** @return whether a newline was among the whitespace skipped. */
+    private fun skipWhitespace(): Boolean {
+        var sawNewline = false
+        while (pos < input.length && input[pos].isWhitespace()) {
+            if (input[pos] == '\n') sawNewline = true
+            pos++
+        }
+        return sawNewline
     }
 
     private fun readDigits(): Long {

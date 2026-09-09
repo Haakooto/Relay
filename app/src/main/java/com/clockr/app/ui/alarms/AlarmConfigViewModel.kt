@@ -1,6 +1,7 @@
 package com.clockr.app.ui.alarms
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.clockr.app.alarm.AlarmScheduler
@@ -34,6 +35,7 @@ data class AlarmConfigUiState(
     val soundProfileId: String = "",
     val snoozeMinutesText: String = "9",
     val maxSnoozesText: String = "",
+    val error: String? = null,
 ) {
     val isRepeating: Boolean get() = repeatDays.isNotEmpty()
 }
@@ -114,13 +116,26 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
             snoozesUsed = 0,
             enabled = true,
         )
-        dao.upsert(entity)
-        scheduler.schedule(entity)
-        onSuccess()
+        try {
+            dao.upsert(entity)
+            scheduler.schedule(entity)
+            onSuccess()
+        } catch (e: Exception) {
+            // The row may already be saved even if scheduling below it fails — surfacing the
+            // error (rather than letting it crash) is what stops "still there after relaunch,
+            // but never actually armed" from looking like data loss.
+            Log.e("AlarmConfigViewModel", "Failed to save/schedule alarm ${entity.id}", e)
+            _uiState.value = _uiState.value.copy(error = "Couldn't save: ${e.message ?: e::class.simpleName}")
+        }
     }
 
     fun delete(onSuccess: () -> Unit) = viewModelScope.launch {
-        dao.findById(_uiState.value.id)?.let { scheduler.cancel(it); dao.delete(it) }
-        onSuccess()
+        try {
+            dao.findById(_uiState.value.id)?.let { scheduler.cancel(it); dao.delete(it) }
+            onSuccess()
+        } catch (e: Exception) {
+            Log.e("AlarmConfigViewModel", "Failed to delete alarm ${_uiState.value.id}", e)
+            _uiState.value = _uiState.value.copy(error = "Couldn't delete: ${e.message ?: e::class.simpleName}")
+        }
     }
 }

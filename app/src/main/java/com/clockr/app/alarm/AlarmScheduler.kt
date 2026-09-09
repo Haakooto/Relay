@@ -32,7 +32,8 @@ class AlarmScheduler(private val context: Context) {
 
     private fun setAlarmClock(alarm: AlarmEntity, triggerAtMillis: Long) {
         val showIntent = PendingIntent.getActivity(
-            context, alarm.id.hashCode(), Intent(context, MainActivity::class.java),
+            context, alarm.id.hashCode(),
+            Intent(context, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         alarmManager.setAlarmClock(

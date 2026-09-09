@@ -74,6 +74,9 @@ interface ChainDefDao {
     @Query("SELECT * FROM chain_defs WHERE label = :label LIMIT 1")
     fun findByLabelBlocking(label: String): ChainDefEntity?
 
+    @Query("SELECT * FROM chain_defs WHERE label = :label LIMIT 1")
+    suspend fun findByLabel(label: String): ChainDefEntity?
+
     @Query("SELECT * FROM chain_defs WHERE id = :id LIMIT 1")
     suspend fun findById(id: String): ChainDefEntity?
 

@@ -23,6 +23,14 @@ import java.util.UUID
 const val NEW_TIMER_ROUTE_ID = "new_timer"
 const val NEW_CHAIN_ROUTE_ID = "new_chain"
 
+/** Chain-syntax keywords (spec §6.4) — a label can't collide with these or every reference to it breaks. */
+private val RESERVED_WORDS = setOf("repeat", "range", "arange", "MINUTE", "HOUR", "SECOND", "RANDOM", "NOW")
+
+/** A label doubles as a chainlang IDENT (spec §6.4), so it has to be a single valid identifier —
+ *  spaces become underscores rather than being silently dropped, matching what people expect. */
+private fun sanitizeLabel(raw: String): String =
+    raw.replace(Regex("\\s+"), "_").filter { it.isLetterOrDigit() || it == '_' }
+
 data class ResolvedStepUi(val label: String?, val seconds: Long)
 
 data class BlockConfigUiState(
@@ -31,6 +39,7 @@ data class BlockConfigUiState(
     val id: String = "",
     val kind: BlockKind = BlockKind.TIMER,
     val label: String = "",
+    val labelError: String? = null,
     val persistent: Boolean = true,
     val soundProfileId: String = "",
     // Timer-only
@@ -62,7 +71,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
                     loading = false,
                     id = UUID.randomUUID().toString(),
                     kind = BlockKind.TIMER,
-                    label = "New Timer",
+                    label = "",
                     persistent = true,
                     soundProfileId = "",
                     durationExpr = "1m",
@@ -75,7 +84,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
                     loading = false,
                     id = UUID.randomUUID().toString(),
                     kind = BlockKind.CHAIN,
-                    label = "New Chain",
+                    label = "",
                     persistent = true,
                     soundProfileId = "",
                     contentExpr = "()",
@@ -115,7 +124,11 @@ class BlockConfigViewModel(application: Application, private val blockId: String
         }
     }
 
-    fun updateLabel(value: String) { _uiState.value = _uiState.value.copy(label = value) }
+    fun updateLabel(value: String) {
+        val sanitized = sanitizeLabel(value)
+        _uiState.value = _uiState.value.copy(label = sanitized)
+        revalidateLabel()
+    }
     fun updatePersistent(value: Boolean) { _uiState.value = _uiState.value.copy(persistent = value) }
     fun updateSoundProfileId(value: String) { _uiState.value = _uiState.value.copy(soundProfileId = value) }
     fun updateTransitionMode(value: TransitionMode) { _uiState.value = _uiState.value.copy(transitionMode = value) }
@@ -128,6 +141,28 @@ class BlockConfigViewModel(application: Application, private val blockId: String
     fun updateContentExpr(value: String) {
         _uiState.value = _uiState.value.copy(contentExpr = value)
         revalidateChain()
+    }
+
+    private fun revalidateLabel() = viewModelScope.launch {
+        val label = _uiState.value.label
+        _uiState.value = _uiState.value.copy(labelError = validateLabel(label))
+    }
+
+    /** Syntax only — cheap, synchronous, safe to call on every keystroke. */
+    private fun validateLabelSyntax(label: String): String? = when {
+        label.isBlank() -> "Label can't be empty"
+        !label.first().isLetter() -> "Must start with a letter"
+        label in RESERVED_WORDS -> "\"$label\" is reserved by the chain syntax"
+        else -> null
+    }
+
+    /** Syntax + uniqueness (across both Timers and Chains — they share one reference namespace). */
+    private suspend fun validateLabel(label: String): String? {
+        validateLabelSyntax(label)?.let { return it }
+        val id = _uiState.value.id
+        val timerHit = db.timerDefDao().findByLabel(label)?.takeIf { it.id != id }
+        val chainHit = db.chainDefDao().findByLabel(label)?.takeIf { it.id != id }
+        return if (timerHit != null || chainHit != null) "\"$label\" is already in use" else null
     }
 
     private fun revalidateTimer() = viewModelScope.launch {
@@ -155,6 +190,11 @@ class BlockConfigViewModel(application: Application, private val blockId: String
 
     fun save(onSuccess: () -> Unit) = viewModelScope.launch {
         val state = _uiState.value
+        val labelIssue = validateLabel(state.label)
+        if (labelIssue != null) {
+            _uiState.value = state.copy(labelError = labelIssue)
+            return@launch
+        }
         try {
             when (state.kind) {
                 BlockKind.TIMER -> repository.saveTimer(

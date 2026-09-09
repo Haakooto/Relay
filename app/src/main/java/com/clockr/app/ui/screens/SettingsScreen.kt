@@ -28,6 +28,20 @@ import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
 
+/**
+ * Deliberately a short, fixed list rather than free text: no UI string in this app is actually
+ * translated yet (every screen uses hardcoded English literals, not string resources) — picking
+ * a language here only changes date/number formatting until real i18n work happens. A dropdown
+ * also sidesteps the bug a free-text field had: applying the locale on every keystroke via
+ * LocaleManager triggers an Activity recreation per character, which read as "the screen
+ * flickers and the letter never appears."
+ */
+private val SUPPORTED_LANGUAGES = listOf(
+    "" to "System default",
+    "en" to "English",
+    "nb" to "Norsk",
+)
+
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {
     val viewModel: SettingsViewModel = viewModel()
@@ -67,13 +81,16 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 }
             }
 
-            OutlinedTextField(
-                value = settings.languageTag,
-                onValueChange = viewModel::setLanguageTag,
-                label = { Text("Language tag (blank = system default)") },
-                supportingText = { Text("e.g. \"en\", \"nb\", \"en-US\"") },
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Text("Language", style = MaterialTheme.typography.bodyLarge)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SUPPORTED_LANGUAGES.forEach { (tag, displayName) ->
+                    FilterChip(
+                        selected = settings.languageTag == tag,
+                        onClick = { viewModel.setLanguageTag(tag) },
+                        label = { Text(displayName) },
+                    )
+                }
+            }
 
             HorizontalDivider()
 

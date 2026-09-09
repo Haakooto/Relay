@@ -1,5 +1,6 @@
 package com.clockr.app.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,6 +79,7 @@ fun StopwatchScreen(modifier: Modifier = Modifier) {
                         onTogglePause = { viewModel.togglePause(sw.id) },
                         onRestart = { viewModel.restart(sw.id) },
                         onDelete = { viewModel.delete(sw.id) },
+                        onRename = { viewModel.rename(sw.id, it) },
                     )
                 }
             }
@@ -128,10 +130,17 @@ private fun StopwatchCard(
     onTogglePause: () -> Unit,
     onRestart: () -> Unit,
     onDelete: () -> Unit,
+    onRename: (String) -> Unit,
 ) {
+    var showRenameDialog by remember { mutableStateOf(false) }
+
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(sw.name ?: "Unnamed", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                sw.name ?: "Unnamed",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.clickable { showRenameDialog = true },
+            )
             Text(formatElapsedClock(sw.elapsedSeconds(nowMillis)), style = MaterialTheme.typography.displayLarge)
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -156,8 +165,47 @@ private fun StopwatchCard(
                     IconButton(onClick = onDelete) { Icon(Icons.Default.Close, contentDescription = "Delete") }
                 }
             }
+            if (sw.laps.isNotEmpty()) {
+                Column(modifier = Modifier.padding(top = 8.dp)) {
+                    sw.laps.forEachIndexed { index, cumulative ->
+                        val previous = sw.laps.getOrNull(index - 1) ?: 0L
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text("Lap ${index + 1}", style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                "+${formatElapsedClock(cumulative - previous)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(formatElapsedClock(cumulative), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+            }
         }
     }
+
+    if (showRenameDialog) {
+        RenameStopwatchDialog(
+            initialName = sw.name ?: "",
+            onDismiss = { showRenameDialog = false },
+            onConfirm = { onRename(it); showRenameDialog = false },
+        )
+    }
+}
+
+@Composable
+private fun RenameStopwatchDialog(initialName: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    var name by remember { mutableStateOf(initialName) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Rename stopwatch") },
+        text = { OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") }) },
+        confirmButton = { TextButton(onClick = { onConfirm(name) }) { Text("Save") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }
 
 @Preview(showBackground = true)

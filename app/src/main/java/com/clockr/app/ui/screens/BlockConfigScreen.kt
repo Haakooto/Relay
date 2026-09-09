@@ -5,14 +5,18 @@ package com.clockr.app.ui.screens
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -29,6 +33,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -63,7 +70,10 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                     }
                 },
                 actions = {
-                    TextButton(enabled = state.error == null && !state.loading, onClick = { viewModel.save(onBack) }) {
+                    TextButton(
+                        enabled = state.error == null && state.labelError == null && !state.loading,
+                        onClick = { viewModel.save(onBack) },
+                    ) {
                         Text("Save")
                     }
                 },
@@ -86,6 +96,8 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                         value = state.label,
                         onValueChange = viewModel::updateLabel,
                         label = { Text("Label") },
+                        supportingText = { Text(state.labelError ?: "Letters, digits, underscore — must be unique") },
+                        isError = state.labelError != null,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -140,15 +152,24 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
 
                     item { HorizontalDivider() }
                     item {
+                        var showHelp by remember { mutableStateOf(false) }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Content", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(end = 4.dp))
+                            IconButton(onClick = { showHelp = true }, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = "Syntax help")
+                            }
+                        }
                         OutlinedTextField(
                             value = state.contentExpr,
                             onValueChange = viewModel::updateContentExpr,
-                            label = { Text("Content") },
-                            supportingText = { Text(state.error ?: "e.g. (Work, Break) or repeat(4, (Work, Break))") },
+                            supportingText = { Text(state.error ?: "e.g. (Work, Break) or repeat(4, (Work, Break)) — one line per step also works") },
                             isError = state.error != null,
-                            minLines = 2,
+                            minLines = 4,
                             modifier = Modifier.fillMaxWidth(),
                         )
+                        if (showHelp) {
+                            ChainSyntaxHelpDialog(onDismiss = { showHelp = false })
+                        }
                     }
                     if (state.error == null) {
                         item { Text("Preview", style = MaterialTheme.typography.titleLarge) }
@@ -175,6 +196,33 @@ private fun ResolvedStepRow(step: ResolvedStepUi) {
             )
         }
     }
+}
+
+@Composable
+private fun ChainSyntaxHelpDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Writing a chain") },
+        text = {
+            Column {
+                Text(
+                    "A chain is a list of steps in parentheses, one per line (or comma-separated " +
+                        "— whichever's easier):",
+                )
+                Text("(Work, Break)", fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
+                Text("Each step is one of:")
+                Text("• A plain duration: 3, 20m, 2h30m10s", modifier = Modifier.padding(top = 4.dp))
+                Text("• The name of an existing Timer or Chain, to reuse it")
+                Text("• repeat(N, step) — repeat a step N times")
+                Text("• range(start, stop, step) or arange(...) — a numpy-style count sequence")
+                Text(
+                    "Example: repeat(4, (Work, Break)) runs Work then Break, four times in a row.",
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Got it") } },
+    )
 }
 
 @Preview(showBackground = true, name = "New chain")

@@ -3,6 +3,7 @@ package com.clockr.app.alarm
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.clockr.app.data.ClockrDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +19,11 @@ class BootRescheduleReceiver : BroadcastReceiver() {
             try {
                 val dao = ClockrDatabase.get(appContext).alarmDao()
                 val scheduler = AlarmScheduler(appContext)
-                dao.getAllEnabled().forEach { scheduler.schedule(it) }
+                // One bad alarm shouldn't stop the rest from being re-armed after a reboot.
+                dao.getAllEnabled().forEach { alarm ->
+                    runCatching { scheduler.schedule(alarm) }
+                        .onFailure { Log.e("BootReschedule", "Failed to reschedule alarm ${alarm.id}", it) }
+                }
             } finally {
                 pendingResult.finish()
             }

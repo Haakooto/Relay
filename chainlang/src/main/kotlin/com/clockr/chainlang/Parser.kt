@@ -8,10 +8,9 @@ package com.clockr.chainlang
  * offset) — at the top of an "element", `(` always starts a nested chain-content group instead,
  * since that's the shape every real example in the spec actually uses.
  */
-internal class Parser(private val tokens: List<Pair<Token, Int>>) {
+internal class Parser(private val tokens: List<LexedToken>) {
     private var index = 0
 
-    private val repeatFns = setOf("repeat", "range", "arange")
     private val timeFns = setOf("MINUTE", "HOUR", "SECOND")
 
     companion object {
@@ -24,34 +23,47 @@ internal class Parser(private val tokens: List<Pair<Token, Int>>) {
         }
     }
 
-    private fun peek(): Pair<Token, Int> = tokens[index]
+    private fun peek(): LexedToken = tokens[index]
 
-    private fun advance(): Pair<Token, Int> = tokens[index].also { index++ }
+    private fun advance(): LexedToken = tokens[index].also { index++ }
 
     private inline fun <reified T : Token> expect(): T {
-        val (tok, pos) = advance()
-        return tok as? T ?: throw ChainSyntaxException("expected ${T::class.simpleName}, found $tok", pos)
+        val lexed = advance()
+        return lexed.token as? T ?: throw ChainSyntaxException("expected ${T::class.simpleName}, found ${lexed.token}", lexed.pos)
     }
 
     private fun expectIdent(name: String) {
-        val (tok, pos) = advance()
-        if (tok !is Token.Ident || tok.name != name) {
-            throw ChainSyntaxException("expected \"$name\", found $tok", pos)
+        val lexed = advance()
+        if (lexed.token !is Token.Ident || lexed.token.name != name) {
+            throw ChainSyntaxException("expected \"$name\", found ${lexed.token}", lexed.pos)
         }
     }
 
     private fun expectEof() {
-        val (tok, pos) = peek()
-        if (tok !is Token.Eof) throw ChainSyntaxException("unexpected trailing input: $tok", pos)
+        val lexed = peek()
+        if (lexed.token !is Token.Eof) throw ChainSyntaxException("unexpected trailing input: ${lexed.token}", lexed.pos)
     }
 
+    /**
+     * Newlines and commas are interchangeable separators — a mix of both is fine, so is either
+     * one repeated (blank lines, a trailing comma before a newline, etc). At least one of them
+     * is still required between elements: bare whitespace alone is not a separator. A newline
+     * is never a real [Token] (see [Lexer]) — [LexedToken.precededByNewline] is what's checked.
+     */
     fun parseChainContent(): Group {
         expect<Token.LParen>()
         val elements = mutableListOf<ChainNode>()
-        if (peek().first !is Token.RParen) {
+        if (peek().token !is Token.RParen) {
             elements += parseElement()
-            while (peek().first is Token.Comma) {
-                advance()
+            while (true) {
+                val next = peek()
+                if (next.token is Token.RParen) break
+                val isComma = next.token is Token.Comma
+                if (!isComma && !next.precededByNewline) {
+                    throw ChainSyntaxException("expected \",\" or a newline, found ${next.token}", next.pos)
+                }
+                if (isComma) advance()
+                if (peek().token is Token.RParen) break // trailing separator before the close paren
                 elements += parseElement()
             }
         }
@@ -60,13 +72,13 @@ internal class Parser(private val tokens: List<Pair<Token, Int>>) {
     }
 
     private fun parseElement(): ChainNode {
-        val (tok, pos) = peek()
-        return when (tok) {
+        val lexed = peek()
+        return when (val tok = lexed.token) {
             is Token.LParen -> parseChainContent()
             is Token.DurationLiteral -> { advance(); DurationLiteral(tok.seconds) }
             is Token.Number -> DurationExpr(parseIntExpr())
-            is Token.Ident -> parseIdentElement(tok.name, pos)
-            else -> throw ChainSyntaxException("expected an element (duration, reference, or function)", pos)
+            is Token.Ident -> parseIdentElement(tok.name, lexed.pos)
+            else -> throw ChainSyntaxException("expected an element (duration, reference, or function)", lexed.pos)
         }
     }
 
@@ -77,7 +89,7 @@ internal class Parser(private val tokens: List<Pair<Token, Int>>) {
         name in timeFns || name == "RANDOM" -> DurationExpr(parseIntExpr())
         name == "NOW" -> throw ChainSyntaxException("NOW can only appear inside MINUTE()/HOUR()/SECOND()", pos)
         else -> {
-            if (peek().first is Token.LParen) throw ChainSyntaxException("unknown function \"$name\"", pos)
+            if (peek().token is Token.LParen) throw ChainSyntaxException("unknown function \"$name\"", pos)
             advance()
             Ref(name)
         }
@@ -100,7 +112,7 @@ internal class Parser(private val tokens: List<Pair<Token, Int>>) {
         expectComma()
         val stop = parseIntExpr()
         var step: IntExpr? = null
-        if (peek().first is Token.Comma) {
+        if (peek().token is Token.Comma) {
             advance()
             step = parseIntExpr()
         }
@@ -109,14 +121,14 @@ internal class Parser(private val tokens: List<Pair<Token, Int>>) {
     }
 
     private fun expectComma() {
-        val (tok, pos) = advance()
-        if (tok !is Token.Comma) throw ChainSyntaxException("expected \",\", found $tok", pos)
+        val lexed = advance()
+        if (lexed.token !is Token.Comma) throw ChainSyntaxException("expected \",\", found ${lexed.token}", lexed.pos)
     }
 
     private fun parseIntExpr(): IntExpr {
         var left = parseIntTerm()
         while (true) {
-            when (peek().first) {
+            when (peek().token) {
                 is Token.Plus -> { advance(); left = IntAdd(left, parseIntTerm()) }
                 is Token.Minus -> { advance(); left = IntSub(left, parseIntTerm()) }
                 else -> return left
@@ -125,12 +137,12 @@ internal class Parser(private val tokens: List<Pair<Token, Int>>) {
     }
 
     private fun parseIntTerm(): IntExpr {
-        val (tok, pos) = peek()
-        return when (tok) {
+        val lexed = peek()
+        return when (val tok = lexed.token) {
             is Token.Number -> { advance(); IntLiteral(tok.value) }
             is Token.LParen -> { advance(); val e = parseIntExpr(); expect<Token.RParen>(); e }
-            is Token.Ident -> parseIdentIntTerm(tok.name, pos)
-            else -> throw ChainSyntaxException("expected a number or expression", pos)
+            is Token.Ident -> parseIdentIntTerm(tok.name, lexed.pos)
+            else -> throw ChainSyntaxException("expected a number or expression", lexed.pos)
         }
     }
 
@@ -155,13 +167,13 @@ internal class Parser(private val tokens: List<Pair<Token, Int>>) {
     }
 
     private fun parseTimeExpr(): TimeExpr {
-        val (tok, pos) = peek()
-        if (tok !is Token.Ident || tok.name != "NOW") {
-            throw ChainSyntaxException("expected NOW", pos)
+        val lexed = peek()
+        if (lexed.token !is Token.Ident || lexed.token.name != "NOW") {
+            throw ChainSyntaxException("expected NOW", lexed.pos)
         }
         advance()
         var offset = 0L
-        when (peek().first) {
+        when (peek().token) {
             is Token.Plus -> { advance(); offset = readOffsetSeconds() }
             is Token.Minus -> { advance(); offset = -readOffsetSeconds() }
             else -> {}
@@ -171,11 +183,11 @@ internal class Parser(private val tokens: List<Pair<Token, Int>>) {
 
     /** Bare-number-⇒-minutes applies here too, in addition to explicit `2h30m` literals. */
     private fun readOffsetSeconds(): Long {
-        val (tok, pos) = advance()
-        return when (tok) {
+        val lexed = advance()
+        return when (val tok = lexed.token) {
             is Token.DurationLiteral -> tok.seconds
             is Token.Number -> tok.value * 60
-            else -> throw ChainSyntaxException("expected a duration after +/-", pos)
+            else -> throw ChainSyntaxException("expected a duration after +/-", lexed.pos)
         }
     }
 }

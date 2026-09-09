@@ -69,6 +69,8 @@ class StopwatchViewModel : ViewModel() {
         if (!sw.isRunning) sw else sw.copy(laps = sw.laps + sw.elapsedSeconds(System.currentTimeMillis()))
     }
 
+    fun rename(id: String, newName: String) = update(id) { sw -> sw.copy(name = newName.takeIf { it.isNotBlank() }) }
+
     /** Resets to t0, not to zero (spec §05). */
     fun restart(id: String) = update(id) { sw ->
         sw.copy(accumulatedSeconds = 0, startedAtMillis = System.currentTimeMillis(), laps = emptyList())
