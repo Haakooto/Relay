@@ -64,7 +64,6 @@
   }
 
   *{box-sizing:border-box;}
-  html{ background:var(--bg); color-scheme: light dark; }
   body{
     margin:0;
     background:var(--bg);
@@ -214,14 +213,14 @@
   <div class="cover-top">
     <div class="wordmark"><span class="dot"></span>CLOCKR</div>
     <div class="meta-row">
-      <span>v0.4 — from the mockups</span>
+      <span>v0.5 — scheduling &amp; modularity</span>
       <span>2026-09-08</span>
       <span>Android · Kotlin · Compose</span>
     </div>
   </div>
   <h1>A clock app worth keeping.</h1>
   <p class="tagline">Full technical specification for a custom Android alarms / timers / stopwatch app — built because the stock one is ugly and the timer can't chain.</p>
-  <div class="cover-note">Rev 4: findings from actually looking at the mockups — stopwatches gained pause/resume/lap/restart and stay in the list whether running or not (in-memory, still not across an app kill); the Timer library card was decluttered to label + kind + total; both Timer and Chain editing now share one full-screen config-screen pattern.</div>
+  <div class="cover-note">Rev 5: design-only pass, nothing built yet — an alarm generalizes to a <strong>scheduled trigger</strong> with a target (anonymous / Timer-or-Chain / Stopwatch), chains get an optional per-step transition override, and the completion UI (Stop/Restart/+1min vs. Dismiss/Snooze) is meant to be one shared, pluggable module. Flags real rework needed in already-built code — see §04.2 and §11.</div>
 </div>
 
 <div class="shell layout">
@@ -325,7 +324,8 @@
           <li><span class="fname">snoozeMinutes</span><span class="ftype">Int</span></li>
           <li><span class="fname">maxSnoozes</span><span class="ftype">Int?</span></li>
           <li><span class="fname">enabled</span><span class="ftype">Boolean</span></li>
-        </ul></div>
+          <li><span class="fname">target</span><span class="ftype">sealed — planned, see §4.2</span></li>
+        </ul><p class="note">Today's fields (<code>oneOffAfterFire</code>, <code>done</code>) only make sense for an <code>Anonymous</code> target — adopting §4.2 splits this into generic scheduling fields + a <code>target: Anonymous | TimerOrChain(blockId) | Stopwatch(name?, t0)</code>.</p></div>
         <div class="card"><h4>TimerDef <span style="opacity:.6;font-weight:400;">— leaf</span></h4><ul>
           <li><span class="fname">id</span><span class="ftype">UUID</span></li>
           <li><span class="fname">label</span><span class="ftype">String</span></li>
@@ -338,8 +338,8 @@
           <li><span class="fname">label</span><span class="ftype">String</span></li>
           <li><span class="fname">persistent</span><span class="ftype">Boolean</span></li>
           <li><span class="fname">defaultSoundProfileId</span><span class="ftype">FK</span></li>
-          <li><span class="fname">soundOverrides</span><span class="ftype">Map&lt;blockId,FK&gt;</span></li>
-          <li><span class="fname">transitionMode</span><span class="ftype">REQUIRE_INTERACTION / SEAMLESS</span></li>
+          <li><span class="fname">soundOverrides</span><span class="ftype">Map&lt;blockId,FK&gt; — →StepOverride, §6.3</span></li>
+          <li><span class="fname">transitionMode</span><span class="ftype">REQUIRE_INTERACTION / SEAMLESS (default)</span></li>
           <li><span class="fname">content</span><span class="ftype">List&lt;ChainElement&gt;</span></li>
           <li><span class="fname">totalDuration</span><span class="ftype">computed, cached</span></li>
         </ul></div>
@@ -381,6 +381,8 @@
     <section id="alarms">
       <span class="eyebrow">04 — Alarms</span>
       <h2>Alarms</h2>
+
+      <h3>4.1 — Today's model</h3>
       <div class="grid cols-2">
         <div class="card"><h4>One-off</h4><ul>
           <li><span class="fname">Fires once at a date + time</span></li>
@@ -400,6 +402,18 @@
         <li>Sound, vibration, and volume are per-alarm via the system alarm-sound picker.</li>
         <li>If the alarm can't fire on time (device off, Doze denial, etc.) it fires late with a clear "this alarm was delayed" notice rather than silently skipping.</li>
       </ul>
+
+      <h3>4.2 — Generalizing: scheduled triggers <span style="opacity:.6;font-weight:400;">(design-only, not built)</span></h3>
+      <p class="lede">An alarm is a special case of a more general primitive: <strong>a scheduled trigger</strong> — a time, a repeat pattern, and a target that fires. A zero-duration Timer <em>is</em> today's alarm; the same time+repeat machinery can just as well start a Timer, a Chain, or a Stopwatch. Dropping the Alarms pane in favor of "just schedule a zero-second timer" would be a worse product for purely human reasons — people think in alarms — so the pane stays, but what it can point at grows.</p>
+      <ul>
+        <li>The Alarms pane gets <strong>three sub-panes</strong>: <strong>Anonymous</strong> (today's alarm, unchanged), <strong>Timer/Chain</strong> (fires by starting a persistent Timer or Chain block), <strong>Stopwatch</strong> (fires by starting a stopwatch, optionally with a name and t₀).</li>
+        <li>The scheduling config — time, repeat days, delete-after, snooze — is <strong>shared</strong> across all three; only the target and what "firing" means differs.</li>
+        <li>A repeating <strong>Timer/Chain</strong> trigger is the natural way to get "run my Workday chain every weekday at 8am" — the payoff for building this at all.</li>
+        <li>Snooze generalizes cleanly to "delay the trigger" regardless of target — no new concept needed.</li>
+        <li><strong>Stopwatch</strong> triggers are the one wrinkle: stopwatches are deliberately in-memory-only (spec §05), but "start at T" only needs one small persisted seed (start timestamp + name + t₀) that the Stopwatch pane reads back on next open to reconstruct "this has been running since T" — it doesn't mean abandoning the in-memory design for manually-started stopwatches.</li>
+        <li>Scheduling a <em>lap</em> on an already-running stopwatch at a future time (also raised alongside this) is a separate, smaller feature — a per-stopwatch mini-scheduler, not a target type under Alarms. Tracked, not designed yet.</li>
+      </ul>
+      <p class="callout danger">This is not backward-compatible with the <code>Alarm</code> entity as built (§03): <code>oneOffAfterFire</code> and <code>done</code> only make sense for the Anonymous target. Adopting this means splitting <code>Alarm</code> into generic scheduling fields (time, repeat, delete-after, snooze) plus a <code>target</code> sealed type, and — bigger — reworking <code>AlarmReceiver</code>/<code>NotificationHelper</code>, which are currently hard-wired to alarm dismiss/snooze semantics rather than a pluggable per-target action set. See §11.</p>
     </section>
 
     <div class="shell" style="padding:0;"><div class="ticks">
@@ -428,7 +442,7 @@
     <section id="timers">
       <span class="eyebrow">06 — The hard part · reworked in v0.2</span>
       <h2>Timers &amp; chains</h2>
-      <p class="lede">The core shift: a Timer or a Chain is no longer a one-shot expression that gets flattened and forgotten. Either one can be a <strong>named, persistent block</strong> that other chains reference by label — define "Work" once, reuse it everywhere, and editing it later ripples everywhere it's used.</p>
+      <p class="lede">The core shift: a Timer or a Chain is no longer a one-shot expression that gets flattened and forgotten. Either one can be a <strong>named, persistent block</strong> that other chains reference by label — define "Work" once, reuse it everywhere, and editing it later ripples everywhere it's used. This already matches the "atom" framing from the modularity discussion: a Timer is the atom (labeled, startable, chainable), a Chain is atoms plus ordering plus per-transition metadata, and neither cares who's driving it — a person tapping Start, or (once §4.2 lands) a scheduled trigger.</p>
 
       <h3>6.1 — Library &amp; config screen</h3>
       <p>The Timers pane is a library list: each card shows only <strong>label, kind (Timer/Chain), and total duration</strong> — no content or sound details cluttering the list. Tapping a card pushes a full-screen <strong>config screen</strong> onto the nav stack (not a modal or bottom sheet), the same screen shape for both Timer and Chain. A Timer's config is short (label, duration, sound, persistent) and a Chain's is long (adds transition mode, default sound, overrides, content) — deliberately one pattern for both rather than two, even though it's more screen than a bare Timer strictly needs.</p>
@@ -449,7 +463,8 @@
         <li><strong>A function of anonymous timers</strong> — <code>range</code> / <code>arange</code> / <code>repeat</code>, exactly as before, expanding to more Anonymous elements (or to a repeated group of any element, including references).</li>
         <li><strong>A reference</strong> — the label of an existing persistent Timer or Chain. Its duration and sound profile are looked up <em>live</em> from the source block, not copied in — so re-tuning "Work" updates every chain that references it, automatically. A reference keeps the source's own sound profile unless this chain explicitly overrides it.</li>
       </ul>
-      <p>Every Chain also declares its <strong>transition mode</strong>: require an interaction to advance between steps, or sound the alert and continue immediately (seamless). This is the chain's own setting — it governs advancing between its steps regardless of what those steps are.</p>
+      <p>Every Chain also declares its <strong>transition mode</strong>: require an interaction to advance between steps, or sound the alert and continue immediately (seamless). This is the chain's own default — it governs advancing between its steps regardless of what those steps are.</p>
+      <p class="callout">Per-step override, not per-step-by-default: rather than every step pair carrying its own transition config (real flexibility — "seamless into Break, but confirm before Work starts back up" — at the cost of configuring N−1 transitions instead of one), the recommended mechanism reuses the <code>soundOverrides</code> pattern that already exists for exactly this shape of problem. Extend it from <code>Map&lt;blockId, soundProfileId&gt;</code> to <code>Map&lt;blockId, StepOverride&gt;</code> where <code>StepOverride</code> carries an optional sound profile <em>and</em> an optional transition-mode override for the transition immediately following that step. Unlisted steps keep the chain's default. Not built — this is the resolution to the "does every level need its own transition metadata" question raised alongside §4.2.</p>
 
       <h3>6.4 — Expression grammar</h3>
       <div class="panel"><pre style="margin:0;white-space:pre-wrap;">chain_content  = "(" element ("," element)* ")"
@@ -619,15 +634,17 @@ time_expr      = "NOW" (("+" | "-") literal_duration)?</pre></div>
       <h2>Open items &amp; next steps</h2>
       <ul>
         <li><strong>Name:</strong> Clockr — settled.</li>
-        <li><strong>Next:</strong> Compose-Preview mockups of the key screens (chain editor with references, widget config, clock face) before wiring any real logic.</li>
-        <li>The chain parser + reference-graph validator (cycle detection, depth, plan-size) is the riskiest piece of engineering here — worth prototyping standalone in plain Kotlin before it touches the UI.</li>
-        <li>Still open: exact wording/flow for the sound-override UI on a Chain (picking which referenced block to override, per chain); final default for the execution-plan-size cap.</li>
+        <li><strong>Done:</strong> Room + chainlang data layer, Timers/Alarms/Stopwatch/Clock/Settings wired to real state, a first Glance clock widget. See the repo for what's actually built vs. this document's design-ahead sections.</li>
+        <li><strong>Next, and the biggest remaining gap:</strong> the Timer/Chain <em>run</em> engine doesn't exist yet — creating and editing definitions works, but there's no foreground service, live countdown, chain-step advancement, or the §6.7 completion prompt. Nothing in §4.2's scheduled-triggers idea is buildable until this exists, since there's nothing yet to schedule <em>into</em>.</li>
+        <li><strong>Build the completion/firing UI as one shared, pluggable module from the start</strong> — not an alarm-only screen generalized later. One controller, parameterized by which actions are valid for the context: Alarm firing gets Dismiss/Snooze; a Timer/Chain run finishing gets Stop/Restart/+1min (spec §6.7). Getting this right now avoids reconciling two divergent implementations afterward.</li>
+        <li><strong>Known refactor debt once §4.2 is adopted:</strong> <code>AlarmEntity</code>, <code>AlarmReceiver</code>, and <code>NotificationHelper</code> as built are alarm-specific (hard-wired dismiss/snooze, <code>oneOffAfterFire</code>/<code>done</code> baked into the entity) rather than shaped around a generic scheduled-trigger + pluggable target. <code>AlarmScheduler</code>'s actual time/repeat math, by contrast, is already target-agnostic and should carry over largely as-is.</li>
+        <li>Still open: exact wording/flow for the sound/transition-override UI on a Chain (picking which step to override, per chain); final default for the execution-plan-size cap; the Stopwatch-target "seed row" mechanism (§4.2).</li>
       </ul>
     </section>
 
   </main>
 </div>
 
-<footer class="doc"><div class="shell">Clockr — technical spec v0.4 · living document, expect revisions as screens get built</div></footer>
+<footer class="doc"><div class="shell">Clockr — technical spec v0.5 · living document, expect revisions as screens get built</div></footer>
 </body>
 </html>
