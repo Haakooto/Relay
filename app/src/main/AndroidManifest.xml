@@ -11,6 +11,8 @@
     <!-- Some OEM battery managers kill background alarm delivery regardless of setAlarmClock()'s
          Doze exemption — this is the one AOSP-level lever to ask for an exemption. -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:allowBackup="false"
@@ -54,6 +56,15 @@
         <receiver
             android:name=".widget.WidgetTickReceiver"
             android:exported="false" />
+
+        <service
+            android:name=".run.TimerRunService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs a user-started timer or chain with a live countdown" />
+        </service>
 
     </application>
 
