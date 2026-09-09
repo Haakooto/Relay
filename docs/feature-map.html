@@ -123,16 +123,16 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>A status snapshot across every pane, taken after the first real device test pass — not a roadmap, a ledger. Full design detail lives in the <a href="https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d">Clockr Spec</a>.</p>
     <div class="meta">
-      <span>2026-09-09</span>
-      <span>41 tracked items</span>
+      <span>2026-09-09, rev 2</span>
+      <span>42 tracked items</span>
       <span>chainlang: 30/30 tests passing</span>
     </div>
 
     <div class="stats">
       <div class="stat approved"><div class="n">5</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">26</div><div class="l">WIP</div></div>
-      <div class="stat lacking"><div class="n">1</div><div class="l">Lacking</div></div>
-      <div class="stat"><div class="n">5</div><div class="l">Planned</div></div>
+      <div class="stat wip"><div class="n">29</div><div class="l">WIP</div></div>
+      <div class="stat lacking"><div class="n">0</div><div class="l">Lacking</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">3</div><div class="l">Deferred</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
     </div>
@@ -158,7 +158,7 @@
           <tr><td class="feature">Snooze + max-snooze count</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Can't test until an alarm actually fires</td></tr>
           <tr><td class="feature">Sound picker</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Real RingtoneManager picker, added this session</td></tr>
           <tr><td class="feature">Delete alarm</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Doesn't depend on the permission fix, but unconfirmed</td></tr>
-          <tr><td class="feature">Fire → notification → dismiss/snooze</td><td><span class="chip wip">◐ WIP</span></td><td class="note"><strong>Retest this first</strong> — SCHEDULE_EXACT_ALARM was missing from the manifest entirely</td></tr>
+          <tr><td class="feature">Fire → notification → dismiss/snooze</td><td><span class="chip wip">◐ WIP</span></td><td class="note"><strong>Retest this first</strong> — 3 fixes shipped: missing SCHEDULE_EXACT_ALARM, picked sound never applied (channel sound is fixed at creation), no battery-optimization exemption requested</td></tr>
           <tr><td class="feature">Reschedule after reboot</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Never tested</td></tr>
         </tbody>
       </table></div>
@@ -172,13 +172,14 @@
         <tbody>
           <tr><td class="feature">Create / edit Timer</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
           <tr><td class="feature">Create / edit Chain</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Label validity + uniqueness</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — was the cause of "second timer shows the first one's length"</td></tr>
+          <tr><td class="feature">Label validity + uniqueness</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed — was the cause of "second timer shows the first one's length"; label is now only required once Persistent is on</td></tr>
           <tr><td class="feature">Delete Timer/Chain</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was <span class="chip lacking" style="vertical-align:middle;">✕</span> — just added</td></tr>
           <tr><td class="feature">Sound picker</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was a bare text field — just added</td></tr>
           <tr><td class="feature">Chain live preview (resolved steps)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
           <tr><td class="feature">Newline as separator + syntax-help dialog</td><td><span class="chip wip">◐ WIP</span></td><td class="note">chainlang side has 30 passing tests; UI use unconfirmed</td></tr>
-          <tr><td class="feature">Deleting a block still referenced elsewhere</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">No warning — a chain referencing it just breaks with a clear error next time it's opened</td></tr>
-          <tr><td class="feature"><strong>Run engine</strong> — start, live countdown, chain-step advance, completion prompt</td><td><span class="chip planned">Planned</span></td><td class="note">The actual core feature. Doesn't exist yet at all.</td></tr>
+          <tr><td class="feature">Deleting a block still referenced elsewhere</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed — confirms first, naming which chains reference it</td></tr>
+          <tr><td class="feature"><strong>Run engine</strong> — start, live countdown, chain-step advance, completion prompt</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Built: foreground service, chronometer notification, recursive chain-reference expansion, Stop/Restart/+1min. Never run on a device yet.</td></tr>
+          <tr><td class="feature">Start button + in-app active-run card</td><td><span class="chip wip">◐ WIP</span></td><td class="note">▶ on each library card; a card at the top of Timers mirrors the notification's controls</td></tr>
           <tr><td class="feature">Per-step transition/sound override</td><td><span class="chip planned">Planned</span></td><td class="note">Spec'd (§6.3), no code</td></tr>
           <tr><td class="feature">Auto-close parens, auto-indent, autocomplete</td><td><span class="chip deferred">Deferred</span></td><td class="note">Your call — "nice to have"</td></tr>
         </tbody>
