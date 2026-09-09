@@ -3,12 +3,6 @@
 package com.clockr.app.ui.screens
 
 import android.app.Application
-import android.content.Intent
-import android.media.RingtoneManager
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -19,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -51,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.clockr.app.data.OneOffAfterFire
+import com.clockr.app.ui.common.SoundPickerRow
 import com.clockr.app.ui.alarms.AlarmConfigViewModel
 import com.clockr.app.ui.alarms.AlarmConfigViewModelFactory
 import com.clockr.app.ui.alarms.DeleteAfterMode
@@ -67,29 +61,6 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
     val application = LocalContext.current.applicationContext as Application
     val viewModel: AlarmConfigViewModel = viewModel(factory = AlarmConfigViewModelFactory(application, alarmId))
     val state by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
-
-    val ringtonePicker = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        // minSdk 33 guarantees the typed overload — no need for the deprecated untyped one.
-        val uri = result.data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri::class.java)
-        viewModel.updateSoundProfileId(uri?.toString() ?: "")
-    }
-    fun launchRingtonePicker() {
-        val existing = state.soundProfileId.takeIf { it.isNotBlank() }?.let { Uri.parse(it) }
-        val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
-            putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
-            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
-            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true)
-            putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
-            putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, existing)
-        }
-        ringtonePicker.launch(intent)
-    }
-    val soundTitle = remember(state.soundProfileId) {
-        state.soundProfileId.takeIf { it.isNotBlank() }
-            ?.let { runCatching { RingtoneManager.getRingtone(context, Uri.parse(it))?.getTitle(context) }.getOrNull() }
-            ?: "Default"
-    }
 
     Scaffold(
         topBar = {
@@ -248,16 +219,7 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                 item { HorizontalDivider() }
 
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().clickable { launchRingtonePicker() },
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Row {
-                            Icon(Icons.Default.MusicNote, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                            Text("Sound", style = MaterialTheme.typography.bodyLarge)
-                        }
-                        Text(soundTitle, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    SoundPickerRow("Sound", state.soundProfileId, viewModel::updateSoundProfileId)
                 }
 
                 item {

@@ -1,8 +1,12 @@
 package com.clockr.app
 
 import android.Manifest
+import android.app.AlarmManager
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -66,6 +70,7 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
+        maybeRequestExactAlarmPermission()
         setContent {
             val settingsViewModel: SettingsViewModel = viewModel()
             val settings by settingsViewModel.settings.collectAsState()
@@ -79,6 +84,20 @@ class MainActivity : ComponentActivity() {
             ClockrTheme(darkTheme = darkTheme, amoled = settings.theme == ThemeSetting.AMOLED) {
                 ClockrApp(openClock = openClock)
             }
+        }
+    }
+
+    /**
+     * setAlarmClock() still needs this — auto-granted on API 31-32, but on 33+ (this app's
+     * minSdk) it needs an explicit user grant via system settings; there's no runtime dialog
+     * for it, just this one settings screen the user flips once.
+     */
+    private fun maybeRequestExactAlarmPermission() {
+        val alarmManager = getSystemService(AlarmManager::class.java)
+        if (!alarmManager.canScheduleExactAlarms()) {
+            startActivity(
+                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:$packageName")),
+            )
         }
     }
 }

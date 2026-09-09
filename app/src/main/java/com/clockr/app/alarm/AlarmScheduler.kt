@@ -10,10 +10,10 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 /**
- * Wraps [AlarmManager.setAlarmClock] rather than the exact-alarm APIs — an alarm-clock app gets
- * exact firing without needing `SCHEDULE_EXACT_ALARM`/`USE_EXACT_ALARM` at all (spec §09's
- * permission dance turns out not to apply here), and the system shows the standard "next alarm"
- * status-bar icon for free.
+ * Wraps [AlarmManager.setAlarmClock] rather than the plain exact-alarm APIs — the system shows
+ * the standard "next alarm" status-bar icon for free. Corrected assumption: this does **not**
+ * exempt the app from `SCHEDULE_EXACT_ALARM` — that's still required (auto-granted on API 31-32,
+ * needs a one-time user grant via system settings on 33+, which [MainActivity] prompts for).
  */
 class AlarmScheduler(private val context: Context) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

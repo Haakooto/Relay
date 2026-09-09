@@ -4,6 +4,10 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Contrary to what I assumed earlier: setAlarmClock() is NOT exempt from this — it still
+         needs to be declared and granted, same as the plain exact-alarm APIs. Auto-granted on
+         API 31-32; needs a user grant via Settings on 33+ (MainActivity prompts for it). -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:allowBackup="false"

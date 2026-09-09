@@ -36,6 +36,7 @@ data class ResolvedStepUi(val label: String?, val seconds: Long)
 data class BlockConfigUiState(
     val loading: Boolean = true,
     val notFound: Boolean = false,
+    val isNew: Boolean = true,
     val id: String = "",
     val kind: BlockKind = BlockKind.TIMER,
     val label: String = "",
@@ -96,6 +97,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
             db.timerDefDao().findById(blockId)?.let { timer ->
                 _uiState.value = BlockConfigUiState(
                     loading = false,
+                    isNew = false,
                     id = timer.id,
                     kind = BlockKind.TIMER,
                     label = timer.label,
@@ -109,6 +111,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
             db.chainDefDao().findById(blockId)?.let { chain ->
                 _uiState.value = BlockConfigUiState(
                     loading = false,
+                    isNew = false,
                     id = chain.id,
                     kind = BlockKind.CHAIN,
                     label = chain.label,
@@ -223,5 +226,20 @@ class BlockConfigViewModel(application: Application, private val blockId: String
         } catch (e: ChainLangException) {
             _uiState.value = state.copy(error = e.message)
         }
+    }
+
+    /**
+     * No dependency check against chains that reference this block by label — deleting a Timer
+     * or Chain still in use elsewhere leaves a dangling reference, which surfaces as a clear
+     * `UnknownReferenceException` message next time that other chain is previewed or run, rather
+     * than silently. Acceptable for now; a "used by" warning here is a reasonable follow-up.
+     */
+    fun delete(onSuccess: () -> Unit) = viewModelScope.launch {
+        val state = _uiState.value
+        when (state.kind) {
+            BlockKind.TIMER -> db.timerDefDao().findById(state.id)?.let { db.timerDefDao().delete(it) }
+            BlockKind.CHAIN -> db.chainDefDao().findById(state.id)?.let { db.chainDefDao().delete(it) }
+        }
+        onSuccess()
     }
 }

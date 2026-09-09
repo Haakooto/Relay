@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.domain.TransitionMode
+import com.clockr.app.ui.common.SoundPickerRow
 import com.clockr.app.ui.theme.ClockrTheme
 import com.clockr.app.ui.timers.BlockConfigViewModel
 import com.clockr.app.ui.timers.BlockConfigViewModelFactory
@@ -70,6 +72,11 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                     }
                 },
                 actions = {
+                    if (!state.isNew) {
+                        IconButton(onClick = { viewModel.delete(onBack) }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+                        }
+                    }
                     TextButton(
                         enabled = state.error == null && state.labelError == null && !state.loading,
                         onClick = { viewModel.save(onBack) },
@@ -125,11 +132,10 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                 }
 
                 item {
-                    OutlinedTextField(
-                        value = state.soundProfileId,
-                        onValueChange = viewModel::updateSoundProfileId,
-                        label = { Text(if (state.kind == BlockKind.CHAIN) "Default sound profile" else "Sound profile") },
-                        modifier = Modifier.fillMaxWidth(),
+                    SoundPickerRow(
+                        label = if (state.kind == BlockKind.CHAIN) "Default sound profile" else "Sound profile",
+                        soundProfileId = state.soundProfileId,
+                        onPicked = viewModel::updateSoundProfileId,
                     )
                 }
 
