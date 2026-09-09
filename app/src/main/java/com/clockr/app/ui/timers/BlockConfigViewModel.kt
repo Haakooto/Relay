@@ -10,6 +10,7 @@ import com.clockr.app.data.SettingsRepository
 import com.clockr.app.data.TimerDefEntity
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.domain.TransitionMode
+import com.clockr.app.run.TimerRunService
 import com.clockr.chainlang.ChainLang
 import com.clockr.chainlang.ChainLangException
 import com.clockr.chainlang.SafetyLimits
@@ -130,9 +131,12 @@ class BlockConfigViewModel(application: Application, private val blockId: String
         }
     }
 
+    /** Giving something a name is a pretty clear signal you want to keep it. */
     fun updateLabel(value: String) {
         val sanitized = sanitizeLabel(value)
-        _uiState.value = _uiState.value.copy(label = sanitized)
+        val current = _uiState.value
+        val autoPersistent = current.persistent || sanitized.isNotBlank()
+        _uiState.value = current.copy(label = sanitized, persistent = autoPersistent)
         revalidateLabel()
     }
     fun updatePersistent(value: Boolean) {
@@ -175,8 +179,10 @@ class BlockConfigViewModel(application: Application, private val blockId: String
         if (!persistent) return null
         validateLabelSyntax(label)?.let { return it }
         val id = _uiState.value.id
-        val timerHit = db.timerDefDao().findByLabel(label)?.takeIf { it.id != id }
-        val chainHit = db.chainDefDao().findByLabel(label)?.takeIf { it.id != id }
+        // A non-persistent row is invisible and disposable — it should never permanently squat
+        // on a label. Only persistent rows count as "already in use".
+        val timerHit = db.timerDefDao().findByLabel(label)?.takeIf { it.id != id && it.persistent }
+        val chainHit = db.chainDefDao().findByLabel(label)?.takeIf { it.id != id && it.persistent }
         return if (timerHit != null || chainHit != null) "\"$label\" is already in use" else null
     }
 
@@ -234,6 +240,12 @@ class BlockConfigViewModel(application: Application, private val blockId: String
                 )
             }
             _uiState.value = state.copy(error = null, saved = true)
+            // Spec §6.2: creating a Timer/Chain always starts it immediately — Persistent only
+            // decides whether the definition survives afterward. Editing an existing one just
+            // saves; it doesn't restart whatever might currently be running.
+            if (state.isNew) {
+                TimerRunService.start(getApplication(), state.id, state.kind)
+            }
             onSuccess()
         } catch (e: ChainLangException) {
             _uiState.value = state.copy(error = e.message)
