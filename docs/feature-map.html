@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clockr Feature Map</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#EFEDE5;
+    --surface:#F8F7F1;
+    --surface-2:#E7E4D8;
+    --ink:#21201B;
+    --ink-soft:#5B584D;
+    --line:#D9D6C7;
+    --accent:#9C6414;
+    --teal:#2E6F66;
+    --good:#3F7D4C;
+    --good-bg:#E4EEE0;
+    --wip:#4A6FA5;
+    --wip-bg:#E4EAF4;
+    --danger:#A23B2E;
+    --danger-bg:#F3E2DE;
+    --planned-bg:#EDEBE2;
+    --deferred-bg:#EDEBE2;
+    --shadow: 0 1px 2px rgba(30,28,20,0.06), 0 8px 24px -12px rgba(30,28,20,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15160F;
+      --surface:#1C1E17;
+      --surface-2:#262820;
+      --ink:#EDEAE0;
+      --ink-soft:#A9A491;
+      --line:#34362B;
+      --accent:#DDA84E;
+      --teal:#5CB3A6;
+      --good:#7FBF8A;
+      --good-bg:#1F2B20;
+      --wip:#8FB4E3;
+      --wip-bg:#1D2733;
+      --danger:#E08472;
+      --danger-bg:#301F1B;
+      --planned-bg:#20221A;
+      --deferred-bg:#20221A;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15160F;
+    --surface:#1C1E17;
+    --surface-2:#262820;
+    --ink:#EDEAE0;
+    --ink-soft:#A9A491;
+    --line:#34362B;
+    --accent:#DDA84E;
+    --teal:#5CB3A6;
+    --good:#7FBF8A;
+    --good-bg:#1F2B20;
+    --wip:#8FB4E3;
+    --wip-bg:#1D2733;
+    --danger:#E08472;
+    --danger-bg:#301F1B;
+    --planned-bg:#20221A;
+    --deferred-bg:#20221A;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Public Sans', system-ui, sans-serif; font-size:16px; line-height:1.6; }
+  h1,h2{ font-family:'Fraunces', Georgia, serif; text-wrap:balance; color:var(--ink); margin:0 0 .3em; }
+  a{ color:var(--teal); }
+  code{ font-family:'IBM Plex Mono', monospace; background:var(--surface-2); padding:.1em .4em; border-radius:4px; font-size:.85em; }
+  .shell{ max-width:1080px; margin:0 auto; padding:0 clamp(1rem,3vw,3rem); }
+
+  header.top{ padding:clamp(2rem,5vw,3.2rem) 0 1.6rem; border-bottom:1px solid var(--line); }
+  .wordmark{ display:flex; align-items:center; gap:.6rem; font-family:'IBM Plex Mono',monospace; font-weight:600; letter-spacing:.02em; margin-bottom:1.2rem; }
+  .wordmark .dot{ width:.6rem; height:.6rem; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+  header.top h1{ font-size:clamp(2rem,4.2vw,2.8rem); font-weight:600; max-width:20ch; }
+  header.top p{ color:var(--ink-soft); max-width:60ch; font-size:1.05rem; margin:.5rem 0 0; }
+  .meta{ display:flex; gap:1.4rem; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:.76rem; color:var(--ink-soft); margin-top:1.1rem; }
+
+  .stats{ display:grid; grid-template-columns:repeat(6,1fr); gap:.7rem; margin:1.8rem 0; }
+  @media (max-width:760px){ .stats{ grid-template-columns:repeat(3,1fr); } }
+  .stat{ background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:.85rem .9rem; }
+  .stat .n{ font-family:'IBM Plex Mono',monospace; font-size:1.5rem; font-weight:600; font-variant-numeric:tabular-nums; }
+  .stat .l{ font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-top:.15rem; }
+  .stat.approved .n{ color:var(--good); }
+  .stat.wip .n{ color:var(--wip); }
+  .stat.lacking .n{ color:var(--danger); }
+
+  main{ padding:1.6rem 0 4rem; display:flex; flex-direction:column; gap:2.2rem; }
+  section h2{ font-size:1.32rem; margin-bottom:.3rem; }
+  section .sub{ color:var(--ink-soft); font-size:.92rem; margin:0 0 .9rem; max-width:70ch; }
+
+  .tablewrap{ overflow-x:auto; border:1px solid var(--line); border-radius:8px; }
+  table{ border-collapse:collapse; width:100%; font-size:.92rem; background:var(--surface); }
+  th,td{ text-align:left; padding:.62rem .85rem; border-bottom:1px solid var(--line); vertical-align:top; }
+  thead th{ font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); background:var(--surface-2); white-space:nowrap; }
+  tbody tr:last-child td{ border-bottom:none; }
+  td.feature{ font-weight:600; }
+  td.note{ color:var(--ink-soft); }
+
+  .chip{ display:inline-flex; align-items:center; gap:.35em; font-family:'IBM Plex Mono',monospace; font-size:.72rem; font-weight:600; padding:.22em .6em; border-radius:999px; white-space:nowrap; }
+  .chip.approved{ background:var(--good-bg); color:var(--good); }
+  .chip.wip{ background:var(--wip-bg); color:var(--wip); }
+  .chip.lacking{ background:var(--danger-bg); color:var(--danger); }
+  .chip.planned{ background:var(--planned-bg); color:var(--ink-soft); border:1px dashed var(--line); }
+  .chip.deferred{ background:var(--deferred-bg); color:var(--ink-soft); border:1px dashed var(--line); font-style:italic; }
+  .chip.declined{ background:var(--planned-bg); color:var(--ink-soft); text-decoration:line-through; }
+
+  .legend{ display:flex; flex-wrap:wrap; gap:.5rem 1rem; margin:1rem 0 0; font-size:.82rem; color:var(--ink-soft); align-items:center; }
+  .legend span.chip{ font-size:.7rem; }
+
+  footer.doc{ border-top:1px solid var(--line); padding:1.6rem 0 2.6rem; color:var(--ink-soft); font-size:.84rem; font-family:'IBM Plex Mono',monospace; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="top">
+    <div class="wordmark"><span class="dot"></span>CLOCKR</div>
+    <h1>What's actually built, versus what's just planned.</h1>
+    <p>A status snapshot across every pane, taken after the first real device test pass — not a roadmap, a ledger. Full design detail lives in the <a href="https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d">Clockr Spec</a>.</p>
+    <div class="meta">
+      <span>2026-09-09</span>
+      <span>41 tracked items</span>
+      <span>chainlang: 30/30 tests passing</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat approved"><div class="n">5</div><div class="l">Approved</div></div>
+      <div class="stat wip"><div class="n">26</div><div class="l">WIP</div></div>
+      <div class="stat lacking"><div class="n">1</div><div class="l">Lacking</div></div>
+      <div class="stat"><div class="n">5</div><div class="l">Planned</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Deferred</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
+    </div>
+    <div class="legend">
+      <span class="chip approved">✓ Approved</span> — built, tested, confirmed working
+      <span class="chip wip">◐ WIP</span> — built, not yet verified (or partly built)
+      <span class="chip lacking">✕ Lacking</span> — known gap, no fix yet
+      <span class="chip planned">Planned</span> — designed, no code
+      <span class="chip deferred">Deferred</span> — your call to push out
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2>Alarms</h2>
+      <p class="sub">Nothing here was reachable end-to-end until this session — the exact-alarm permission was missing entirely, blocking Save on any device.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Create / edit (time, label, repeat days)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Never confirmed saving successfully until this fix</td></tr>
+          <tr><td class="feature">One-off: delete vs. mark done</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Repeating: delete after (count / date)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Snooze + max-snooze count</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Can't test until an alarm actually fires</td></tr>
+          <tr><td class="feature">Sound picker</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Real RingtoneManager picker, added this session</td></tr>
+          <tr><td class="feature">Delete alarm</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Doesn't depend on the permission fix, but unconfirmed</td></tr>
+          <tr><td class="feature">Fire → notification → dismiss/snooze</td><td><span class="chip wip">◐ WIP</span></td><td class="note"><strong>Retest this first</strong> — SCHEDULE_EXACT_ALARM was missing from the manifest entirely</td></tr>
+          <tr><td class="feature">Reschedule after reboot</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Never tested</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Timers &amp; Chains</h2>
+      <p class="sub">Definitions (create/edit/save) work; there's still no way to actually <em>run</em> one.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Create / edit Timer</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Create / edit Chain</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Label validity + uniqueness</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — was the cause of "second timer shows the first one's length"</td></tr>
+          <tr><td class="feature">Delete Timer/Chain</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was <span class="chip lacking" style="vertical-align:middle;">✕</span> — just added</td></tr>
+          <tr><td class="feature">Sound picker</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was a bare text field — just added</td></tr>
+          <tr><td class="feature">Chain live preview (resolved steps)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Newline as separator + syntax-help dialog</td><td><span class="chip wip">◐ WIP</span></td><td class="note">chainlang side has 30 passing tests; UI use unconfirmed</td></tr>
+          <tr><td class="feature">Deleting a block still referenced elsewhere</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">No warning — a chain referencing it just breaks with a clear error next time it's opened</td></tr>
+          <tr><td class="feature"><strong>Run engine</strong> — start, live countdown, chain-step advance, completion prompt</td><td><span class="chip planned">Planned</span></td><td class="note">The actual core feature. Doesn't exist yet at all.</td></tr>
+          <tr><td class="feature">Per-step transition/sound override</td><td><span class="chip planned">Planned</span></td><td class="note">Spec'd (§6.3), no code</td></tr>
+          <tr><td class="feature">Auto-close parens, auto-indent, autocomplete</td><td><span class="chip deferred">Deferred</span></td><td class="note">Your call — "nice to have"</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Stopwatch</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Multiple concurrent, pause/resume/lap/restart-to-t₀</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
+          <tr><td class="feature">Rename</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
+          <tr><td class="feature">Lap delta + cumulative display</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Added this session, not yet re-confirmed</td></tr>
+          <tr><td class="feature">Editing recorded lap/total times</td><td><span class="chip declined">✕ Declined</span></td><td class="note">Agreed: undermines the point of a stopwatch as a factual record</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Clock</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Live ticking digital face</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Visual customization (color/font/analogue)</td><td><span class="chip planned">Planned</span></td><td class="note">Spec §07's axes, unbuilt</td></tr>
+          <tr><td class="feature">World clock / multiple timezones</td><td><span class="chip deferred">Deferred</span></td><td class="note">Your call</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Widgets</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Digital home-screen widget (Glance)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Never confirmed on an actual home screen — no device/emulator on my end at build time</td></tr>
+          <tr><td class="feature">Customization axes (color, font, background, shape)</td><td><span class="chip planned">Planned</span></td><td class="note">—</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Settings</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Theme (light/dark/AMOLED)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">"Themes work well"</td></tr>
+          <tr><td class="feature">24h clock format</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">First day of week</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Language (dropdown, locale only)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was buggy (flicker/dropped letters) — root-caused and fixed this session</td></tr>
+          <tr><td class="feature">Full i18n — translated UI strings</td><td><span class="chip deferred">Deferred</span></td><td class="note">Zero strings are actually translated today — every screen is hardcoded English</td></tr>
+          <tr><td class="feature">Default snooze / haptics / max plan size</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Engine &amp; data layer</h2>
+      <p class="sub">Not user-facing, but worth tracking on its own — this is the one area with real automated verification.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">chainlang — parser, evaluator, safety limits, cycle checker</td><td><span class="chip approved">✓ Approved</span></td><td class="note">30/30 automated tests passing, standalone JVM module</td></tr>
+          <tr><td class="feature">Room persistence (Alarm/TimerDef/ChainDef/SoundProfile)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Exercised via the UI, no direct DB-level test</td></tr>
+          <tr><td class="feature">Settings DataStore</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Cross-cutting</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Notification permission flow</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Exact-alarm permission</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was missing entirely — the bug in this round's screenshot. Fixed, needs retest.</td></tr>
+          <tr><td class="feature">Crash → graceful error handling</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed this exact round: the permission error surfaced as a clear message, not a crash</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Design-only (spec written, zero code)</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Scheduled triggers — Alarm generalizes to Timer/Chain/Stopwatch targets</td><td><span class="chip planned">Planned</span></td><td class="note">Spec §4.2 — blocked on the run engine existing first</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+  </main>
+
+  <footer class="doc"><div class="shell">Clockr — feature map · a living ledger, not a roadmap; update it as things move</div></footer>
+</div>
+</body>
+</html>
