@@ -73,7 +73,7 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                 },
                 actions = {
                     if (!state.isNew) {
-                        IconButton(onClick = { viewModel.delete(onBack) }) {
+                        IconButton(onClick = { viewModel.requestDelete(onBack) }) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete")
                         }
                     }
@@ -193,6 +193,16 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                 }
             }
         }
+    }
+
+    state.pendingDeleteUsedBy?.let { usedBy ->
+        AlertDialog(
+            onDismissRequest = viewModel::cancelPendingDelete,
+            title = { Text("Still in use") },
+            text = { Text("Referenced by: ${usedBy.joinToString(", ")}. Deleting it will break ${if (usedBy.size > 1) "those chains" else "that chain"}. Delete anyway?") },
+            confirmButton = { TextButton(onClick = { viewModel.confirmDelete(onBack) }) { Text("Delete anyway") } },
+            dismissButton = { TextButton(onClick = viewModel::cancelPendingDelete) { Text("Cancel") } },
+        )
     }
 }
 

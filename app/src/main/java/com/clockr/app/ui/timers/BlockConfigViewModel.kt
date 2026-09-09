@@ -10,6 +10,7 @@ import com.clockr.app.data.SettingsRepository
 import com.clockr.app.data.TimerDefEntity
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.domain.TransitionMode
+import com.clockr.chainlang.ChainLang
 import com.clockr.chainlang.ChainLangException
 import com.clockr.chainlang.SafetyLimits
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +53,8 @@ data class BlockConfigUiState(
     val resolvedSteps: List<ResolvedStepUi> = emptyList(),
     val error: String? = null,
     val saved: Boolean = false,
+    /** Non-null while a delete is pending confirmation — the labels of chains that reference this block. */
+    val pendingDeleteUsedBy: List<String>? = null,
 )
 
 class BlockConfigViewModel(application: Application, private val blockId: String) : AndroidViewModel(application) {
@@ -237,18 +240,38 @@ class BlockConfigViewModel(application: Application, private val blockId: String
         }
     }
 
-    /**
-     * No dependency check against chains that reference this block by label — deleting a Timer
-     * or Chain still in use elsewhere leaves a dangling reference, which surfaces as a clear
-     * `UnknownReferenceException` message next time that other chain is previewed or run, rather
-     * than silently. Acceptable for now; a "used by" warning here is a reasonable follow-up.
-     */
-    fun delete(onSuccess: () -> Unit) = viewModelScope.launch {
+    /** Which persistent chains (other than this one) reference this block's label, if any. */
+    private suspend fun usedBy(label: String, ownId: String): List<String> =
+        db.chainDefDao().getAll()
+            .filter { it.id != ownId }
+            .filter { label in ChainLang.referencedLabels(it.contentExpr) }
+            .map { it.label }
+
+    /** Deletes immediately if nothing references this block; otherwise asks for confirmation first. */
+    fun requestDelete(onSuccess: () -> Unit) = viewModelScope.launch {
         val state = _uiState.value
+        val referencedBy = if (state.persistent) usedBy(state.label, state.id) else emptyList()
+        if (referencedBy.isEmpty()) {
+            performDelete(state)
+            onSuccess()
+        } else {
+            _uiState.value = state.copy(pendingDeleteUsedBy = referencedBy)
+        }
+    }
+
+    fun cancelPendingDelete() {
+        _uiState.value = _uiState.value.copy(pendingDeleteUsedBy = null)
+    }
+
+    fun confirmDelete(onSuccess: () -> Unit) = viewModelScope.launch {
+        performDelete(_uiState.value)
+        onSuccess()
+    }
+
+    private suspend fun performDelete(state: BlockConfigUiState) {
         when (state.kind) {
             BlockKind.TIMER -> db.timerDefDao().findById(state.id)?.let { db.timerDefDao().delete(it) }
             BlockKind.CHAIN -> db.chainDefDao().findById(state.id)?.let { db.chainDefDao().delete(it) }
         }
-        onSuccess()
     }
 }
