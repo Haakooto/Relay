@@ -123,14 +123,14 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>A status snapshot across every pane, taken after the first real device test pass — not a roadmap, a ledger. Full design detail lives in the <a href="https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d">Clockr Spec</a>.</p>
     <div class="meta">
-      <span>2026-09-09, rev 2</span>
-      <span>42 tracked items</span>
+      <span>2026-09-09, rev 3</span>
+      <span>43 tracked items</span>
       <span>chainlang: 30/30 tests passing</span>
     </div>
 
     <div class="stats">
       <div class="stat approved"><div class="n">5</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">29</div><div class="l">WIP</div></div>
+      <div class="stat wip"><div class="n">30</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">0</div><div class="l">Lacking</div></div>
       <div class="stat"><div class="n">4</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">3</div><div class="l">Deferred</div></div>
@@ -149,6 +149,7 @@
     <section>
       <h2>Alarms</h2>
       <p class="sub">Nothing here was reachable end-to-end until this session — the exact-alarm permission was missing entirely, blocking Save on any device.</p>
+      <p class="sub" style="border-left:3px solid var(--wip);padding-left:.7rem;"><strong>Open question, not yet answered:</strong> what phone/OEM this is being tested on, and when an alarm "doesn't fire," whether literally nothing happens or something silent/brief appears. Xiaomi/Samsung/OnePlus-style OEM battery managers are a common cause beyond what any AOSP API alone can fix — worth checking OEM-specific "autostart"/battery settings for this app if the exemption prompt alone doesn't resolve it.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
@@ -170,9 +171,9 @@
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Create / edit Timer</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Create / edit Chain</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Label validity + uniqueness</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed — was the cause of "second timer shows the first one's length"; label is now only required once Persistent is on</td></tr>
+          <tr><td class="feature">Create / edit Timer</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Saving a <em>new</em> one now actually starts it (spec §6.2) — editing an existing one just saves</td></tr>
+          <tr><td class="feature">Create / edit Chain</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Same auto-start-on-create rule as Timer</td></tr>
+          <tr><td class="feature">Label validity + uniqueness</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed twice over — label only required once Persistent is on; typing a label now auto-flips Persistent on; uniqueness only counts other <em>persistent</em> rows (a non-persistent row used to permanently squat on its label forever)</td></tr>
           <tr><td class="feature">Delete Timer/Chain</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was <span class="chip lacking" style="vertical-align:middle;">✕</span> — just added</td></tr>
           <tr><td class="feature">Sound picker</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was a bare text field — just added</td></tr>
           <tr><td class="feature">Chain live preview (resolved steps)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
@@ -233,6 +234,7 @@
           <tr><td class="feature">Language (dropdown, locale only)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was buggy (flicker/dropped letters) — root-caused and fixed this session</td></tr>
           <tr><td class="feature">Full i18n — translated UI strings</td><td><span class="chip deferred">Deferred</span></td><td class="note">Zero strings are actually translated today — every screen is hardcoded English</td></tr>
           <tr><td class="feature">Default snooze / haptics / max plan size</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Reset all data</td><td><span class="chip wip">◐ WIP</span></td><td class="note">New — cancels alarms + stops any run, then clears all Room tables. Confirmation dialog, doesn't touch Settings itself.</td></tr>
         </tbody>
       </table></div>
     </section>
