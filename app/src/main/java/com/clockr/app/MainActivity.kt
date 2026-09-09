@@ -2,10 +2,12 @@ package com.clockr.app
 
 import android.Manifest
 import android.app.AlarmManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -71,6 +73,7 @@ class MainActivity : ComponentActivity() {
             requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
         maybeRequestExactAlarmPermission()
+        maybeRequestBatteryOptimizationExemption()
         setContent {
             val settingsViewModel: SettingsViewModel = viewModel()
             val settings by settingsViewModel.settings.collectAsState()
@@ -97,6 +100,21 @@ class MainActivity : ComponentActivity() {
         if (!alarmManager.canScheduleExactAlarms()) {
             startActivity(
                 Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:$packageName")),
+            )
+        }
+    }
+
+    /**
+     * setAlarmClock() is meant to survive Doze, but some OEM battery managers (Xiaomi, Samsung,
+     * OnePlus, etc.) kill or defer background alarm delivery regardless unless the app is
+     * explicitly whitelisted — a very common real-world cause of "the alarm just doesn't fire"
+     * that no AOSP API alone can fix. This is the one AOSP-level lever available for it.
+     */
+    private fun maybeRequestBatteryOptimizationExemption() {
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+            startActivity(
+                Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName")),
             )
         }
     }

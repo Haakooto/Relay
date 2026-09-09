@@ -8,6 +8,9 @@
          needs to be declared and granted, same as the plain exact-alarm APIs. Auto-granted on
          API 31-32; needs a user grant via Settings on 33+ (MainActivity prompts for it). -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Some OEM battery managers kill background alarm delivery regardless of setAlarmClock()'s
+         Doze exemption — this is the one AOSP-level lever to ask for an exemption. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:allowBackup="false"

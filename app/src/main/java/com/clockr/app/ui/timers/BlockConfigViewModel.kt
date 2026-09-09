@@ -41,7 +41,7 @@ data class BlockConfigUiState(
     val kind: BlockKind = BlockKind.TIMER,
     val label: String = "",
     val labelError: String? = null,
-    val persistent: Boolean = true,
+    val persistent: Boolean = false,
     val soundProfileId: String = "",
     // Timer-only
     val durationExpr: String = "",
@@ -73,7 +73,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
                     id = UUID.randomUUID().toString(),
                     kind = BlockKind.TIMER,
                     label = "",
-                    persistent = true,
+                    persistent = false,
                     soundProfileId = "",
                     durationExpr = "1m",
                 )
@@ -86,7 +86,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
                     id = UUID.randomUUID().toString(),
                     kind = BlockKind.CHAIN,
                     label = "",
-                    persistent = true,
+                    persistent = false,
                     soundProfileId = "",
                     contentExpr = "()",
                     transitionMode = TransitionMode.SEAMLESS,
@@ -132,7 +132,10 @@ class BlockConfigViewModel(application: Application, private val blockId: String
         _uiState.value = _uiState.value.copy(label = sanitized)
         revalidateLabel()
     }
-    fun updatePersistent(value: Boolean) { _uiState.value = _uiState.value.copy(persistent = value) }
+    fun updatePersistent(value: Boolean) {
+        _uiState.value = _uiState.value.copy(persistent = value)
+        revalidateLabel()
+    }
     fun updateSoundProfileId(value: String) { _uiState.value = _uiState.value.copy(soundProfileId = value) }
     fun updateTransitionMode(value: TransitionMode) { _uiState.value = _uiState.value.copy(transitionMode = value) }
 
@@ -147,20 +150,26 @@ class BlockConfigViewModel(application: Application, private val blockId: String
     }
 
     private fun revalidateLabel() = viewModelScope.launch {
-        val label = _uiState.value.label
-        _uiState.value = _uiState.value.copy(labelError = validateLabel(label))
+        val state = _uiState.value
+        _uiState.value = state.copy(labelError = validateLabel(state.label, state.persistent))
     }
 
-    /** Syntax only — cheap, synchronous, safe to call on every keystroke. */
+    /** Syntax only, once we already know a label is required — cheap, safe on every keystroke. */
     private fun validateLabelSyntax(label: String): String? = when {
-        label.isBlank() -> "Label can't be empty"
+        label.isBlank() -> "Persistent blocks need a label"
         !label.first().isLetter() -> "Must start with a letter"
         label in RESERVED_WORDS -> "\"$label\" is reserved by the chain syntax"
         else -> null
     }
 
-    /** Syntax + uniqueness (across both Timers and Chains — they share one reference namespace). */
-    private suspend fun validateLabel(label: String): String? {
+    /**
+     * A label is only required — and only checked for validity/uniqueness — once a block is
+     * Persistent: an anonymous, ephemeral Timer/Chain doesn't need one (it's never referenced by
+     * label, and never shows in the library). Toggling Persistent on with a blank label surfaces
+     * this immediately rather than waiting for Save.
+     */
+    private suspend fun validateLabel(label: String, persistent: Boolean): String? {
+        if (!persistent) return null
         validateLabelSyntax(label)?.let { return it }
         val id = _uiState.value.id
         val timerHit = db.timerDefDao().findByLabel(label)?.takeIf { it.id != id }
@@ -193,7 +202,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
 
     fun save(onSuccess: () -> Unit) = viewModelScope.launch {
         val state = _uiState.value
-        val labelIssue = validateLabel(state.label)
+        val labelIssue = validateLabel(state.label, state.persistent)
         if (labelIssue != null) {
             _uiState.value = state.copy(labelError = labelIssue)
             return@launch

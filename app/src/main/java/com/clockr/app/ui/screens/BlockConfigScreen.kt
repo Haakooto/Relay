@@ -102,8 +102,17 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                     OutlinedTextField(
                         value = state.label,
                         onValueChange = viewModel::updateLabel,
-                        label = { Text("Label") },
-                        supportingText = { Text(state.labelError ?: "Letters, digits, underscore — must be unique") },
+                        label = { Text(if (state.persistent) "Label (required)" else "Label (optional)") },
+                        supportingText = {
+                            Text(
+                                state.labelError
+                                    ?: if (state.persistent) {
+                                        "Letters, digits, underscore — must be unique"
+                                    } else {
+                                        "Only needed if you turn Persistent on"
+                                    },
+                            )
+                        },
                         isError = state.labelError != null,
                         modifier = Modifier.fillMaxWidth(),
                     )
