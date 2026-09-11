@@ -12,4 +12,14 @@ data class LibraryItem(
     val label: String,
     val kind: BlockKind,
     val totalSeconds: Long,
+    /** Which [LibraryHeader] it's grouped under, if any — null means ungrouped. */
+    val headerId: String? = null,
+    val sortOrder: Long = 0L,
+)
+
+/** A user-named, user-orderable section header in the Timers library list. */
+data class LibraryHeader(
+    val id: String,
+    val title: String,
+    val sortOrder: Long,
 )

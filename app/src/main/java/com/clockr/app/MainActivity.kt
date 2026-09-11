@@ -68,7 +68,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        NotificationHelper.ensureChannel(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -77,6 +76,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsViewModel: SettingsViewModel = viewModel()
             val settings by settingsViewModel.settings.collectAsState()
+            LaunchedEffect(Unit) { NotificationHelper.ensureChannel(this@MainActivity) }
             val systemDark = isSystemInDarkTheme()
             val darkTheme = when (settings.theme) {
                 ThemeSetting.SYSTEM -> systemDark
@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
             }
             val openClock = intent?.getBooleanExtra(EXTRA_OPEN_CLOCK, false) == true
             ClockrTheme(darkTheme = darkTheme, amoled = settings.theme == ThemeSetting.AMOLED) {
-                ClockrApp(openClock = openClock)
+                ClockrApp(openClock = openClock, clockFormat24h = settings.clockFormat24h)
             }
         }
     }
@@ -121,7 +121,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun ClockrApp(openClock: Boolean = false) {
+private fun ClockrApp(openClock: Boolean = false, clockFormat24h: Boolean = true) {
     val navController = rememberNavController()
 
     LaunchedEffect(openClock) {
@@ -163,7 +163,7 @@ private fun ClockrApp(openClock: Boolean = false) {
                 TimersScreen(onBlockClick = { blockId -> navController.navigate("block_config/$blockId") })
             }
             composable(Pane.Stopwatch.route) { StopwatchScreen() }
-            composable(Pane.Clock.route) { ClockScreen() }
+            composable(Pane.Clock.route) { ClockScreen(is24Hour = clockFormat24h) }
             composable(Pane.Settings.route) { SettingsScreen() }
             composable(
                 "block_config/{blockId}",

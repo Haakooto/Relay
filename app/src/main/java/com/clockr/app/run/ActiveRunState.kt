@@ -12,6 +12,9 @@ data class ActiveRunSnapshot(
     val stepCount: Int,
     val stepSeconds: Long,
     val phase: RunPhase,
+    /** Wall-clock time the current step ends — lets the UI tick a live countdown itself instead
+     *  of freezing at [stepSeconds] (only meaningful while [phase] is [RunPhase.RUNNING]). */
+    val stepEndAtMillis: Long = 0L,
 )
 
 /**

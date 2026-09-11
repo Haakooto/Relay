@@ -10,6 +10,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import com.clockr.app.data.AlarmEntity
+import com.clockr.app.data.SettingsRepository
 
 /**
  * Spec §09 — a dedicated channel per surface; this one's for alarms specifically.
@@ -24,12 +25,13 @@ object NotificationHelper {
     private const val DEFAULT_CHANNEL_ID = "alarms_default"
 
     /** Called once at app startup so a channel exists before the user ever picks a custom sound. */
-    fun ensureChannel(context: Context) {
-        ensureChannelFor(context, "")
+    suspend fun ensureChannel(context: Context) {
+        ensureChannelFor(context, "", SettingsRepository(context).current().haptics)
     }
 
-    fun showAlarmFiring(context: Context, alarm: AlarmEntity) {
-        val channelId = ensureChannelFor(context, alarm.soundProfileId)
+    suspend fun showAlarmFiring(context: Context, alarm: AlarmEntity) {
+        val haptics = SettingsRepository(context).current().haptics
+        val channelId = ensureChannelFor(context, alarm.soundProfileId, haptics)
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val dismissIntent = actionPendingIntent(context, alarm, AlarmActions.ACTION_DISMISS)
@@ -65,7 +67,7 @@ object NotificationHelper {
      * volume low or silenced but alarm volume up would otherwise ring silently, which reads
      * exactly like "the alarm didn't fire" even though it technically did.
      */
-    private fun ensureChannelFor(context: Context, soundProfileId: String): String {
+    private fun ensureChannelFor(context: Context, soundProfileId: String, haptics: Boolean): String {
         val soundUri = soundProfileId.takeIf { it.isNotBlank() }
             ?.let { runCatching { Uri.parse(it) }.getOrNull() }
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
@@ -82,7 +84,7 @@ object NotificationHelper {
         val channel = NotificationChannel(channelId, "Alarms", NotificationManager.IMPORTANCE_HIGH).apply {
             description = "Alarm firing notifications"
             setSound(soundUri, audioAttributes)
-            enableVibration(true)
+            enableVibration(haptics)
             setBypassDnd(true)
         }
         manager.createNotificationChannel(channel)

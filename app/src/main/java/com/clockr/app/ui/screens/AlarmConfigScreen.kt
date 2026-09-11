@@ -102,7 +102,7 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                     val timePickerState = rememberTimePickerState(
                         initialHour = state.hour,
                         initialMinute = state.minute,
-                        is24Hour = true,
+                        is24Hour = state.is24Hour,
                     )
                     LaunchedEffect(timePickerState.hour, timePickerState.minute) {
                         viewModel.updateTime(timePickerState.hour, timePickerState.minute)
@@ -123,8 +123,13 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
 
                 item { Text("Repeat", style = MaterialTheme.typography.bodyLarge) }
                 item {
+                    val orderedDays = remember(state.firstDayOfWeek) {
+                        val all = DayOfWeek.entries
+                        val startIndex = all.indexOf(state.firstDayOfWeek)
+                        all.drop(startIndex) + all.take(startIndex)
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        DayOfWeek.entries.forEach { day ->
+                        orderedDays.forEach { day ->
                             FilterChip(
                                 selected = day in state.repeatDays,
                                 onClick = { viewModel.toggleDay(day) },

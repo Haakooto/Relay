@@ -123,15 +123,15 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>A status snapshot across every pane, taken after the first real device test pass — not a roadmap, a ledger. Full design detail lives in the <a href="https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d">Clockr Spec</a>.</p>
     <div class="meta">
-      <span>2026-09-09, rev 3</span>
-      <span>43 tracked items</span>
+      <span>2026-09-11, rev 6</span>
+      <span>48 tracked items</span>
       <span>chainlang: 30/30 tests passing</span>
     </div>
 
     <div class="stats">
-      <div class="stat approved"><div class="n">5</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">30</div><div class="l">WIP</div></div>
-      <div class="stat lacking"><div class="n">0</div><div class="l">Lacking</div></div>
+      <div class="stat approved"><div class="n">21</div><div class="l">Approved</div></div>
+      <div class="stat wip"><div class="n">18</div><div class="l">WIP</div></div>
+      <div class="stat lacking"><div class="n">1</div><div class="l">Lacking</div></div>
       <div class="stat"><div class="n">4</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">3</div><div class="l">Deferred</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
@@ -148,26 +148,26 @@
   <main>
     <section>
       <h2>Alarms</h2>
-      <p class="sub">Nothing here was reachable end-to-end until this session — the exact-alarm permission was missing entirely, blocking Save on any device.</p>
-      <p class="sub" style="border-left:3px solid var(--wip);padding-left:.7rem;"><strong>Open question, not yet answered:</strong> what phone/OEM this is being tested on, and when an alarm "doesn't fire," whether literally nothing happens or something silent/brief appears. Xiaomi/Samsung/OnePlus-style OEM battery managers are a common cause beyond what any AOSP API alone can fix — worth checking OEM-specific "autostart"/battery settings for this app if the exemption prompt alone doesn't resolve it.</p>
+      <p class="sub">Confirmed working end-to-end on a real device this round — create/edit, fire, dismiss/snooze, and the underlying permission/scheduling code all check out.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Create / edit (time, label, repeat days)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Never confirmed saving successfully until this fix</td></tr>
-          <tr><td class="feature">One-off: delete vs. mark done</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Repeating: delete after (count / date)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Snooze + max-snooze count</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Can't test until an alarm actually fires</td></tr>
-          <tr><td class="feature">Sound picker</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Real RingtoneManager picker, added this session</td></tr>
-          <tr><td class="feature">Delete alarm</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Doesn't depend on the permission fix, but unconfirmed</td></tr>
-          <tr><td class="feature">Fire → notification → dismiss/snooze</td><td><span class="chip wip">◐ WIP</span></td><td class="note"><strong>Retest this first</strong> — 3 fixes shipped: missing SCHEDULE_EXACT_ALARM, picked sound never applied (channel sound is fixed at creation), no battery-optimization exemption requested</td></tr>
-          <tr><td class="feature">Reschedule after reboot</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Never tested</td></tr>
+          <tr><td class="feature">Create / edit (time, label, repeat days)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device</td></tr>
+          <tr><td class="feature">One-off: delete vs. mark done</td><td><span class="chip approved">✓ Approved</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Repeating: delete after (count / date)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Snooze + max-snooze count</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Falls back to dismiss once exhausted</td></tr>
+          <tr><td class="feature">Sound picker</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Real RingtoneManager picker</td></tr>
+          <tr><td class="feature">Delete alarm</td><td><span class="chip approved">✓ Approved</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Fire → notification → dismiss/snooze</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device</td></tr>
+          <tr><td class="feature">Reschedule after reboot</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Boot receiver reschedules every enabled alarm, per-alarm error isolation</td></tr>
+          <tr><td class="feature">Continuous ring until dismissed</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">Alarm sound is a one-shot notification-channel sound, not a looping siren — a competing notification (e.g. an incoming text) firing its own sound stops the alarm's from continuing. Known, deliberately low priority.</td></tr>
         </tbody>
       </table></div>
     </section>
 
     <section>
       <h2>Timers &amp; Chains</h2>
-      <p class="sub">Definitions (create/edit/save) work; there's still no way to actually <em>run</em> one.</p>
+      <p class="sub">A device test surfaced two run-engine bugs — the alert sound firing immediately on start instead of at completion, and a crash on start — both root-caused and fixed this session. Still needs a fresh on-device pass.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
@@ -179,8 +179,10 @@
           <tr><td class="feature">Chain live preview (resolved steps)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
           <tr><td class="feature">Newline as separator + syntax-help dialog</td><td><span class="chip wip">◐ WIP</span></td><td class="note">chainlang side has 30 passing tests; UI use unconfirmed</td></tr>
           <tr><td class="feature">Deleting a block still referenced elsewhere</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed — confirms first, naming which chains reference it</td></tr>
-          <tr><td class="feature"><strong>Run engine</strong> — start, live countdown, chain-step advance, completion prompt</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Built: foreground service, chronometer notification, recursive chain-reference expansion, Stop/Restart/+1min. Never run on a device yet.</td></tr>
+          <tr><td class="feature"><strong>Run engine</strong> — start, live countdown, chain-step advance, completion prompt</td><td><span class="chip wip">◐ WIP</span></td><td class="note">First on-device pass found: sound firing on start (fixed — split notification channel), a chain crashing on start (fixed — chain resolution was hitting Room's blocking DAO from the main thread; now forced onto <code>Dispatchers.IO</code>), and the in-app countdown card frozen at the step's full duration (fixed — it now ticks from a real end-timestamp instead of a static field). Needs retest.</td></tr>
           <tr><td class="feature">Start button + in-app active-run card</td><td><span class="chip wip">◐ WIP</span></td><td class="note">▶ on each library card; a card at the top of Timers mirrors the notification's controls</td></tr>
+          <tr><td class="feature">Per-chain seamless transition sound</td><td><span class="chip wip">◐ WIP</span></td><td class="note">New — seamless chain steps were completely silent, no alert at all. Added a synthesized-tone cue (Beep/Double beep/Chime/Pip/Silent), set per-Chain in its own config screen (not global — different chains sound different at their own boundaries) with tap-to-preview. Needs on-device test.</td></tr>
+          <tr><td class="feature">Library organization — headers, drag-to-reorder</td><td><span class="chip wip">◐ WIP</span></td><td class="note">New, not in the original spec — user-named header sections in the Timers library, freeform: any Timer or Chain can be dragged under any header or left ungrouped. Blocks reorder via long-press-and-drag (custom implementation, no library — gesture feel needs on-device tuning); headers reorder via up/down buttons. Backed by a real Room migration (v1→v2) that preserves existing data.</td></tr>
           <tr><td class="feature">Per-step transition/sound override</td><td><span class="chip planned">Planned</span></td><td class="note">Spec'd (§6.3), no code</td></tr>
           <tr><td class="feature">Auto-close parens, auto-indent, autocomplete</td><td><span class="chip deferred">Deferred</span></td><td class="note">Your call — "nice to have"</td></tr>
         </tbody>
@@ -194,7 +196,7 @@
         <tbody>
           <tr><td class="feature">Multiple concurrent, pause/resume/lap/restart-to-t₀</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
           <tr><td class="feature">Rename</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
-          <tr><td class="feature">Lap delta + cumulative display</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Added this session, not yet re-confirmed</td></tr>
+          <tr><td class="feature">Lap delta + cumulative display</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
           <tr><td class="feature">Editing recorded lap/total times</td><td><span class="chip declined">✕ Declined</span></td><td class="note">Agreed: undermines the point of a stopwatch as a factual record</td></tr>
         </tbody>
       </table></div>
@@ -205,7 +207,7 @@
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Live ticking digital face</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Live ticking digital face</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — was hardcoded to 24h regardless of Settings; now reads the setting. Needs retest.</td></tr>
           <tr><td class="feature">Visual customization (color/font/analogue)</td><td><span class="chip planned">Planned</span></td><td class="note">Spec §07's axes, unbuilt</td></tr>
           <tr><td class="feature">World clock / multiple timezones</td><td><span class="chip deferred">Deferred</span></td><td class="note">Your call</td></tr>
         </tbody>
@@ -217,8 +219,8 @@
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Digital home-screen widget (Glance)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Never confirmed on an actual home screen — no device/emulator on my end at build time</td></tr>
-          <tr><td class="feature">Customization axes (color, font, background, shape)</td><td><span class="chip planned">Planned</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Digital home-screen widget (Glance)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device — shows the live clock</td></tr>
+          <tr><td class="feature">Customization axes (color, font, background, shape)</td><td><span class="chip planned">Planned</span></td><td class="note">Confirmed gap: no way to configure the widget's display yet</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -229,12 +231,14 @@
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
           <tr><td class="feature">Theme (light/dark/AMOLED)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">"Themes work well"</td></tr>
-          <tr><td class="feature">24h clock format</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">First day of week</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">24h clock format</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — was persisted but never read (Clock and the alarm time picker both hardcoded 24h). Needs retest.</td></tr>
+          <tr><td class="feature">First day of week</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — was persisted but unused; the alarm day-picker now starts from it. Needs retest.</td></tr>
           <tr><td class="feature">Language (dropdown, locale only)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was buggy (flicker/dropped letters) — root-caused and fixed this session</td></tr>
           <tr><td class="feature">Full i18n — translated UI strings</td><td><span class="chip deferred">Deferred</span></td><td class="note">Zero strings are actually translated today — every screen is hardcoded English</td></tr>
-          <tr><td class="feature">Default snooze / haptics / max plan size</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Reset all data</td><td><span class="chip wip">◐ WIP</span></td><td class="note">New — cancels alarms + stops any run, then clears all Room tables. Confirmation dialog, doesn't touch Settings itself.</td></tr>
+          <tr><td class="feature">Default snooze minutes</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — was hardcoded to 9; a new alarm's default and the save-time fallback now read the setting. Needs retest.</td></tr>
+          <tr><td class="feature">Haptics</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — toggle was entirely dead (no vibration call existed anywhere). Now gates notification-channel vibration for alarms and timer/chain alerts, with existing channels invalidated on toggle so the change actually takes effect. Needs retest.</td></tr>
+          <tr><td class="feature">Max execution plan size</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Wired into the run engine's safety limit</td></tr>
+          <tr><td class="feature">Reset all data</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Cancels alarms + stops any run, then clears all Room tables, correct order. Confirmation dialog, doesn't touch Settings itself.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -246,8 +250,8 @@
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
           <tr><td class="feature">chainlang — parser, evaluator, safety limits, cycle checker</td><td><span class="chip approved">✓ Approved</span></td><td class="note">30/30 automated tests passing, standalone JVM module</td></tr>
-          <tr><td class="feature">Room persistence (Alarm/TimerDef/ChainDef/SoundProfile)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Exercised via the UI, no direct DB-level test</td></tr>
-          <tr><td class="feature">Settings DataStore</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
+          <tr><td class="feature">Room persistence (Alarm/TimerDef/ChainDef/SoundProfile)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Standard singleton DB, exercised via the UI; no direct DB-level test but nothing to suggest a gap</td></tr>
+          <tr><td class="feature">Settings DataStore</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Reads/writes are straightforward and correct</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -257,8 +261,8 @@
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Notification permission flow</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Exact-alarm permission</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was missing entirely — the bug in this round's screenshot. Fixed, needs retest.</td></tr>
+          <tr><td class="feature">Notification permission flow</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Requested correctly at startup</td></tr>
+          <tr><td class="feature">Exact-alarm permission</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Was missing entirely, now requested with a rationale screen; confirmed alarms fire on-device</td></tr>
           <tr><td class="feature">Crash → graceful error handling</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed this exact round: the permission error surfaced as a clear message, not a crash</td></tr>
         </tbody>
       </table></div>

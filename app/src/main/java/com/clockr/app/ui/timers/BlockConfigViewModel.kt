@@ -8,10 +8,10 @@ import com.clockr.app.data.ChainDefEntity
 import com.clockr.app.data.ClockrDatabase
 import com.clockr.app.data.SettingsRepository
 import com.clockr.app.data.TimerDefEntity
+import com.clockr.app.data.TransitionBeepTone
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.domain.TransitionMode
 import com.clockr.app.run.TimerRunService
-import com.clockr.chainlang.ChainLang
 import com.clockr.chainlang.ChainLangException
 import com.clockr.chainlang.SafetyLimits
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,11 +51,16 @@ data class BlockConfigUiState(
     // Chain-only
     val contentExpr: String = "",
     val transitionMode: TransitionMode = TransitionMode.SEAMLESS,
+    /** Chain-only — the cue played at each of *this* chain's own SEAMLESS boundaries. */
+    val transitionBeepTone: TransitionBeepTone = TransitionBeepTone.BEEP,
     val resolvedSteps: List<ResolvedStepUi> = emptyList(),
     val error: String? = null,
     val saved: Boolean = false,
     /** Non-null while a delete is pending confirmation — the labels of chains that reference this block. */
     val pendingDeleteUsedBy: List<String>? = null,
+    /** Library-list placement — carried through untouched on save, never edited from this screen. */
+    val headerId: String? = null,
+    val sortOrder: Long = System.currentTimeMillis(),
 )
 
 class BlockConfigViewModel(application: Application, private val blockId: String) : AndroidViewModel(application) {
@@ -108,6 +113,8 @@ class BlockConfigViewModel(application: Application, private val blockId: String
                     persistent = timer.persistent,
                     soundProfileId = timer.soundProfileId,
                     durationExpr = timer.durationExpr,
+                    headerId = timer.headerId,
+                    sortOrder = timer.sortOrder,
                 )
                 revalidateTimer()
                 return@launch
@@ -123,6 +130,9 @@ class BlockConfigViewModel(application: Application, private val blockId: String
                     soundProfileId = chain.defaultSoundProfileId,
                     contentExpr = chain.contentExpr,
                     transitionMode = TransitionMode.valueOf(chain.transitionMode),
+                    transitionBeepTone = runCatching { TransitionBeepTone.valueOf(chain.transitionBeepTone) }.getOrDefault(TransitionBeepTone.BEEP),
+                    headerId = chain.headerId,
+                    sortOrder = chain.sortOrder,
                 )
                 revalidateChain()
                 return@launch
@@ -145,6 +155,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
     }
     fun updateSoundProfileId(value: String) { _uiState.value = _uiState.value.copy(soundProfileId = value) }
     fun updateTransitionMode(value: TransitionMode) { _uiState.value = _uiState.value.copy(transitionMode = value) }
+    fun updateTransitionBeepTone(value: TransitionBeepTone) { _uiState.value = _uiState.value.copy(transitionBeepTone = value) }
 
     fun updateDurationExpr(value: String) {
         _uiState.value = _uiState.value.copy(durationExpr = value)
@@ -225,6 +236,8 @@ class BlockConfigViewModel(application: Application, private val blockId: String
                         durationExpr = state.durationExpr,
                         soundProfileId = state.soundProfileId,
                         persistent = state.persistent,
+                        headerId = state.headerId,
+                        sortOrder = state.sortOrder,
                     ),
                 )
                 BlockKind.CHAIN -> repository.saveChain(
@@ -235,6 +248,9 @@ class BlockConfigViewModel(application: Application, private val blockId: String
                         defaultSoundProfileId = state.soundProfileId,
                         transitionMode = state.transitionMode.name,
                         persistent = state.persistent,
+                        headerId = state.headerId,
+                        sortOrder = state.sortOrder,
+                        transitionBeepTone = state.transitionBeepTone.name,
                     ),
                     currentLimits(),
                 )
@@ -252,17 +268,10 @@ class BlockConfigViewModel(application: Application, private val blockId: String
         }
     }
 
-    /** Which persistent chains (other than this one) reference this block's label, if any. */
-    private suspend fun usedBy(label: String, ownId: String): List<String> =
-        db.chainDefDao().getAll()
-            .filter { it.id != ownId }
-            .filter { label in ChainLang.referencedLabels(it.contentExpr) }
-            .map { it.label }
-
     /** Deletes immediately if nothing references this block; otherwise asks for confirmation first. */
     fun requestDelete(onSuccess: () -> Unit) = viewModelScope.launch {
         val state = _uiState.value
-        val referencedBy = if (state.persistent) usedBy(state.label, state.id) else emptyList()
+        val referencedBy = if (state.persistent) repository.usedBy(state.label, state.id) else emptyList()
         if (referencedBy.isEmpty()) {
             performDelete(state)
             onSuccess()

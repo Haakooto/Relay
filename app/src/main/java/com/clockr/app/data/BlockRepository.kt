@@ -41,6 +41,18 @@ class BlockRepository(private val db: ClockrDatabase) : BlockResolver {
         resolve(label).durationSeconds
     }
 
+    /**
+     * Which other persistent Chains reference [label], if any — the one place this check is
+     * made, so the manual delete-confirmation flow and the run engine's auto-delete-on-finish
+     * ([com.clockr.app.run.TimerRunService]) can't drift out of sync with each other.
+     */
+    suspend fun usedBy(label: String, excludeId: String): List<String> = withContext(Dispatchers.IO) {
+        db.chainDefDao().getAll()
+            .filter { it.id != excludeId }
+            .filter { label in ChainLang.referencedLabels(it.contentExpr) }
+            .map { it.label }
+    }
+
     /** For a config screen's live preview — parses/validates without persisting anything. */
     suspend fun evalDurationPreview(source: String): Long = withContext(Dispatchers.IO) {
         ChainLang.evalSingleDuration(source, NowClock.now())

@@ -2,6 +2,7 @@ package com.clockr.app.ui.settings
 
 import android.app.Application
 import android.app.LocaleManager
+import android.app.NotificationManager
 import android.content.Intent
 import android.os.LocaleList
 import androidx.lifecycle.AndroidViewModel
@@ -30,7 +31,19 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setClockFormat24h(value: Boolean) = viewModelScope.launch { repository.setClockFormat24h(value) }
     fun setFirstDayOfWeek(value: DayOfWeek) = viewModelScope.launch { repository.setFirstDayOfWeek(value) }
     fun setDefaultSnoozeMinutes(value: Int) = viewModelScope.launch { repository.setDefaultSnoozeMinutes(value) }
-    fun setHaptics(value: Boolean) = viewModelScope.launch { repository.setHaptics(value) }
+
+    /**
+     * A channel's sound/vibration is locked in at creation (Android 8+) — [repository.setHaptics]
+     * alone wouldn't affect any channel already posted to. Deleting our own channels here forces
+     * them to be recreated, honoring the new setting, next time each is actually needed.
+     */
+    fun setHaptics(value: Boolean) = viewModelScope.launch {
+        repository.setHaptics(value)
+        val manager = getApplication<Application>().getSystemService(NotificationManager::class.java)
+        manager.notificationChannels
+            .filter { it.id.startsWith("alarm") || it.id.startsWith("timer_alert") }
+            .forEach { manager.deleteNotificationChannel(it.id) }
+    }
     fun setMaxExecutionPlanSize(value: Int) = viewModelScope.launch { repository.setMaxExecutionPlanSize(value) }
 
     /** Applied immediately via the platform per-app language API (minSdk 33, no appcompat needed). */

@@ -1,5 +1,6 @@
 package com.clockr.app.run
 
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -8,9 +9,11 @@ import androidx.core.content.ContextCompat
 import com.clockr.app.data.BlockRepository
 import com.clockr.app.data.ClockrDatabase
 import com.clockr.app.data.SettingsRepository
+import com.clockr.app.data.TransitionBeepTone
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.domain.TransitionMode
 import com.clockr.chainlang.SafetyLimits
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -60,6 +63,7 @@ class TimerRunService : Service() {
     private var persistent = false
     private var runningBlockId: String? = null
     private var runningBlockKind: BlockKind? = null
+    private var hapticsEnabled = true
 
     override fun onCreate() {
         super.onCreate()
@@ -73,10 +77,17 @@ class TimerRunService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
-                val blockId = intent.getStringExtra(EXTRA_BLOCK_ID) ?: return START_NOT_STICKY
-                val kind = intent.getStringExtra(EXTRA_BLOCK_KIND)?.let { BlockKind.valueOf(it) } ?: return START_NOT_STICKY
+                // startForeground() must be called unconditionally and first: we've already been
+                // launched via startForegroundService(), and throwing before reaching this call
+                // (e.g. a malformed extra) crashes the service instead of just failing the run.
                 startForeground(RunNotificationHelper.NOTIFICATION_ID, RunNotificationHelper.startingNotification(this))
-                beginRun(blockId, kind)
+                val blockId = intent.getStringExtra(EXTRA_BLOCK_ID)
+                val kind = intent.getStringExtra(EXTRA_BLOCK_KIND)?.let { runCatching { BlockKind.valueOf(it) }.getOrNull() }
+                if (blockId == null || kind == null) {
+                    abortRun(null)
+                } else {
+                    beginRun(blockId, kind)
+                }
             }
             ACTION_STOP, ACTION_COMPLETE_STOP -> finishRun()
             ACTION_CONTINUE -> {
@@ -98,30 +109,45 @@ class TimerRunService : Service() {
         return START_NOT_STICKY
     }
 
+    /**
+     * Resolving/building a plan can fail well after `startForeground()` already ran — an
+     * `UnknownReferenceException` from a dangling label (see [finishRun]), an oversized chain,
+     * whatever. None of that may crash the process; it just means this particular run can't
+     * start.
+     */
     private fun beginRun(blockId: String, kind: BlockKind) = scope.launch {
         runJob?.cancel()
         runningBlockId = blockId
         runningBlockKind = kind
-        val limits = SafetyLimits(maxPlanSize = settingsRepository.current().maxExecutionPlanSize)
-        when (kind) {
-            BlockKind.TIMER -> {
-                val timer = db.timerDefDao().findById(blockId)
-                if (timer == null) { finishRun(); return@launch }
-                blockLabel = timer.label.ifBlank { "Timer" }
-                persistent = timer.persistent
-                plan = RunPlanBuilder(db, repository).buildForTimer(timer)
+        try {
+            val settings = settingsRepository.current()
+            hapticsEnabled = settings.haptics
+            val limits = SafetyLimits(maxPlanSize = settings.maxExecutionPlanSize)
+            when (kind) {
+                BlockKind.TIMER -> {
+                    val timer = db.timerDefDao().findById(blockId)
+                    if (timer == null) { abortRun("This Timer no longer exists"); return@launch }
+                    blockLabel = timer.label.ifBlank { "Timer" }
+                    persistent = timer.persistent
+                    plan = RunPlanBuilder(db, repository).buildForTimer(timer)
+                }
+                BlockKind.CHAIN -> {
+                    val chain = db.chainDefDao().findById(blockId)
+                    if (chain == null) { abortRun("This Chain no longer exists"); return@launch }
+                    blockLabel = chain.label.ifBlank { "Chain" }
+                    persistent = chain.persistent
+                    plan = RunPlanBuilder(db, repository).buildForChain(chain, limits)
+                }
             }
-            BlockKind.CHAIN -> {
-                val chain = db.chainDefDao().findById(blockId)
-                if (chain == null) { finishRun(); return@launch }
-                blockLabel = chain.label.ifBlank { "Chain" }
-                persistent = chain.persistent
-                plan = RunPlanBuilder(db, repository).buildForChain(chain, limits)
-            }
+            if (plan.isEmpty()) { abortRun(null); return@launch }
+            stepIndex = 0
+            runFromCurrentStep()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            val label = blockLabel.ifBlank { "this run" }
+            abortRun("Couldn't start $label: ${e.message ?: e::class.simpleName}")
         }
-        if (plan.isEmpty()) { finishRun(); return@launch }
-        stepIndex = 0
-        runFromCurrentStep()
     }
 
     private fun runFromCurrentStep() {
@@ -138,6 +164,7 @@ class TimerRunService : Service() {
                     return@launch
                 }
                 if (step.transitionMode == TransitionMode.SEAMLESS) {
+                    playTransitionBeep(step.transitionBeepTone)
                     stepIndex++
                     continue
                 } else {
@@ -148,40 +175,74 @@ class TimerRunService : Service() {
         }
     }
 
+    /**
+     * Seamless transitions deliberately skip the alert notification (no "awaiting interaction"
+     * stop), which left them completely silent — with the step's own picked sound reserved for
+     * completion/interaction alerts (often long, and a bad fit for back-to-back short steps that
+     * would overlap), a step boundary needs its own cue independent of any picked ringtone. See
+     * [TransitionBeep] — the tone is set per-Chain (its config screen), not globally; "Silent"
+     * turns it back off for that one chain.
+     */
+    private fun playTransitionBeep(tone: TransitionBeepTone) {
+        scope.launch(Dispatchers.Default) { TransitionBeep.play(tone) }
+    }
+
     private fun postRunning(step: RunStep) {
-        ActiveRunState.update(ActiveRunSnapshot(blockLabel, step.label, stepIndex, plan.size, step.seconds, RunPhase.RUNNING))
-        val notification = RunNotificationHelper.runningNotification(this, blockLabel, step, stepIndex, plan.size)
+        val endAtMillis = System.currentTimeMillis() + step.seconds * 1000
+        ActiveRunState.update(ActiveRunSnapshot(blockLabel, step.label, stepIndex, plan.size, step.seconds, RunPhase.RUNNING, endAtMillis))
+        val notification = RunNotificationHelper.runningNotification(this, blockLabel, step, stepIndex, plan.size, endAtMillis)
         startForeground(RunNotificationHelper.NOTIFICATION_ID, notification)
     }
 
     private fun postAwaitingInteraction(step: RunStep) {
         ActiveRunState.update(ActiveRunSnapshot(blockLabel, step.label, stepIndex, plan.size, 0, RunPhase.AWAITING_INTERACTION))
-        val notification = RunNotificationHelper.awaitingInteractionNotification(this, blockLabel, step, stepIndex, plan.size)
+        val notification = RunNotificationHelper.awaitingInteractionNotification(this, blockLabel, step, stepIndex, plan.size, hapticsEnabled)
         startForeground(RunNotificationHelper.NOTIFICATION_ID, notification)
     }
 
     private fun postCompletion() {
+        val step = plan.getOrNull(stepIndex)
         ActiveRunState.update(ActiveRunSnapshot(blockLabel, null, stepIndex, plan.size, 0, RunPhase.AWAITING_COMPLETION))
-        val notification = RunNotificationHelper.completionNotification(this, blockLabel)
+        val notification = RunNotificationHelper.completionNotification(this, blockLabel, step?.soundProfileId, hapticsEnabled)
         startForeground(RunNotificationHelper.NOTIFICATION_ID, notification)
     }
 
     /**
      * Stop always ends the active run; whether it leaves a trace depends on Persistent (spec
      * §6.7) — a non-persistent block is deleted entirely, a persistent one just stops running,
-     * definition intact in the library.
+     * definition intact in the library. Deleting still checks references first (the same check
+     * [com.clockr.app.ui.timers.BlockConfigViewModel]'s manual delete uses, via
+     * [BlockRepository.usedBy]) — silently dropping a block another Chain still points at would
+     * leave that Chain referencing nothing, which surfaces as a crash next time it's started.
      */
     private fun finishRun() = scope.launch {
         runJob?.cancel()
         if (!persistent) {
-            when (runningBlockKind) {
-                BlockKind.TIMER -> runningBlockId?.let { id -> db.timerDefDao().findById(id)?.let { db.timerDefDao().delete(it) } }
-                BlockKind.CHAIN -> runningBlockId?.let { id -> db.chainDefDao().findById(id)?.let { db.chainDefDao().delete(it) } }
-                null -> {}
+            val id = runningBlockId
+            val label = blockLabel
+            if (id != null && (label.isBlank() || repository.usedBy(label, id).isEmpty())) {
+                when (runningBlockKind) {
+                    BlockKind.TIMER -> db.timerDefDao().findById(id)?.let { db.timerDefDao().delete(it) }
+                    BlockKind.CHAIN -> db.chainDefDao().findById(id)?.let { db.chainDefDao().delete(it) }
+                    null -> {}
+                }
             }
         }
         ActiveRunState.update(null)
         RunNotificationHelper.cancel(this@TimerRunService)
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
+    /** A run that never got going — no block to (maybe) delete, just clean shutdown. */
+    private fun abortRun(message: String?) = scope.launch {
+        runJob?.cancel()
+        ActiveRunState.update(null)
+        RunNotificationHelper.cancel(this@TimerRunService)
+        if (message != null) {
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.notify(RunNotificationHelper.ERROR_NOTIFICATION_ID, RunNotificationHelper.errorNotification(this@TimerRunService, message))
+        }
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

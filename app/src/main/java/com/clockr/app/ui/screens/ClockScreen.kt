@@ -28,7 +28,7 @@ import java.time.format.FormatStyle
  * axes) lands with the Widgets milestone; this is the plain digital face for now.
  */
 @Composable
-fun ClockScreen(modifier: Modifier = Modifier) {
+fun ClockScreen(modifier: Modifier = Modifier, is24Hour: Boolean = true) {
     var now by remember { mutableStateOf(LocalDateTime.now()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -36,7 +36,9 @@ fun ClockScreen(modifier: Modifier = Modifier) {
             delay(1000)
         }
     }
-    val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm:ss") }
+    val timeFormatter = remember(is24Hour) {
+        DateTimeFormatter.ofPattern(if (is24Hour) "HH:mm:ss" else "hh:mm:ss a")
+    }
     val dateFormatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
 
     Scaffold(modifier = modifier) { padding ->

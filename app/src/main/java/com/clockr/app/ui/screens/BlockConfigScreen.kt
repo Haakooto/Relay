@@ -36,6 +36,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,9 +44,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.clockr.app.data.TransitionBeepTone
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.domain.TransitionMode
+import com.clockr.app.run.TransitionBeep
 import com.clockr.app.ui.common.SoundPickerRow
+import com.clockr.app.ui.common.displayName
 import com.clockr.app.ui.theme.ClockrTheme
 import com.clockr.app.ui.timers.BlockConfigViewModel
 import com.clockr.app.ui.timers.BlockConfigViewModelFactory
@@ -53,6 +57,7 @@ import com.clockr.app.ui.timers.NEW_CHAIN_ROUTE_ID
 import com.clockr.app.ui.timers.NEW_TIMER_ROUTE_ID
 import com.clockr.app.ui.timers.ResolvedStepUi
 import com.clockr.app.util.formatDuration
+import kotlinx.coroutines.launch
 
 @Composable
 fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
@@ -61,6 +66,7 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
         factory = BlockConfigViewModelFactory(application, blockId),
     )
     val state by viewModel.uiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -162,6 +168,31 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                                 onClick = { viewModel.updateTransitionMode(TransitionMode.SEAMLESS) },
                                 label = { Text("Seamless") },
                             )
+                        }
+                    }
+
+                    if (state.transitionMode == TransitionMode.SEAMLESS) {
+                        item { Text("Seamless transition sound", style = MaterialTheme.typography.bodyLarge) }
+                        item {
+                            Text(
+                                "Plays at each step boundary in this chain, since seamless steps advance with no other alert. Tap to preview, tap again to pick.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        item {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                TransitionBeepTone.entries.forEach { option ->
+                                    FilterChip(
+                                        selected = state.transitionBeepTone == option,
+                                        onClick = {
+                                            coroutineScope.launch { TransitionBeep.play(option) }
+                                            viewModel.updateTransitionBeepTone(option)
+                                        },
+                                        label = { Text(option.displayName()) },
+                                    )
+                                }
+                            }
                         }
                     }
 

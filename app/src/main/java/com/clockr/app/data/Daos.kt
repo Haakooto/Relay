@@ -25,6 +25,21 @@ interface AlarmDao {
 }
 
 @Dao
+interface LibraryHeaderDao {
+    @Query("SELECT * FROM library_headers ORDER BY sortOrder")
+    fun observeAll(): Flow<List<LibraryHeaderEntity>>
+
+    @Query("SELECT * FROM library_headers WHERE id = :id LIMIT 1")
+    suspend fun findById(id: String): LibraryHeaderEntity?
+
+    @Upsert
+    suspend fun upsert(entity: LibraryHeaderEntity)
+
+    @Delete
+    suspend fun delete(entity: LibraryHeaderEntity)
+}
+
+@Dao
 interface SoundProfileDao {
     @Query("SELECT * FROM sound_profiles ORDER BY id")
     fun observeAll(): Flow<List<SoundProfileEntity>>
@@ -46,6 +61,9 @@ interface TimerDefDao {
 
     @Query("SELECT * FROM timer_defs WHERE id = :id LIMIT 1")
     suspend fun findById(id: String): TimerDefEntity?
+
+    @Query("SELECT * FROM timer_defs WHERE headerId = :headerId")
+    suspend fun getAllByHeader(headerId: String): List<TimerDefEntity>
 
     /** Blocking on purpose — used only by [com.clockr.app.data.BlockRepository]'s synchronous
      * chainlang `BlockResolver`, which must itself be called off the main thread. */
@@ -79,6 +97,9 @@ interface ChainDefDao {
 
     @Query("SELECT * FROM chain_defs WHERE id = :id LIMIT 1")
     suspend fun findById(id: String): ChainDefEntity?
+
+    @Query("SELECT * FROM chain_defs WHERE headerId = :headerId")
+    suspend fun getAllByHeader(headerId: String): List<ChainDefEntity>
 
     @Upsert
     suspend fun upsert(entity: ChainDefEntity)

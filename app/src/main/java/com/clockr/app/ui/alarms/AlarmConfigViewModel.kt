@@ -8,6 +8,7 @@ import com.clockr.app.alarm.AlarmScheduler
 import com.clockr.app.data.AlarmEntity
 import com.clockr.app.data.ClockrDatabase
 import com.clockr.app.data.OneOffAfterFire
+import com.clockr.app.data.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -36,6 +37,9 @@ data class AlarmConfigUiState(
     val snoozeMinutesText: String = "9",
     val maxSnoozesText: String = "",
     val error: String? = null,
+    /** Display-only, sourced from Settings — not persisted on the alarm itself. */
+    val is24Hour: Boolean = true,
+    val firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
 ) {
     val isRepeating: Boolean get() = repeatDays.isNotEmpty()
 }
@@ -43,19 +47,33 @@ data class AlarmConfigUiState(
 class AlarmConfigViewModel(application: Application, private val alarmId: String) : AndroidViewModel(application) {
     private val dao = ClockrDatabase.get(application).alarmDao()
     private val scheduler = AlarmScheduler(application)
+    private val settingsRepository = SettingsRepository(application)
 
     private val _uiState = MutableStateFlow(AlarmConfigUiState())
     val uiState: StateFlow<AlarmConfigUiState> = _uiState
 
     init {
         viewModelScope.launch {
+            val settings = settingsRepository.current()
             if (alarmId == NEW_ALARM_ROUTE_ID) {
-                _uiState.value = AlarmConfigUiState(loading = false, isNew = true, id = UUID.randomUUID().toString())
+                _uiState.value = AlarmConfigUiState(
+                    loading = false,
+                    isNew = true,
+                    id = UUID.randomUUID().toString(),
+                    snoozeMinutesText = settings.defaultSnoozeMinutes.toString(),
+                    is24Hour = settings.clockFormat24h,
+                    firstDayOfWeek = settings.firstDayOfWeek,
+                )
                 return@launch
             }
             val alarm = dao.findById(alarmId)
             if (alarm == null) {
-                _uiState.value = AlarmConfigUiState(loading = false, notFound = true)
+                _uiState.value = AlarmConfigUiState(
+                    loading = false,
+                    notFound = true,
+                    is24Hour = settings.clockFormat24h,
+                    firstDayOfWeek = settings.firstDayOfWeek,
+                )
                 return@launch
             }
             _uiState.value = AlarmConfigUiState(
@@ -78,6 +96,8 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
                 soundProfileId = alarm.soundProfileId,
                 snoozeMinutesText = alarm.snoozeMinutes.toString(),
                 maxSnoozesText = alarm.maxSnoozes?.toString() ?: "",
+                is24Hour = settings.clockFormat24h,
+                firstDayOfWeek = settings.firstDayOfWeek,
             )
         }
     }
@@ -111,7 +131,7 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
             repeatUntilEpochDay = if (s.deleteAfterMode == DeleteAfterMode.DATE) s.repeatUntilEpochDay else null,
             repeatOccurrencesRemaining = if (s.deleteAfterMode == DeleteAfterMode.COUNT) s.repeatCountText.toIntOrNull() else null,
             soundProfileId = s.soundProfileId,
-            snoozeMinutes = s.snoozeMinutesText.toIntOrNull() ?: 9,
+            snoozeMinutes = s.snoozeMinutesText.toIntOrNull() ?: settingsRepository.current().defaultSnoozeMinutes,
             maxSnoozes = s.maxSnoozesText.toIntOrNull(),
             snoozesUsed = 0,
             enabled = true,
