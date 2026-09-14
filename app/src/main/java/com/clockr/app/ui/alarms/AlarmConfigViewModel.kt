@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.clockr.app.R
 import com.clockr.app.alarm.AlarmScheduler
 import com.clockr.app.data.AlarmEntity
 import com.clockr.app.data.ClockrDatabase
@@ -158,7 +159,7 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
     fun save(onSuccess: () -> Unit) = viewModelScope.launch {
         val s = _uiState.value
         if (s.firesBlockTarget && !s.hasBlockTarget) {
-            _uiState.value = s.copy(error = "Pick a Timer or Chain, or switch back to Alarm")
+            _uiState.value = s.copy(error = getApplication<Application>().getString(R.string.error_alarm_no_target))
             return@launch
         }
         val entity = AlarmEntity(
@@ -188,7 +189,7 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
             // error (rather than letting it crash) is what stops "still there after relaunch,
             // but never actually armed" from looking like data loss.
             Log.e("AlarmConfigViewModel", "Failed to save/schedule alarm ${entity.id}", e)
-            _uiState.value = _uiState.value.copy(error = "Couldn't save: ${e.message ?: e::class.simpleName}")
+            _uiState.value = _uiState.value.copy(error = getApplication<Application>().getString(R.string.error_alarm_save, e.message ?: e::class.simpleName ?: "unknown"))
         }
     }
 
@@ -198,7 +199,7 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
             onSuccess()
         } catch (e: Exception) {
             Log.e("AlarmConfigViewModel", "Failed to delete alarm ${_uiState.value.id}", e)
-            _uiState.value = _uiState.value.copy(error = "Couldn't delete: ${e.message ?: e::class.simpleName}")
+            _uiState.value = _uiState.value.copy(error = getApplication<Application>().getString(R.string.error_alarm_delete, e.message ?: e::class.simpleName ?: "unknown"))
         }
     }
 }

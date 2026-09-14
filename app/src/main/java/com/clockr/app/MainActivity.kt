@@ -26,10 +26,12 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -53,12 +55,13 @@ import com.clockr.app.ui.theme.ClockrTheme
 import com.clockr.app.widget.EXTRA_OPEN_CLOCK
 import androidx.compose.runtime.LaunchedEffect
 
-private enum class Pane(val route: String, val label: String) {
-    Alarms("alarms", "Alarms"),
-    Timers("timers", "Timers"),
-    Stopwatch("stopwatch", "Stopwatch"),
-    Clock("clock", "Clock"),
-    Settings("settings", "Settings"),
+/** [route] is a nav-graph key, not user-visible — stays a fixed identifier regardless of locale. */
+private enum class Pane(val route: String, @StringRes val labelRes: Int) {
+    Alarms("alarms", R.string.pane_alarms),
+    Timers("timers", R.string.pane_timers),
+    Stopwatch("stopwatch", R.string.pane_stopwatch),
+    Clock("clock", R.string.pane_clock),
+    Settings("settings", R.string.pane_settings),
 }
 
 class MainActivity : ComponentActivity() {
@@ -135,6 +138,7 @@ private fun ClockrApp(openClock: Boolean = false, clockFormat24h: Boolean = true
                 val currentRoute = backStackEntry?.destination
 
                 Pane.entries.forEach { pane ->
+                    val label = stringResource(pane.labelRes)
                     NavigationBarItem(
                         selected = currentRoute?.hierarchy?.any { it.route == pane.route } == true,
                         onClick = {
@@ -144,8 +148,8 @@ private fun ClockrApp(openClock: Boolean = false, clockFormat24h: Boolean = true
                                 restoreState = true
                             }
                         },
-                        icon = { Icon(paneIcon(pane), contentDescription = pane.label) },
-                        label = { Text(pane.label) },
+                        icon = { Icon(paneIcon(pane), contentDescription = label) },
+                        label = { Text(label) },
                     )
                 }
             }

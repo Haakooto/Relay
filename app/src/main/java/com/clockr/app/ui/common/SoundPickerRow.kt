@@ -19,7 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.clockr.app.R
 
 /** A tappable row opening the system alarm-sound picker (spec: RingtoneManager, not a text field). */
 @Composable
@@ -32,10 +34,11 @@ fun SoundPickerRow(label: String, soundProfileId: String, onPicked: (String) -> 
         onPicked(uri?.toString() ?: "")
     }
 
-    val title = remember(soundProfileId) {
+    val defaultLabel = stringResource(R.string.sound_default)
+    val title = remember(soundProfileId, defaultLabel) {
         soundProfileId.takeIf { it.isNotBlank() }
             ?.let { runCatching { RingtoneManager.getRingtone(context, Uri.parse(it))?.getTitle(context) }.getOrNull() }
-            ?: "Default"
+            ?: defaultLabel
     }
 
     Row(

@@ -123,17 +123,17 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>A status snapshot across every pane, taken after the first real device test pass — not a roadmap, a ledger. Full design detail lives in the <a href="https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d">Clockr Spec</a>.</p>
     <div class="meta">
-      <span>2026-09-14, rev 10</span>
+      <span>2026-09-14, rev 11</span>
       <span>50 tracked items</span>
       <span>chainlang: 30/30 tests passing</span>
     </div>
 
     <div class="stats">
       <div class="stat approved"><div class="n">27</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">14</div><div class="l">WIP</div></div>
+      <div class="stat wip"><div class="n">15</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">2</div><div class="l">Lacking</div></div>
       <div class="stat"><div class="n">3</div><div class="l">Planned</div></div>
-      <div class="stat"><div class="n">3</div><div class="l">Deferred</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">Deferred</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
     </div>
     <div class="legend">
@@ -235,7 +235,7 @@
           <tr><td class="feature">24h clock format</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
           <tr><td class="feature">First day of week</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
           <tr><td class="feature">Language (dropdown, locale only)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was buggy (flicker/dropped letters) — root-caused and fixed this session</td></tr>
-          <tr><td class="feature">Full i18n — translated UI strings</td><td><span class="chip deferred">Deferred</span></td><td class="note">Zero strings are actually translated today — every screen is hardcoded English</td></tr>
+          <tr><td class="feature">Full i18n — translated UI strings</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Every hardcoded UI string moved to <code>strings.xml</code> — screens, notifications/channels, and ViewModel-surfaced error messages — with a full English+Norwegian (nb) translation, verified with no <code>MissingTranslation</code> lint errors. Known scope boundary: chainlang's own exception messages (duration/chain-syntax parse errors) stay English — that module has no Android dependency by design, so localizing them needs chainlang to expose error codes for the app to map, not a quick fix. Needs on-device confirmation switching to Norsk actually renders right.</td></tr>
           <tr><td class="feature">Default snooze minutes</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
           <tr><td class="feature">Haptics</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
           <tr><td class="feature">Max execution plan size</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Wired into the run engine's safety limit</td></tr>

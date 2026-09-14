@@ -29,9 +29,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.clockr.app.R
 import com.clockr.app.data.AlarmEntity
 import com.clockr.app.ui.alarms.AlarmsViewModel
 import com.clockr.app.ui.alarms.NEW_ALARM_ROUTE_ID
@@ -59,14 +61,14 @@ fun AlarmsScreen(modifier: Modifier = Modifier, onAlarmClick: (String) -> Unit =
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = { onAlarmClick(NEW_ALARM_ROUTE_ID) }) {
-                Icon(Icons.Default.Add, contentDescription = "New alarm")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.alarms_new_desc))
             }
         },
     ) { padding ->
         if (alarms.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Text(
-                    "No alarms yet — tap + to add one",
+                    stringResource(R.string.alarms_empty),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -110,15 +112,19 @@ private fun AlarmCard(
                 }
                 val recurrence = when {
                     alarm.isRepeating -> formatDays(alarm.repeatDaySet())
-                    alarm.done -> "Done"
-                    else -> "Once"
+                    alarm.done -> stringResource(R.string.alarm_recurrence_done)
+                    else -> stringResource(R.string.alarm_recurrence_once)
                 }
-                val summary = if (alarm.hasBlockTarget) "$recurrence · Starts ${targetLabel ?: "…"}" else recurrence
+                val summary = if (alarm.hasBlockTarget) {
+                    stringResource(R.string.alarm_summary_with_target, recurrence, targetLabel ?: stringResource(R.string.common_loading_placeholder))
+                } else {
+                    recurrence
+                }
                 Text(summary, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Column(horizontalAlignment = Alignment.End) {
                 if (!alarm.isRepeating && alarm.done) {
-                    AssistChip(onClick = onDoneToggle, label = { Text("Done — reactivate") })
+                    AssistChip(onClick = onDoneToggle, label = { Text(stringResource(R.string.alarm_reactivate)) })
                 } else {
                     Switch(checked = alarm.enabled, onCheckedChange = onEnabledChange)
                 }

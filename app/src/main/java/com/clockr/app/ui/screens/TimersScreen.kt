@@ -45,10 +45,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.clockr.app.R
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.domain.LibraryHeader
 import com.clockr.app.domain.LibraryItem
@@ -145,25 +147,25 @@ fun TimersScreen(modifier: Modifier = Modifier, onBlockClick: (String) -> Unit =
         floatingActionButton = {
             Box {
                 FloatingActionButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Default.Add, contentDescription = "New block")
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.timers_new_block_desc))
                 }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                     DropdownMenuItem(
-                        text = { Text("New Timer") },
+                        text = { Text(stringResource(R.string.timers_new_timer)) },
                         onClick = {
                             menuExpanded = false
                             onBlockClick(NEW_TIMER_ROUTE_ID)
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("New Chain") },
+                        text = { Text(stringResource(R.string.timers_new_chain)) },
                         onClick = {
                             menuExpanded = false
                             onBlockClick(NEW_CHAIN_ROUTE_ID)
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("New Header") },
+                        text = { Text(stringResource(R.string.timers_new_header)) },
                         onClick = {
                             menuExpanded = false
                             showAddHeaderDialog = true
@@ -176,7 +178,7 @@ fun TimersScreen(modifier: Modifier = Modifier, onBlockClick: (String) -> Unit =
         if (items.isEmpty() && headers.isEmpty() && activeRun == null) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Text(
-                    "No timers or chains yet — tap + to add one",
+                    stringResource(R.string.timers_empty),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -198,7 +200,7 @@ fun TimersScreen(modifier: Modifier = Modifier, onBlockClick: (String) -> Unit =
                         )
                     }
                 }
-                item { Text("Library", style = MaterialTheme.typography.titleLarge) }
+                item { Text(stringResource(R.string.timers_library_title), style = MaterialTheme.typography.titleLarge) }
                 for (row in rows.toList()) {
                     when (row) {
                         is LibraryRow.HeaderRow -> item(key = row.key) {
@@ -267,7 +269,7 @@ fun TimersScreen(modifier: Modifier = Modifier, onBlockClick: (String) -> Unit =
 
     if (showAddHeaderDialog) {
         HeaderEditDialog(
-            title = "New header",
+            title = stringResource(R.string.timers_new_header_dialog_title),
             initialText = "",
             onConfirm = { viewModel.addHeader(it) },
             onDismiss = { showAddHeaderDialog = false },
@@ -275,7 +277,7 @@ fun TimersScreen(modifier: Modifier = Modifier, onBlockClick: (String) -> Unit =
     }
     renamingHeader?.let { header ->
         HeaderEditDialog(
-            title = "Rename header",
+            title = stringResource(R.string.timers_rename_header_dialog_title),
             initialText = header.title,
             onConfirm = { viewModel.renameHeader(header.id, it) },
             onDismiss = { renamingHeader = null },
@@ -290,12 +292,17 @@ private fun HeaderEditDialog(title: String, initialText: String, onConfirm: (Str
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            OutlinedTextField(value = text, onValueChange = { text = it }, label = { Text("Name") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text(stringResource(R.string.common_name_label)) },
+                modifier = Modifier.fillMaxWidth(),
+            )
         },
         confirmButton = {
-            TextButton(onClick = { if (text.isNotBlank()) { onConfirm(text); onDismiss() } }) { Text("Save") }
+            TextButton(onClick = { if (text.isNotBlank()) { onConfirm(text); onDismiss() } }) { Text(stringResource(R.string.action_save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }
 
@@ -317,16 +324,16 @@ private fun HeaderRowView(
         Text(header.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(end = 4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onMoveUp, enabled = canMoveUp) {
-                Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Move header up")
+                Icon(Icons.Default.KeyboardArrowUp, contentDescription = stringResource(R.string.timers_header_move_up_desc))
             }
             IconButton(onClick = onMoveDown, enabled = canMoveDown) {
-                Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Move header down")
+                Icon(Icons.Default.KeyboardArrowDown, contentDescription = stringResource(R.string.timers_header_move_down_desc))
             }
             IconButton(onClick = onRename) {
-                Icon(Icons.Default.Edit, contentDescription = "Rename header")
+                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.timers_header_rename_desc))
             }
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete header")
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.timers_header_delete_desc))
             }
         }
     }
@@ -344,9 +351,13 @@ private fun ActiveRunCard(
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(run.blockLabel, style = MaterialTheme.typography.titleLarge)
-            val stepText = run.stepLabel ?: "Step ${run.stepIndex + 1}"
+            val stepText = run.stepLabel ?: stringResource(R.string.run_step_fallback, run.stepIndex + 1)
             Text(
-                if (run.stepCount > 1) "$stepText (${run.stepIndex + 1}/${run.stepCount})" else stepText,
+                if (run.stepCount > 1) {
+                    stringResource(R.string.run_step_with_count, stepText, run.stepIndex + 1, run.stepCount)
+                } else {
+                    stepText
+                },
                 style = MaterialTheme.typography.bodyLarge,
             )
             when (run.phase) {
@@ -365,21 +376,21 @@ private fun ActiveRunCard(
                     val remainingMillis = (run.stepEndAtMillis - nowMillis).coerceAtLeast(0)
                     val remainingSeconds = (remainingMillis + 999) / 1000
                     Text(formatElapsedClock(remainingSeconds), style = MaterialTheme.typography.displayLarge)
-                    TextButton(onClick = onStop) { Text("Stop") }
+                    TextButton(onClick = onStop) { Text(stringResource(R.string.action_stop)) }
                 }
                 RunPhase.AWAITING_INTERACTION -> {
-                    Text("Done — waiting for you", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.run_awaiting_interaction), style = MaterialTheme.typography.bodyLarge)
                     Row {
-                        TextButton(onClick = onContinue) { Text("Continue") }
-                        TextButton(onClick = onStop) { Text("Stop") }
+                        TextButton(onClick = onContinue) { Text(stringResource(R.string.action_continue)) }
+                        TextButton(onClick = onStop) { Text(stringResource(R.string.action_stop)) }
                     }
                 }
                 RunPhase.AWAITING_COMPLETION -> {
-                    Text("Finished", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.run_finished), style = MaterialTheme.typography.bodyLarge)
                     Row {
-                        TextButton(onClick = onCompleteStop) { Text("Stop") }
-                        TextButton(onClick = onCompleteRestart) { Text("Restart") }
-                        TextButton(onClick = onCompleteAddMinute) { Text("+1 min") }
+                        TextButton(onClick = onCompleteStop) { Text(stringResource(R.string.action_stop)) }
+                        TextButton(onClick = onCompleteRestart) { Text(stringResource(R.string.action_restart)) }
+                        TextButton(onClick = onCompleteAddMinute) { Text(stringResource(R.string.run_add_minute)) }
                     }
                 }
             }
@@ -431,14 +442,15 @@ private fun DraggableBlockCard(
         ) {
             Column {
                 Text(block.label, style = MaterialTheme.typography.titleLarge)
+                val kindLabel = stringResource(if (block.kind == BlockKind.CHAIN) R.string.block_kind_chain else R.string.block_kind_timer)
                 Text(
-                    "${if (block.kind == BlockKind.CHAIN) "Chain" else "Timer"} · ${formatDuration(block.totalSeconds)}",
+                    stringResource(R.string.timers_block_summary, kindLabel, formatDuration(block.totalSeconds)),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             IconButton(onClick = onStart) {
-                Icon(Icons.Default.PlayArrow, contentDescription = "Start")
+                Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.action_start))
             }
         }
     }

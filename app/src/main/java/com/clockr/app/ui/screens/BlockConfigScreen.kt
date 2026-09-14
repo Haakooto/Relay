@@ -41,9 +41,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.clockr.app.R
 import com.clockr.app.data.TransitionBeepTone
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.domain.TransitionMode
@@ -71,23 +73,23 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.label.ifBlank { "Untitled" }) },
+                title = { Text(state.label.ifBlank { stringResource(R.string.block_config_untitled) }) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
                     if (!state.isNew) {
                         IconButton(onClick = { viewModel.requestDelete(onBack) }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+                            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete))
                         }
                     }
                     TextButton(
                         enabled = state.error == null && state.labelError == null && !state.loading,
                         onClick = { viewModel.save(onBack) },
                     ) {
-                        Text("Save")
+                        Text(stringResource(R.string.action_save))
                     }
                 },
             )
@@ -98,7 +100,7 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
             state.notFound -> Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-                Text("Not found", modifier = Modifier.align(Alignment.Center))
+                Text(stringResource(R.string.common_not_found), modifier = Modifier.align(Alignment.Center))
             }
             else -> LazyColumn(
                 modifier = Modifier.padding(padding).padding(16.dp),
@@ -108,15 +110,11 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                     OutlinedTextField(
                         value = state.label,
                         onValueChange = viewModel::updateLabel,
-                        label = { Text(if (state.persistent) "Label (required)" else "Label (optional)") },
+                        label = { Text(stringResource(if (state.persistent) R.string.block_config_label_required else R.string.block_config_label_optional)) },
                         supportingText = {
                             Text(
                                 state.labelError
-                                    ?: if (state.persistent) {
-                                        "Letters, digits, underscore — must be unique"
-                                    } else {
-                                        "Only needed if you turn Persistent on"
-                                    },
+                                    ?: stringResource(if (state.persistent) R.string.block_config_label_hint_required else R.string.block_config_label_hint_optional),
                             )
                         },
                         isError = state.labelError != null,
@@ -129,9 +127,13 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                         OutlinedTextField(
                             value = state.durationExpr,
                             onValueChange = viewModel::updateDurationExpr,
-                            label = { Text("Duration") },
+                            label = { Text(stringResource(R.string.block_config_duration_label)) },
                             supportingText = {
-                                Text(state.error ?: state.resolvedSeconds?.let { "= ${formatDuration(it)}" } ?: "")
+                                Text(
+                                    state.error
+                                        ?: state.resolvedSeconds?.let { stringResource(R.string.block_config_duration_resolved, formatDuration(it)) }
+                                        ?: "",
+                                )
                             },
                             isError = state.error != null,
                             modifier = Modifier.fillMaxWidth(),
@@ -141,41 +143,41 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
 
                 item {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Persistent — save to library", style = MaterialTheme.typography.bodyLarge)
+                        Text(stringResource(R.string.block_config_persistent_label), style = MaterialTheme.typography.bodyLarge)
                         Switch(checked = state.persistent, onCheckedChange = viewModel::updatePersistent)
                     }
                 }
 
                 item {
                     SoundPickerRow(
-                        label = if (state.kind == BlockKind.CHAIN) "Default sound profile" else "Sound profile",
+                        label = stringResource(if (state.kind == BlockKind.CHAIN) R.string.block_config_sound_chain else R.string.block_config_sound_timer),
                         soundProfileId = state.soundProfileId,
                         onPicked = viewModel::updateSoundProfileId,
                     )
                 }
 
                 if (state.kind == BlockKind.CHAIN) {
-                    item { Text("Transition mode", style = MaterialTheme.typography.bodyLarge) }
+                    item { Text(stringResource(R.string.block_config_transition_mode_title), style = MaterialTheme.typography.bodyLarge) }
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             FilterChip(
                                 selected = state.transitionMode == TransitionMode.REQUIRE_INTERACTION,
                                 onClick = { viewModel.updateTransitionMode(TransitionMode.REQUIRE_INTERACTION) },
-                                label = { Text("Require interaction") },
+                                label = { Text(stringResource(R.string.block_config_transition_require_interaction)) },
                             )
                             FilterChip(
                                 selected = state.transitionMode == TransitionMode.SEAMLESS,
                                 onClick = { viewModel.updateTransitionMode(TransitionMode.SEAMLESS) },
-                                label = { Text("Seamless") },
+                                label = { Text(stringResource(R.string.block_config_transition_seamless)) },
                             )
                         }
                     }
 
                     if (state.transitionMode == TransitionMode.SEAMLESS) {
-                        item { Text("Seamless transition sound", style = MaterialTheme.typography.bodyLarge) }
+                        item { Text(stringResource(R.string.block_config_beep_title), style = MaterialTheme.typography.bodyLarge) }
                         item {
                             Text(
-                                "Plays at each step boundary in this chain, since seamless steps advance with no other alert. Tap to preview, tap again to pick.",
+                                stringResource(R.string.block_config_beep_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -200,15 +202,15 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                     item {
                         var showHelp by remember { mutableStateOf(false) }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Content", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(end = 4.dp))
+                            Text(stringResource(R.string.block_config_content_title), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(end = 4.dp))
                             IconButton(onClick = { showHelp = true }, modifier = Modifier.size(24.dp)) {
-                                Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = "Syntax help")
+                                Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = stringResource(R.string.block_config_syntax_help_desc))
                             }
                         }
                         OutlinedTextField(
                             value = state.contentExpr,
                             onValueChange = viewModel::updateContentExpr,
-                            supportingText = { Text(state.error ?: "e.g. (Work, Break) or repeat(4, (Work, Break)) — one line per step also works") },
+                            supportingText = { Text(state.error ?: stringResource(R.string.block_config_content_hint)) },
                             isError = state.error != null,
                             minLines = 4,
                             modifier = Modifier.fillMaxWidth(),
@@ -218,7 +220,7 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
                         }
                     }
                     if (state.error == null) {
-                        item { Text("Preview", style = MaterialTheme.typography.titleLarge) }
+                        item { Text(stringResource(R.string.block_config_preview_title), style = MaterialTheme.typography.titleLarge) }
                         items(state.resolvedSteps) { step -> ResolvedStepRow(step) }
                     }
                 }
@@ -227,12 +229,13 @@ fun BlockConfigScreen(blockId: String, onBack: () -> Unit = {}) {
     }
 
     state.pendingDeleteUsedBy?.let { usedBy ->
+        val refWord = stringResource(if (usedBy.size > 1) R.string.block_config_ref_plural else R.string.block_config_ref_singular)
         AlertDialog(
             onDismissRequest = viewModel::cancelPendingDelete,
-            title = { Text("Still in use") },
-            text = { Text("Referenced by: ${usedBy.joinToString(", ")}. Deleting it will break ${if (usedBy.size > 1) "those chains" else "that chain"}. Delete anyway?") },
-            confirmButton = { TextButton(onClick = { viewModel.confirmDelete(onBack) }) { Text("Delete anyway") } },
-            dismissButton = { TextButton(onClick = viewModel::cancelPendingDelete) { Text("Cancel") } },
+            title = { Text(stringResource(R.string.block_config_still_in_use_title)) },
+            text = { Text(stringResource(R.string.block_config_still_in_use_message, usedBy.joinToString(", "), refWord)) },
+            confirmButton = { TextButton(onClick = { viewModel.confirmDelete(onBack) }) { Text(stringResource(R.string.block_config_delete_anyway)) } },
+            dismissButton = { TextButton(onClick = viewModel::cancelPendingDelete) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }
@@ -244,7 +247,7 @@ private fun ResolvedStepRow(step: ResolvedStepUi) {
             modifier = Modifier.padding(12.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(step.label ?: "—", style = MaterialTheme.typography.bodyLarge)
+            Text(step.label ?: stringResource(R.string.block_config_step_placeholder), style = MaterialTheme.typography.bodyLarge)
             Text(
                 formatDuration(step.seconds),
                 style = MaterialTheme.typography.labelSmall,
@@ -258,26 +261,27 @@ private fun ResolvedStepRow(step: ResolvedStepUi) {
 private fun ChainSyntaxHelpDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Writing a chain") },
+        title = { Text(stringResource(R.string.chain_help_title)) },
         text = {
             Column {
+                Text(stringResource(R.string.chain_help_intro))
                 Text(
-                    "A chain is a list of steps in parentheses, one per line (or comma-separated " +
-                        "— whichever's easier):",
+                    stringResource(R.string.chain_help_example_syntax),
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
                 )
-                Text("(Work, Break)", fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
-                Text("Each step is one of:")
-                Text("• A plain duration: 3, 20m, 2h30m10s", modifier = Modifier.padding(top = 4.dp))
-                Text("• The name of an existing Timer or Chain, to reuse it")
-                Text("• repeat(N, step) — repeat a step N times")
-                Text("• range(start, stop, step) or arange(...) — a numpy-style count sequence")
+                Text(stringResource(R.string.chain_help_step_types))
+                Text(stringResource(R.string.chain_help_step_duration), modifier = Modifier.padding(top = 4.dp))
+                Text(stringResource(R.string.chain_help_step_reference))
+                Text(stringResource(R.string.chain_help_step_repeat))
+                Text(stringResource(R.string.chain_help_step_range))
                 Text(
-                    "Example: repeat(4, (Work, Break)) runs Work then Break, four times in a row.",
+                    stringResource(R.string.chain_help_example),
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Got it") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.chain_help_got_it)) } },
     )
 }
 

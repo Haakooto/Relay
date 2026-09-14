@@ -1,0 +1,208 @@
+<resources>
+    <!-- Shared actions, reused across screens/dialogs -->
+    <string name="action_save">Lagre</string>
+    <string name="action_cancel">Avbryt</string>
+    <string name="action_stop">Stopp</string>
+    <string name="action_continue">Fortsett</string>
+    <string name="action_restart">Start på nytt</string>
+    <string name="action_delete">Slett</string>
+    <string name="action_ok">OK</string>
+    <string name="action_back">Tilbake</string>
+    <string name="action_start">Start</string>
+    <string name="common_name_label">Navn</string>
+
+    <!-- Timers pane -->
+    <string name="timers_new_block_desc">Ny blokk</string>
+    <string name="timers_new_timer">Ny tidtaker</string>
+    <string name="timers_new_chain">Ny serie</string>
+    <string name="timers_new_header">Ny overskrift</string>
+    <string name="timers_empty">Ingen tidtakere eller serier ennå — trykk + for å legge til en</string>
+    <string name="timers_library_title">Bibliotek</string>
+    <string name="timers_new_header_dialog_title">Ny overskrift</string>
+    <string name="timers_rename_header_dialog_title">Gi overskrift nytt navn</string>
+    <string name="timers_header_move_up_desc">Flytt overskrift opp</string>
+    <string name="timers_header_move_down_desc">Flytt overskrift ned</string>
+    <string name="timers_header_rename_desc">Gi overskrift nytt navn</string>
+    <string name="timers_header_delete_desc">Slett overskrift</string>
+    <string name="timers_block_summary">%1$s · %2$s</string>
+    <string name="block_kind_chain">Serie</string>
+    <string name="block_kind_timer">Tidtaker</string>
+
+    <!-- Timer/Chain run — the active-run card and its notification -->
+    <string name="run_step_fallback">Steg %1$d</string>
+    <string name="run_step_with_count">%1$s (%2$d/%3$d)</string>
+    <string name="run_awaiting_interaction">Ferdig — venter på deg</string>
+    <string name="run_finished">Ferdig</string>
+    <string name="run_add_minute">+1 min</string>
+
+    <!-- Duration formatting -->
+    <string name="duration_hours_minutes">%1$dt %2$dmin</string>
+    <string name="duration_hours">%1$dt</string>
+    <string name="duration_minutes_seconds">%1$dmin %2$dsek</string>
+    <string name="duration_minutes">%1$dmin</string>
+    <string name="duration_seconds">%1$dsek</string>
+
+    <!-- Alarms pane -->
+    <string name="alarms_new_desc">Ny alarm</string>
+    <string name="alarms_empty">Ingen alarmer ennå — trykk + for å legge til en</string>
+    <string name="alarm_recurrence_once">Én gang</string>
+    <string name="alarm_recurrence_done">Ferdig</string>
+    <string name="alarm_summary_with_target">%1$s · Starter %2$s</string>
+    <string name="alarm_reactivate">Ferdig — aktiver på nytt</string>
+    <string name="common_loading_placeholder">…</string>
+
+    <!-- Alarm config screen -->
+    <string name="alarm_config_title_new">Ny alarm</string>
+    <string name="alarm_config_title_edit">Rediger alarm</string>
+    <string name="alarm_delete_desc">Slett alarm</string>
+    <string name="common_not_found">Ikke funnet</string>
+    <string name="alarm_label_field">Etikett</string>
+    <string name="alarm_repeat_title">Gjenta</string>
+    <string name="alarm_after_firing_title">Etter at den ringer</string>
+    <string name="alarm_after_fire_mark_done">Merk som utført</string>
+    <string name="alarm_delete_after_title">Slett etter</string>
+    <string name="alarm_delete_after_never">Aldri</string>
+    <string name="alarm_delete_after_count">Etter N ganger</string>
+    <string name="alarm_delete_after_date">Til dato</string>
+    <string name="alarm_repeat_count_label">Antall ganger</string>
+    <string name="alarm_pick_date">Velg en dato</string>
+    <string name="alarm_fires_title">Utløser</string>
+    <string name="alarm_fires_alarm_chip">Alarm</string>
+    <string name="alarm_fires_target_chip">Tidtaker eller serie</string>
+    <string name="alarm_select_target">Velg en tidtaker eller serie</string>
+    <string name="alarm_target_option_format">%1$s (%2$s)</string>
+    <string name="alarm_target_note">Bruker tidtakerens/seriens egen lyd og Stopp/Start på nytt/+1 min-varsel — lyd og utsettelse under gjelder ikke.</string>
+    <string name="alarm_sound_label">Lyd</string>
+    <string name="alarm_snooze_minutes_label">Utsettelseslengde (minutter)</string>
+    <string name="alarm_max_snoozes_label">Maks utsettelser (tomt = ubegrenset)</string>
+
+    <!-- Shared sound/tone picker -->
+    <string name="sound_default">Standard</string>
+
+    <!-- Seamless-transition beep options (per-Chain) -->
+    <string name="beep_tone_beep">Pip</string>
+    <string name="beep_tone_double_beep">Dobbeltpip</string>
+    <string name="beep_tone_chime">Klokkeklang</string>
+    <string name="beep_tone_pip">Knepp</string>
+    <string name="beep_tone_silent">Stille</string>
+
+    <!-- Timer/Chain config screen -->
+    <string name="block_config_untitled">Uten navn</string>
+    <string name="block_config_label_required">Etikett (påkrevd)</string>
+    <string name="block_config_label_optional">Etikett (valgfritt)</string>
+    <string name="block_config_label_hint_required">Bokstaver, tall, understrek — må være unik</string>
+    <string name="block_config_label_hint_optional">Bare nødvendig hvis du slår på Vedvarende</string>
+    <string name="block_config_duration_label">Varighet</string>
+    <string name="block_config_duration_resolved">= %1$s</string>
+    <string name="block_config_persistent_label">Vedvarende — lagre i biblioteket</string>
+    <string name="block_config_sound_chain">Standard lydprofil</string>
+    <string name="block_config_sound_timer">Lydprofil</string>
+    <string name="block_config_transition_mode_title">Overgangsmodus</string>
+    <string name="block_config_transition_require_interaction">Krev interaksjon</string>
+    <string name="block_config_transition_seamless">Sømløs</string>
+    <string name="block_config_beep_title">Sømløs overgangslyd</string>
+    <string name="block_config_beep_desc">Spilles ved hver steggrense i denne serien, siden sømløse steg går videre uten annet varsel. Trykk for å forhåndslytte, trykk igjen for å velge.</string>
+    <string name="block_config_content_title">Innhold</string>
+    <string name="block_config_syntax_help_desc">Syntakshjelp</string>
+    <string name="block_config_content_hint">f.eks. (Work, Break) eller repeat(4, (Work, Break)) — én linje per steg fungerer også</string>
+    <string name="block_config_preview_title">Forhåndsvisning</string>
+    <string name="block_config_step_placeholder">—</string>
+    <string name="block_config_still_in_use_title">Fortsatt i bruk</string>
+    <string name="block_config_still_in_use_message">Referert av: %1$s. Hvis du sletter den, vil %2$s slutte å virke. Slett likevel?</string>
+    <string name="block_config_ref_singular">den serien</string>
+    <string name="block_config_ref_plural">de seriene</string>
+    <string name="block_config_delete_anyway">Slett likevel</string>
+
+    <!-- Chain syntax help dialog. Code fragments like "(Work, Break)" and "repeat(N, step)" stay
+         as literal chainlang syntax within the translated sentences — see the default strings.xml
+         for why. -->
+    <string name="chain_help_title">Skrive en serie</string>
+    <string name="chain_help_intro">En serie er en liste med steg i parentes, ett per linje (eller kommaseparert — det som er enklest):</string>
+    <string name="chain_help_step_types">Hvert steg er ett av:</string>
+    <string name="chain_help_step_duration">• En vanlig varighet: 3, 20m, 2h30m10s</string>
+    <string name="chain_help_step_reference">• Navnet på en eksisterende tidtaker eller serie, for å gjenbruke den</string>
+    <string name="chain_help_step_repeat">• repeat(N, step) — gjentar et steg N ganger</string>
+    <string name="chain_help_step_range">• range(start, stop, step) eller arange(...) — en numpy-stil tallsekvens</string>
+    <string name="chain_help_example">Eksempel: repeat(4, (Work, Break)) kjører Work og deretter Break, fire ganger på rad.</string>
+    <string name="chain_help_got_it">Skjønner</string>
+
+    <!-- Settings screen -->
+    <string name="settings_display_title">Visning</string>
+    <string name="settings_theme_label">Tema</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Lys</string>
+    <string name="theme_dark">Mørk</string>
+    <string name="theme_amoled">AMOLED</string>
+    <string name="settings_24h_label">24-timers klokke</string>
+    <string name="settings_first_day_label">Ukens første dag</string>
+    <string name="settings_language_label">Språk</string>
+    <string name="language_system_default">Systemstandard</string>
+    <string name="settings_defaults_title">Standardverdier</string>
+    <string name="settings_default_snooze_label">Standard utsettelseslengde (minutter)</string>
+    <string name="settings_haptics_label">Vibrasjon</string>
+    <string name="settings_max_plan_size_label">Maks. kjøreplan-størrelse (≤1000)</string>
+    <string name="settings_danger_zone_title">Faresone</string>
+    <string name="settings_danger_zone_desc">Sletter alle alarmer, tidtakere og serier. Kan ikke angres.</string>
+    <string name="settings_reset_button">Tilbakestill alle data</string>
+    <string name="settings_reset_dialog_title">Tilbakestille alle data?</string>
+    <string name="settings_reset_dialog_message">Alle alarmer, tidtakere og serier vil bli slettet. Dette kan ikke angres.</string>
+    <string name="settings_reset_confirm">Tilbakestill</string>
+
+    <!-- Stopwatch pane -->
+    <string name="stopwatch_new_desc">Ny stoppeklokke</string>
+    <string name="stopwatch_empty">Ingen stoppeklokker i gang — trykk + for å starte en</string>
+    <string name="stopwatch_new_dialog_title">Ny stoppeklokke</string>
+    <string name="stopwatch_name_optional_label">Navn (valgfritt)</string>
+    <string name="stopwatch_start_from_label">Start fra, minutter (valgfritt)</string>
+    <string name="stopwatch_unnamed">Uten navn</string>
+    <string name="stopwatch_lap_desc">Runde</string>
+    <string name="stopwatch_pause_desc">Pause</string>
+    <string name="stopwatch_resume_desc">Fortsett</string>
+    <string name="stopwatch_lap_label">Runde %1$d</string>
+    <string name="stopwatch_rename_dialog_title">Gi stoppeklokke nytt navn</string>
+    <plurals name="stopwatch_lap_count">
+        <item quantity="one">%1$d runde</item>
+        <item quantity="other">%1$d runder</item>
+    </plurals>
+
+    <!-- Bottom navigation panes -->
+    <string name="pane_alarms">Alarmer</string>
+    <string name="pane_timers">Tidtakere</string>
+    <string name="pane_stopwatch">Stoppeklokke</string>
+    <string name="pane_clock">Klokke</string>
+    <string name="pane_settings">Innstillinger</string>
+
+    <!-- User-visible error messages -->
+    <string name="error_run_start_failed">Kunne ikke starte %1$s: %2$s</string>
+    <string name="run_error_notification_title">Kunne ikke starte</string>
+    <string name="error_alarm_list_update">Kunne ikke oppdatere alarm: %1$s</string>
+    <string name="error_alarm_list_delete">Kunne ikke slette alarm: %1$s</string>
+    <string name="error_alarm_save">Kunne ikke lagre: %1$s</string>
+    <string name="error_alarm_delete">Kunne ikke slette: %1$s</string>
+    <string name="error_alarm_no_target">Velg en tidtaker eller serie, eller bytt tilbake til Alarm</string>
+    <string name="block_label_error_required">Vedvarende blokker trenger en etikett</string>
+    <string name="block_label_error_start_letter">Må starte med en bokstav</string>
+    <string name="block_label_error_reserved">«%1$s» er reservert av seriesyntaksen</string>
+    <string name="block_label_error_in_use">«%1$s» er allerede i bruk</string>
+    <string name="block_alarm_ref_format">Alarm %1$s</string>
+    <string name="block_alarm_ref_with_label_format">Alarm %1$s (%2$s)</string>
+
+    <!-- Alarm notification -->
+    <string name="alarm_notification_default_title">Alarm</string>
+    <string name="action_dismiss">Avvis</string>
+    <string name="alarm_snooze_action_format">Utsett %1$dm</string>
+    <string name="alarm_channel_name">Alarmer</string>
+    <string name="alarm_channel_description">Varsler når alarmer ringer</string>
+
+    <!-- Timer/Chain run notifications -->
+    <string name="run_notification_awaiting_interaction">%1$s ferdig — trykk Fortsett</string>
+    <string name="run_starting_title">Starter…</string>
+    <string name="run_progress_channel_name">Tidtaker/serie-fremdrift</string>
+    <string name="run_progress_channel_desc">Løpende nedtelling mens en tidtaker/serie kjører — stille med hensikt</string>
+    <string name="run_alert_channel_name">Tidtaker/serie-varsler</string>
+    <string name="run_alert_channel_desc">Varsler ved steg fullført og kjøring ferdig</string>
+    <string name="run_error_channel_name">Tidtaker/serie-feil</string>
+    <string name="run_error_channel_desc">En tidtaker/serie-kjøring som ikke kunne starte</string>
+    <string name="run_error_timer_gone">Denne tidtakeren finnes ikke lenger</string>
+    <string name="run_error_chain_gone">Denne serien finnes ikke lenger</string>
+</resources>

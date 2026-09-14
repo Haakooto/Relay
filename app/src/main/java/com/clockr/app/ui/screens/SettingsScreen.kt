@@ -26,9 +26,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.clockr.app.R
 import com.clockr.app.data.ThemeSetting
 import com.clockr.app.ui.settings.SettingsViewModel
 import com.clockr.app.ui.theme.ClockrTheme
@@ -42,18 +44,28 @@ private fun appVersionName(context: android.content.Context): String = runCatchi
     context.packageManager.getPackageInfo(context.packageName, android.content.pm.PackageManager.PackageInfoFlags.of(0)).versionName
 }.getOrNull() ?: "unknown"
 
+@Composable
+private fun ThemeSetting.displayName(): String = stringResource(
+    when (this) {
+        ThemeSetting.SYSTEM -> R.string.theme_system
+        ThemeSetting.LIGHT -> R.string.theme_light
+        ThemeSetting.DARK -> R.string.theme_dark
+        ThemeSetting.AMOLED -> R.string.theme_amoled
+    },
+)
+
 /**
- * Deliberately a short, fixed list rather than free text: no UI string in this app is actually
- * translated yet (every screen uses hardcoded English literals, not string resources) — picking
- * a language here only changes date/number formatting until real i18n work happens. A dropdown
- * also sidesteps the bug a free-text field had: applying the locale on every keystroke via
- * LocaleManager triggers an Activity recreation per character, which read as "the screen
- * flickers and the letter never appears."
+ * Deliberately a short, fixed list rather than free text: a dropdown sidesteps the bug a
+ * free-text field had — applying the locale on every keystroke via LocaleManager triggers an
+ * Activity recreation per character, which read as "the screen flickers and the letter never
+ * appears." Each language's own name is shown in that language itself (convention), not
+ * translated into whichever one happens to be selected right now.
  */
-private val SUPPORTED_LANGUAGES = listOf(
-    "" to "System default",
-    "en" to "English",
-    "nb" to "Norsk",
+@Composable
+private fun supportedLanguages(): List<Pair<String, String>> = listOf(
+    "" to stringResource(R.string.language_system_default),
+    "en" to stringResource(R.string.language_english),
+    "nb" to stringResource(R.string.language_norwegian),
 )
 
 @Composable
@@ -67,25 +79,25 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Text("Display", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.settings_display_title), style = MaterialTheme.typography.titleLarge)
 
-            Text("Theme", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.settings_theme_label), style = MaterialTheme.typography.bodyLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ThemeSetting.entries.forEach { option ->
                     FilterChip(
                         selected = settings.theme == option,
                         onClick = { viewModel.setTheme(option) },
-                        label = { Text(option.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                        label = { Text(option.displayName()) },
                     )
                 }
             }
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("24-hour clock", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.settings_24h_label), style = MaterialTheme.typography.bodyLarge)
                 Switch(checked = settings.clockFormat24h, onCheckedChange = viewModel::setClockFormat24h)
             }
 
-            Text("First day of week", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.settings_first_day_label), style = MaterialTheme.typography.bodyLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 DayOfWeek.entries.forEach { day ->
                     FilterChip(
@@ -96,9 +108,9 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 }
             }
 
-            Text("Language", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.settings_language_label), style = MaterialTheme.typography.bodyLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SUPPORTED_LANGUAGES.forEach { (tag, displayName) ->
+                supportedLanguages().forEach { (tag, displayName) ->
                     FilterChip(
                         selected = settings.languageTag == tag,
                         onClick = { viewModel.setLanguageTag(tag) },
@@ -109,32 +121,32 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
 
             HorizontalDivider()
 
-            Text("Defaults", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.settings_defaults_title), style = MaterialTheme.typography.titleLarge)
 
             OutlinedTextField(
                 value = settings.defaultSnoozeMinutes.toString(),
                 onValueChange = { it.toIntOrNull()?.let(viewModel::setDefaultSnoozeMinutes) },
-                label = { Text("Default snooze length (minutes)") },
+                label = { Text(stringResource(R.string.settings_default_snooze_label)) },
                 modifier = Modifier.fillMaxWidth(),
             )
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Haptics", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.settings_haptics_label), style = MaterialTheme.typography.bodyLarge)
                 Switch(checked = settings.haptics, onCheckedChange = viewModel::setHaptics)
             }
 
             OutlinedTextField(
                 value = settings.maxExecutionPlanSize.toString(),
                 onValueChange = { it.toIntOrNull()?.let(viewModel::setMaxExecutionPlanSize) },
-                label = { Text("Max execution-plan size (≤1000)") },
+                label = { Text(stringResource(R.string.settings_max_plan_size_label)) },
                 modifier = Modifier.fillMaxWidth(),
             )
 
             HorizontalDivider()
 
-            Text("Danger zone", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.settings_danger_zone_title), style = MaterialTheme.typography.titleLarge)
             Text(
-                "Deletes every alarm, timer, and chain. Can't be undone.",
+                stringResource(R.string.settings_danger_zone_desc),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -142,14 +154,14 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 onClick = { showResetDialog = true },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
             ) {
-                Text("Reset all data")
+                Text(stringResource(R.string.settings_reset_button))
             }
 
             HorizontalDivider()
 
             val context = LocalContext.current
             Text(
-                "Clockr ${appVersionName(context)}",
+                stringResource(R.string.settings_app_version, appVersionName(context)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -159,15 +171,15 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text("Reset all data?") },
-            text = { Text("Every alarm, timer, and chain will be deleted. This can't be undone.") },
+            title = { Text(stringResource(R.string.settings_reset_dialog_title)) },
+            text = { Text(stringResource(R.string.settings_reset_dialog_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.resetAllData()
                     showResetDialog = false
-                }) { Text("Reset") }
+                }) { Text(stringResource(R.string.settings_reset_confirm)) }
             },
-            dismissButton = { TextButton(onClick = { showResetDialog = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { showResetDialog = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }

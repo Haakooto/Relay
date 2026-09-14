@@ -5,6 +5,14 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v0.3 — 2026-09-14
+
+- Fixed a stopwatch bug: the first lap after starting with an offset (e.g. "start from 1m")
+  showed its delta as if it included that offset, instead of measuring from it.
+- Started real i18n: every hardcoded UI string (screens, notifications, error messages) now
+  comes from resources, with English and Norwegian (Bokmål) translations. Picking Norsk in
+  Settings should now actually translate the app, not just change date/number formatting.
+
 ## v0.2 — 2026-09-14
 
 - Alarms can now target a Timer or Chain instead of firing themselves — pick "Timer or Chain" in

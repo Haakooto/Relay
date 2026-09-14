@@ -9,6 +9,7 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
 import androidx.core.app.NotificationCompat
+import com.clockr.app.R
 
 /**
  * Two channels per surface, not one (spec §09's "dedicated channel per surface" applies *within*
@@ -35,12 +36,12 @@ object RunNotificationHelper {
         endAtMillis: Long,
     ) = build(context, ensureProgressChannel(context)) {
         setContentTitle(blockLabel)
-        setContentText(stepLabelText(step, stepIndex, stepCount))
+        setContentText(stepLabelText(context, step, stepIndex, stepCount))
         setUsesChronometer(true)
         setChronometerCountDown(true)
         setWhen(endAtMillis)
         setShowWhen(true)
-        addAction(0, "Stop", actionPendingIntent(context, TimerRunService.ACTION_STOP))
+        addAction(0, context.getString(R.string.action_stop), actionPendingIntent(context, TimerRunService.ACTION_STOP))
     }
 
     fun awaitingInteractionNotification(
@@ -52,24 +53,24 @@ object RunNotificationHelper {
         haptics: Boolean,
     ) = build(context, ensureAlertChannelFor(context, step.soundProfileId, haptics)) {
         setContentTitle(blockLabel)
-        setContentText("${stepLabelText(step, stepIndex, stepCount)} done — tap Continue")
-        addAction(0, "Continue", actionPendingIntent(context, TimerRunService.ACTION_CONTINUE))
-        addAction(0, "Stop", actionPendingIntent(context, TimerRunService.ACTION_STOP))
+        setContentText(context.getString(R.string.run_notification_awaiting_interaction, stepLabelText(context, step, stepIndex, stepCount)))
+        addAction(0, context.getString(R.string.action_continue), actionPendingIntent(context, TimerRunService.ACTION_CONTINUE))
+        addAction(0, context.getString(R.string.action_stop), actionPendingIntent(context, TimerRunService.ACTION_STOP))
     }
 
     fun startingNotification(context: Context) =
         build(context, ensureProgressChannel(context)) {
-            setContentTitle("Starting…")
-            addAction(0, "Stop", actionPendingIntent(context, TimerRunService.ACTION_STOP))
+            setContentTitle(context.getString(R.string.run_starting_title))
+            addAction(0, context.getString(R.string.action_stop), actionPendingIntent(context, TimerRunService.ACTION_STOP))
         }
 
     fun completionNotification(context: Context, blockLabel: String, soundProfileId: String?, haptics: Boolean) =
         build(context, ensureAlertChannelFor(context, soundProfileId, haptics)) {
             setContentTitle(blockLabel)
-            setContentText("Finished")
-            addAction(0, "Stop", actionPendingIntent(context, TimerRunService.ACTION_COMPLETE_STOP))
-            addAction(0, "Restart", actionPendingIntent(context, TimerRunService.ACTION_COMPLETE_RESTART))
-            addAction(0, "+1 min", actionPendingIntent(context, TimerRunService.ACTION_COMPLETE_ADD_MINUTE))
+            setContentText(context.getString(R.string.run_finished))
+            addAction(0, context.getString(R.string.action_stop), actionPendingIntent(context, TimerRunService.ACTION_COMPLETE_STOP))
+            addAction(0, context.getString(R.string.action_restart), actionPendingIntent(context, TimerRunService.ACTION_COMPLETE_RESTART))
+            addAction(0, context.getString(R.string.run_add_minute), actionPendingIntent(context, TimerRunService.ACTION_COMPLETE_ADD_MINUTE))
         }
 
     /** Non-ongoing, auto-cancelling — posted when a run can't start at all (see [TimerRunService]). */
@@ -77,7 +78,7 @@ object RunNotificationHelper {
         ensureErrorChannel(context)
         return NotificationCompat.Builder(context, ERROR_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("Couldn't start")
+            .setContentTitle(context.getString(R.string.run_error_notification_title))
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
@@ -88,9 +89,9 @@ object RunNotificationHelper {
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(NOTIFICATION_ID)
     }
 
-    private fun stepLabelText(step: RunStep, stepIndex: Int, stepCount: Int): String {
-        val name = step.label ?: "Step ${stepIndex + 1}"
-        return if (stepCount > 1) "$name (${stepIndex + 1}/$stepCount)" else name
+    private fun stepLabelText(context: Context, step: RunStep, stepIndex: Int, stepCount: Int): String {
+        val name = step.label ?: context.getString(R.string.run_step_fallback, stepIndex + 1)
+        return if (stepCount > 1) context.getString(R.string.run_step_with_count, name, stepIndex + 1, stepCount) else name
     }
 
     private fun build(
@@ -110,8 +111,8 @@ object RunNotificationHelper {
     private fun ensureProgressChannel(context: Context): String {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (manager.getNotificationChannel(PROGRESS_CHANNEL_ID) == null) {
-            val channel = NotificationChannel(PROGRESS_CHANNEL_ID, "Timer/chain progress", NotificationManager.IMPORTANCE_LOW).apply {
-                description = "Ongoing countdown while a timer/chain runs — silent by design"
+            val channel = NotificationChannel(PROGRESS_CHANNEL_ID, context.getString(R.string.run_progress_channel_name), NotificationManager.IMPORTANCE_LOW).apply {
+                description = context.getString(R.string.run_progress_channel_desc)
                 setSound(null, null)
                 enableVibration(false)
             }
@@ -138,8 +139,8 @@ object RunNotificationHelper {
             .setUsage(AudioAttributes.USAGE_ALARM)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
-        val channel = NotificationChannel(channelId, "Timer/chain alerts", NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "Step-complete and finished-run alerts"
+        val channel = NotificationChannel(channelId, context.getString(R.string.run_alert_channel_name), NotificationManager.IMPORTANCE_HIGH).apply {
+            description = context.getString(R.string.run_alert_channel_desc)
             setSound(soundUri, audioAttributes)
             enableVibration(haptics)
         }
@@ -151,8 +152,8 @@ object RunNotificationHelper {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (manager.getNotificationChannel(ERROR_CHANNEL_ID) == null) {
             manager.createNotificationChannel(
-                NotificationChannel(ERROR_CHANNEL_ID, "Timer/chain errors", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                    description = "A timer/chain run that couldn't start"
+                NotificationChannel(ERROR_CHANNEL_ID, context.getString(R.string.run_error_channel_name), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    description = context.getString(R.string.run_error_channel_desc)
                 },
             )
         }

@@ -3,6 +3,7 @@ package com.clockr.app.ui.timers
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.clockr.app.R
 import com.clockr.app.data.BlockRepository
 import com.clockr.app.data.ChainDefEntity
 import com.clockr.app.data.ClockrDatabase
@@ -173,11 +174,14 @@ class BlockConfigViewModel(application: Application, private val blockId: String
     }
 
     /** Syntax only, once we already know a label is required — cheap, safe on every keystroke. */
-    private fun validateLabelSyntax(label: String): String? = when {
-        label.isBlank() -> "Persistent blocks need a label"
-        !label.first().isLetter() -> "Must start with a letter"
-        label in RESERVED_WORDS -> "\"$label\" is reserved by the chain syntax"
-        else -> null
+    private fun validateLabelSyntax(label: String): String? {
+        val app = getApplication<Application>()
+        return when {
+            label.isBlank() -> app.getString(R.string.block_label_error_required)
+            !label.first().isLetter() -> app.getString(R.string.block_label_error_start_letter)
+            label in RESERVED_WORDS -> app.getString(R.string.block_label_error_reserved, label)
+            else -> null
+        }
     }
 
     /**
@@ -194,7 +198,7 @@ class BlockConfigViewModel(application: Application, private val blockId: String
         // on a label. Only persistent rows count as "already in use".
         val timerHit = db.timerDefDao().findByLabel(label)?.takeIf { it.id != id && it.persistent }
         val chainHit = db.chainDefDao().findByLabel(label)?.takeIf { it.id != id && it.persistent }
-        return if (timerHit != null || chainHit != null) "\"$label\" is already in use" else null
+        return if (timerHit != null || chainHit != null) getApplication<Application>().getString(R.string.block_label_error_in_use, label) else null
     }
 
     private fun revalidateTimer() = viewModelScope.launch {
@@ -275,8 +279,11 @@ class BlockConfigViewModel(application: Application, private val blockId: String
     fun requestDelete(onSuccess: () -> Unit) = viewModelScope.launch {
         val state = _uiState.value
         val chainRefs = if (state.persistent) repository.usedBy(state.label, state.id) else emptyList()
-        val alarmRefs = db.alarmDao().getAllByTargetBlock(state.id)
-            .map { alarm -> "Alarm ${"%02d:%02d".format(alarm.hour, alarm.minute)}".let { it + alarm.label.takeIf { l -> l.isNotBlank() }?.let { l -> " ($l)" }.orEmpty() } }
+        val app = getApplication<Application>()
+        val alarmRefs = db.alarmDao().getAllByTargetBlock(state.id).map { alarm ->
+            val time = "%02d:%02d".format(alarm.hour, alarm.minute)
+            if (alarm.label.isNotBlank()) app.getString(R.string.block_alarm_ref_with_label_format, time, alarm.label) else app.getString(R.string.block_alarm_ref_format, time)
+        }
         val referencedBy = chainRefs + alarmRefs
         if (referencedBy.isEmpty()) {
             performDelete(state)

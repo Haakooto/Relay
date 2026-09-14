@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.clockr.app.R
 import com.clockr.app.alarm.AlarmScheduler
 import com.clockr.app.data.AlarmEntity
 import com.clockr.app.data.ClockrDatabase
@@ -41,7 +42,7 @@ class AlarmsViewModel(application: Application) : AndroidViewModel(application) 
             if (enabled) scheduler.schedule(updated) else scheduler.cancel(updated)
         }.onFailure {
             Log.e(TAG, "Failed to toggle alarm ${alarm.id}", it)
-            _error.value = "Couldn't update alarm: ${it.message ?: it::class.simpleName}"
+            _error.value = getApplication<Application>().getString(R.string.error_alarm_list_update, it.message ?: it::class.simpleName ?: "unknown")
         }
     }
 
@@ -53,7 +54,7 @@ class AlarmsViewModel(application: Application) : AndroidViewModel(application) 
             if (updated.enabled) scheduler.schedule(updated) else scheduler.cancel(updated)
         }.onFailure {
             Log.e(TAG, "Failed to toggle done for alarm ${alarm.id}", it)
-            _error.value = "Couldn't update alarm: ${it.message ?: it::class.simpleName}"
+            _error.value = getApplication<Application>().getString(R.string.error_alarm_list_update, it.message ?: it::class.simpleName ?: "unknown")
         }
     }
 
@@ -63,7 +64,7 @@ class AlarmsViewModel(application: Application) : AndroidViewModel(application) 
             dao.delete(alarm)
         }.onFailure {
             Log.e(TAG, "Failed to delete alarm ${alarm.id}", it)
-            _error.value = "Couldn't delete alarm: ${it.message ?: it::class.simpleName}"
+            _error.value = getApplication<Application>().getString(R.string.error_alarm_list_delete, it.message ?: it::class.simpleName ?: "unknown")
         }
     }
 

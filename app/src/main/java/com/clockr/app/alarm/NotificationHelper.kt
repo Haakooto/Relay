@@ -9,6 +9,7 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
 import androidx.core.app.NotificationCompat
+import com.clockr.app.R
 import com.clockr.app.data.AlarmEntity
 import com.clockr.app.data.SettingsRepository
 
@@ -37,7 +38,7 @@ object NotificationHelper {
         val dismissIntent = actionPendingIntent(context, alarm, AlarmActions.ACTION_DISMISS)
         val snoozeIntent = actionPendingIntent(context, alarm, AlarmActions.ACTION_SNOOZE)
 
-        val title = alarm.label.ifBlank { "Alarm" }
+        val title = alarm.label.ifBlank { context.getString(R.string.alarm_notification_default_title) }
         val time = "%02d:%02d".format(alarm.hour, alarm.minute)
 
         val notification = NotificationCompat.Builder(context, channelId)
@@ -48,8 +49,8 @@ object NotificationHelper {
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setOngoing(true)
             .setAutoCancel(false)
-            .addAction(0, "Dismiss", dismissIntent)
-            .addAction(0, "Snooze ${alarm.snoozeMinutes}m", snoozeIntent)
+            .addAction(0, context.getString(R.string.action_dismiss), dismissIntent)
+            .addAction(0, context.getString(R.string.alarm_snooze_action_format, alarm.snoozeMinutes), snoozeIntent)
             .build()
 
         manager.notify(alarm.id.hashCode(), notification)
@@ -81,8 +82,8 @@ object NotificationHelper {
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
 
-        val channel = NotificationChannel(channelId, "Alarms", NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "Alarm firing notifications"
+        val channel = NotificationChannel(channelId, context.getString(R.string.alarm_channel_name), NotificationManager.IMPORTANCE_HIGH).apply {
+            description = context.getString(R.string.alarm_channel_description)
             setSound(soundUri, audioAttributes)
             enableVibration(haptics)
             setBypassDnd(true)

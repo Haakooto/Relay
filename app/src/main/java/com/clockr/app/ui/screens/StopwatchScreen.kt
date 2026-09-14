@@ -35,9 +35,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.clockr.app.R
 import com.clockr.app.ui.stopwatch.StopwatchUi
 import com.clockr.app.ui.stopwatch.StopwatchViewModel
 import com.clockr.app.ui.theme.ClockrTheme
@@ -54,14 +57,14 @@ fun StopwatchScreen(modifier: Modifier = Modifier) {
         modifier = modifier,
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "New stopwatch")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.stopwatch_new_desc))
             }
         },
     ) { padding ->
         if (stopwatches.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Text(
-                    "No stopwatches running — tap + to start one",
+                    stringResource(R.string.stopwatch_empty),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -104,21 +107,21 @@ private fun AddStopwatchDialog(onDismiss: () -> Unit, onConfirm: (String, Long) 
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("New stopwatch") },
+        title = { Text(stringResource(R.string.stopwatch_new_dialog_title)) },
         text = {
             Column {
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name (optional)") })
+                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.stopwatch_name_optional_label)) })
                 OutlinedTextField(
                     value = t0Text,
                     onValueChange = { t0Text = it },
-                    label = { Text("Start from, minutes (optional)") },
+                    label = { Text(stringResource(R.string.stopwatch_start_from_label)) },
                 )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name, t0Text.toLongOrNull() ?: 0L) }) { Text("Start") }
+            TextButton(onClick = { onConfirm(name, t0Text.toLongOrNull() ?: 0L) }) { Text(stringResource(R.string.action_start)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }
 
@@ -137,7 +140,7 @@ private fun StopwatchCard(
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                sw.name ?: "Unnamed",
+                sw.name ?: stringResource(R.string.stopwatch_unnamed),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.clickable { showRenameDialog = true },
             )
@@ -147,22 +150,22 @@ private fun StopwatchCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    "${sw.laps.size} laps",
+                    pluralStringResource(R.plurals.stopwatch_lap_count, sw.laps.size, sw.laps.size),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Row {
                     IconButton(onClick = onLap, enabled = sw.isRunning) {
-                        Icon(Icons.Default.Flag, contentDescription = "Lap")
+                        Icon(Icons.Default.Flag, contentDescription = stringResource(R.string.stopwatch_lap_desc))
                     }
                     IconButton(onClick = onTogglePause) {
                         Icon(
                             if (sw.isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (sw.isRunning) "Pause" else "Resume",
+                            contentDescription = stringResource(if (sw.isRunning) R.string.stopwatch_pause_desc else R.string.stopwatch_resume_desc),
                         )
                     }
-                    IconButton(onClick = onRestart) { Icon(Icons.Default.Replay, contentDescription = "Restart") }
-                    IconButton(onClick = onDelete) { Icon(Icons.Default.Close, contentDescription = "Delete") }
+                    IconButton(onClick = onRestart) { Icon(Icons.Default.Replay, contentDescription = stringResource(R.string.action_restart)) }
+                    IconButton(onClick = onDelete) { Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_delete)) }
                 }
             }
             if (sw.laps.isNotEmpty()) {
@@ -176,9 +179,9 @@ private fun StopwatchCard(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Text("Lap ${index + 1}", style = MaterialTheme.typography.labelSmall)
+                            Text(stringResource(R.string.stopwatch_lap_label, index + 1), style = MaterialTheme.typography.labelSmall)
                             Text(
-                                "+${formatElapsedClock(cumulative - previous)}",
+                                stringResource(R.string.stopwatch_lap_delta_format, formatElapsedClock(cumulative - previous)),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -204,10 +207,10 @@ private fun RenameStopwatchDialog(initialName: String, onDismiss: () -> Unit, on
     var name by remember { mutableStateOf(initialName) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Rename stopwatch") },
-        text = { OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") }) },
-        confirmButton = { TextButton(onClick = { onConfirm(name) }) { Text("Save") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        title = { Text(stringResource(R.string.stopwatch_rename_dialog_title)) },
+        text = { OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.common_name_label)) }) },
+        confirmButton = { TextButton(onClick = { onConfirm(name) }) { Text(stringResource(R.string.action_save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }
 

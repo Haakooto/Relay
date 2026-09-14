@@ -1,3 +1,217 @@
 <resources>
-    <string name="app_name">Clockr</string>
+    <string name="app_name" translatable="false">Clockr</string>
+
+    <!-- Shared actions, reused across screens/dialogs -->
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_restart">Restart</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_ok">OK</string>
+    <string name="action_back">Back</string>
+    <string name="action_start">Start</string>
+    <string name="common_name_label">Name</string>
+
+    <!-- Timers pane -->
+    <string name="timers_new_block_desc">New block</string>
+    <string name="timers_new_timer">New timer</string>
+    <string name="timers_new_chain">New chain</string>
+    <string name="timers_new_header">New header</string>
+    <string name="timers_empty">No timers or chains yet — tap + to add one</string>
+    <string name="timers_library_title">Library</string>
+    <string name="timers_new_header_dialog_title">New header</string>
+    <string name="timers_rename_header_dialog_title">Rename header</string>
+    <string name="timers_header_move_up_desc">Move header up</string>
+    <string name="timers_header_move_down_desc">Move header down</string>
+    <string name="timers_header_rename_desc">Rename header</string>
+    <string name="timers_header_delete_desc">Delete header</string>
+    <string name="timers_block_summary">%1$s · %2$s</string>
+    <string name="block_kind_chain">Chain</string>
+    <string name="block_kind_timer">Timer</string>
+
+    <!-- Timer/Chain run — the active-run card and its notification -->
+    <string name="run_step_fallback">Step %1$d</string>
+    <string name="run_step_with_count">%1$s (%2$d/%3$d)</string>
+    <string name="run_awaiting_interaction">Done — waiting for you</string>
+    <string name="run_finished">Finished</string>
+    <string name="run_add_minute">+1 min</string>
+
+    <!-- Duration formatting (spec §6.5-style short form, e.g. "1h 30m") -->
+    <string name="duration_hours_minutes">%1$dh %2$dm</string>
+    <string name="duration_hours">%1$dh</string>
+    <string name="duration_minutes_seconds">%1$dm %2$ds</string>
+    <string name="duration_minutes">%1$dm</string>
+    <string name="duration_seconds">%1$ds</string>
+
+    <!-- Alarms pane -->
+    <string name="alarms_new_desc">New alarm</string>
+    <string name="alarms_empty">No alarms yet — tap + to add one</string>
+    <string name="alarm_recurrence_once">Once</string>
+    <string name="alarm_recurrence_done">Done</string>
+    <string name="alarm_summary_with_target">%1$s · Starts %2$s</string>
+    <string name="alarm_reactivate">Done — reactivate</string>
+    <string name="common_loading_placeholder">…</string>
+
+    <!-- Alarm config screen -->
+    <string name="alarm_config_title_new">New alarm</string>
+    <string name="alarm_config_title_edit">Edit alarm</string>
+    <string name="alarm_delete_desc">Delete alarm</string>
+    <string name="common_not_found">Not found</string>
+    <string name="alarm_label_field">Label</string>
+    <string name="alarm_repeat_title">Repeat</string>
+    <string name="alarm_after_firing_title">After firing</string>
+    <string name="alarm_after_fire_mark_done">Mark as done</string>
+    <string name="alarm_delete_after_title">Delete after</string>
+    <string name="alarm_delete_after_never">Never</string>
+    <string name="alarm_delete_after_count">After N times</string>
+    <string name="alarm_delete_after_date">Until date</string>
+    <string name="alarm_repeat_count_label">Number of occurrences</string>
+    <string name="alarm_pick_date">Pick a date</string>
+    <string name="alarm_fires_title">Fires</string>
+    <string name="alarm_fires_alarm_chip">Alarm</string>
+    <string name="alarm_fires_target_chip">Timer or Chain</string>
+    <string name="alarm_select_target">Select a Timer or Chain</string>
+    <string name="alarm_target_option_format">%1$s (%2$s)</string>
+    <string name="alarm_target_note">Uses that Timer/Chain\'s own sound and Stop/Restart/+1min prompt — sound and snooze below don\'t apply.</string>
+    <string name="alarm_sound_label">Sound</string>
+    <string name="alarm_snooze_minutes_label">Snooze length (minutes)</string>
+    <string name="alarm_max_snoozes_label">Max snoozes (blank = unlimited)</string>
+
+    <!-- Shared sound/tone picker -->
+    <string name="sound_default">Default</string>
+
+    <!-- Seamless-transition beep options (per-Chain) -->
+    <string name="beep_tone_beep">Beep</string>
+    <string name="beep_tone_double_beep">Double beep</string>
+    <string name="beep_tone_chime">Chime</string>
+    <string name="beep_tone_pip">Pip</string>
+    <string name="beep_tone_silent">Silent</string>
+
+    <!-- Timer/Chain config screen -->
+    <string name="block_config_untitled">Untitled</string>
+    <string name="block_config_label_required">Label (required)</string>
+    <string name="block_config_label_optional">Label (optional)</string>
+    <string name="block_config_label_hint_required">Letters, digits, underscore — must be unique</string>
+    <string name="block_config_label_hint_optional">Only needed if you turn Persistent on</string>
+    <string name="block_config_duration_label">Duration</string>
+    <string name="block_config_duration_resolved">= %1$s</string>
+    <string name="block_config_persistent_label">Persistent — save to library</string>
+    <string name="block_config_sound_chain">Default sound profile</string>
+    <string name="block_config_sound_timer">Sound profile</string>
+    <string name="block_config_transition_mode_title">Transition mode</string>
+    <string name="block_config_transition_require_interaction">Require interaction</string>
+    <string name="block_config_transition_seamless">Seamless</string>
+    <string name="block_config_beep_title">Seamless transition sound</string>
+    <string name="block_config_beep_desc">Plays at each step boundary in this chain, since seamless steps advance with no other alert. Tap to preview, tap again to pick.</string>
+    <string name="block_config_content_title">Content</string>
+    <string name="block_config_syntax_help_desc">Syntax help</string>
+    <string name="block_config_content_hint">e.g. (Work, Break) or repeat(4, (Work, Break)) — one line per step also works</string>
+    <string name="block_config_preview_title">Preview</string>
+    <string name="block_config_step_placeholder">—</string>
+    <string name="block_config_still_in_use_title">Still in use</string>
+    <string name="block_config_still_in_use_message">Referenced by: %1$s. Deleting it will break %2$s. Delete anyway?</string>
+    <string name="block_config_ref_singular">that chain</string>
+    <string name="block_config_ref_plural">those chains</string>
+    <string name="block_config_delete_anyway">Delete anyway</string>
+
+    <!-- Chain syntax help dialog. The code fragments (e.g. "(Work, Break)", "repeat(N, step)")
+         are chainlang syntax, not prose — identical across languages by design, since the DSL
+         keywords themselves are fixed (see RESERVED_WORDS), not translated. -->
+    <string name="chain_help_title">Writing a chain</string>
+    <string name="chain_help_intro">A chain is a list of steps in parentheses, one per line (or comma-separated — whichever\'s easier):</string>
+    <string name="chain_help_example_syntax" translatable="false">(Work, Break)</string>
+    <string name="chain_help_step_types">Each step is one of:</string>
+    <string name="chain_help_step_duration">• A plain duration: 3, 20m, 2h30m10s</string>
+    <string name="chain_help_step_reference">• The name of an existing Timer or Chain, to reuse it</string>
+    <string name="chain_help_step_repeat">• repeat(N, step) — repeat a step N times</string>
+    <string name="chain_help_step_range">• range(start, stop, step) or arange(...) — a numpy-style count sequence</string>
+    <string name="chain_help_example">Example: repeat(4, (Work, Break)) runs Work then Break, four times in a row.</string>
+    <string name="chain_help_got_it">Got it</string>
+
+    <!-- Settings screen -->
+    <string name="settings_display_title">Display</string>
+    <string name="settings_theme_label">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_amoled">AMOLED</string>
+    <string name="settings_24h_label">24-hour clock</string>
+    <string name="settings_first_day_label">First day of week</string>
+    <string name="settings_language_label">Language</string>
+    <string name="language_system_default">System default</string>
+    <!-- A language's own name is conventionally shown in that language itself, not translated
+         into whichever language happens to be selected right now. -->
+    <string name="language_english" translatable="false">English</string>
+    <string name="language_norwegian" translatable="false">Norsk</string>
+    <string name="settings_defaults_title">Defaults</string>
+    <string name="settings_default_snooze_label">Default snooze length (minutes)</string>
+    <string name="settings_haptics_label">Haptics</string>
+    <string name="settings_max_plan_size_label">Max execution-plan size (≤1000)</string>
+    <string name="settings_danger_zone_title">Danger zone</string>
+    <string name="settings_danger_zone_desc">Deletes every alarm, timer, and chain. Can\'t be undone.</string>
+    <string name="settings_reset_button">Reset all data</string>
+    <string name="settings_reset_dialog_title">Reset all data?</string>
+    <string name="settings_reset_dialog_message">Every alarm, timer, and chain will be deleted. This can\'t be undone.</string>
+    <string name="settings_reset_confirm">Reset</string>
+    <string name="settings_app_version" translatable="false">Clockr %1$s</string>
+
+    <!-- Stopwatch pane -->
+    <string name="stopwatch_new_desc">New stopwatch</string>
+    <string name="stopwatch_empty">No stopwatches running — tap + to start one</string>
+    <string name="stopwatch_new_dialog_title">New stopwatch</string>
+    <string name="stopwatch_name_optional_label">Name (optional)</string>
+    <string name="stopwatch_start_from_label">Start from, minutes (optional)</string>
+    <string name="stopwatch_unnamed">Unnamed</string>
+    <string name="stopwatch_lap_desc">Lap</string>
+    <string name="stopwatch_pause_desc">Pause</string>
+    <string name="stopwatch_resume_desc">Resume</string>
+    <string name="stopwatch_lap_label">Lap %1$d</string>
+    <string name="stopwatch_lap_delta_format" translatable="false">+%1$s</string>
+    <string name="stopwatch_rename_dialog_title">Rename stopwatch</string>
+    <plurals name="stopwatch_lap_count">
+        <item quantity="one">%1$d lap</item>
+        <item quantity="other">%1$d laps</item>
+    </plurals>
+
+    <!-- Bottom navigation panes -->
+    <string name="pane_alarms">Alarms</string>
+    <string name="pane_timers">Timers</string>
+    <string name="pane_stopwatch">Stopwatch</string>
+    <string name="pane_clock">Clock</string>
+    <string name="pane_settings">Settings</string>
+
+    <!-- User-visible error messages -->
+    <string name="error_run_start_failed">Couldn\'t start %1$s: %2$s</string>
+    <string name="run_error_notification_title">Couldn\'t start</string>
+    <string name="error_alarm_list_update">Couldn\'t update alarm: %1$s</string>
+    <string name="error_alarm_list_delete">Couldn\'t delete alarm: %1$s</string>
+    <string name="error_alarm_save">Couldn\'t save: %1$s</string>
+    <string name="error_alarm_delete">Couldn\'t delete: %1$s</string>
+    <string name="error_alarm_no_target">Pick a Timer or Chain, or switch back to Alarm</string>
+    <string name="block_label_error_required">Persistent blocks need a label</string>
+    <string name="block_label_error_start_letter">Must start with a letter</string>
+    <string name="block_label_error_reserved">\"%1$s\" is reserved by the chain syntax</string>
+    <string name="block_label_error_in_use">\"%1$s\" is already in use</string>
+    <string name="block_alarm_ref_format">Alarm %1$s</string>
+    <string name="block_alarm_ref_with_label_format">Alarm %1$s (%2$s)</string>
+
+    <!-- Alarm notification (alarm/NotificationHelper) -->
+    <string name="alarm_notification_default_title">Alarm</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="alarm_snooze_action_format">Snooze %1$dm</string>
+    <string name="alarm_channel_name">Alarms</string>
+    <string name="alarm_channel_description">Alarm firing notifications</string>
+
+    <!-- Timer/Chain run notifications (run/RunNotificationHelper) -->
+    <string name="run_notification_awaiting_interaction">%1$s done — tap Continue</string>
+    <string name="run_starting_title">Starting…</string>
+    <string name="run_progress_channel_name">Timer/chain progress</string>
+    <string name="run_progress_channel_desc">Ongoing countdown while a timer/chain runs — silent by design</string>
+    <string name="run_alert_channel_name">Timer/chain alerts</string>
+    <string name="run_alert_channel_desc">Step-complete and finished-run alerts</string>
+    <string name="run_error_channel_name">Timer/chain errors</string>
+    <string name="run_error_channel_desc">A timer/chain run that couldn\'t start</string>
+    <string name="run_error_timer_gone">This Timer no longer exists</string>
+    <string name="run_error_chain_gone">This Chain no longer exists</string>
 </resources>

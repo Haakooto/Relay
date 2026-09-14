@@ -42,9 +42,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.clockr.app.R
 import com.clockr.app.data.OneOffAfterFire
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.ui.common.SoundPickerRow
@@ -68,19 +70,19 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (state.isNew) "New alarm" else "Edit alarm") },
+                title = { Text(stringResource(if (state.isNew) R.string.alarm_config_title_new else R.string.alarm_config_title_edit)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
                     if (!state.isNew) {
                         IconButton(onClick = { viewModel.delete(onBack) }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete alarm")
+                            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.alarm_delete_desc))
                         }
                     }
-                    TextButton(onClick = { viewModel.save(onBack) }) { Text("Save") }
+                    TextButton(onClick = { viewModel.save(onBack) }) { Text(stringResource(R.string.action_save)) }
                 },
             )
         },
@@ -90,7 +92,7 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
             state.notFound -> Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-                Text("Not found", modifier = Modifier.align(Alignment.Center))
+                Text(stringResource(R.string.common_not_found), modifier = Modifier.align(Alignment.Center))
             }
             else -> LazyColumn(
                 modifier = Modifier.padding(padding).padding(16.dp),
@@ -119,12 +121,12 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                     OutlinedTextField(
                         value = state.label,
                         onValueChange = viewModel::updateLabel,
-                        label = { Text("Label") },
+                        label = { Text(stringResource(R.string.alarm_label_field)) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
 
-                item { Text("Repeat", style = MaterialTheme.typography.bodyLarge) }
+                item { Text(stringResource(R.string.alarm_repeat_title), style = MaterialTheme.typography.bodyLarge) }
                 item {
                     val orderedDays = remember(state.firstDayOfWeek) {
                         val all = DayOfWeek.entries
@@ -143,39 +145,39 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                 }
 
                 if (!state.isRepeating) {
-                    item { Text("After firing", style = MaterialTheme.typography.bodyLarge) }
+                    item { Text(stringResource(R.string.alarm_after_firing_title), style = MaterialTheme.typography.bodyLarge) }
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             FilterChip(
                                 selected = state.oneOffAfterFire == OneOffAfterFire.DELETE,
                                 onClick = { viewModel.updateOneOffAfterFire(OneOffAfterFire.DELETE) },
-                                label = { Text("Delete") },
+                                label = { Text(stringResource(R.string.action_delete)) },
                             )
                             FilterChip(
                                 selected = state.oneOffAfterFire == OneOffAfterFire.MARK_DONE,
                                 onClick = { viewModel.updateOneOffAfterFire(OneOffAfterFire.MARK_DONE) },
-                                label = { Text("Mark as done") },
+                                label = { Text(stringResource(R.string.alarm_after_fire_mark_done)) },
                             )
                         }
                     }
                 } else {
-                    item { Text("Delete after", style = MaterialTheme.typography.bodyLarge) }
+                    item { Text(stringResource(R.string.alarm_delete_after_title), style = MaterialTheme.typography.bodyLarge) }
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             FilterChip(
                                 selected = state.deleteAfterMode == DeleteAfterMode.NONE,
                                 onClick = { viewModel.updateDeleteAfterMode(DeleteAfterMode.NONE) },
-                                label = { Text("Never") },
+                                label = { Text(stringResource(R.string.alarm_delete_after_never)) },
                             )
                             FilterChip(
                                 selected = state.deleteAfterMode == DeleteAfterMode.COUNT,
                                 onClick = { viewModel.updateDeleteAfterMode(DeleteAfterMode.COUNT) },
-                                label = { Text("After N times") },
+                                label = { Text(stringResource(R.string.alarm_delete_after_count)) },
                             )
                             FilterChip(
                                 selected = state.deleteAfterMode == DeleteAfterMode.DATE,
                                 onClick = { viewModel.updateDeleteAfterMode(DeleteAfterMode.DATE) },
-                                label = { Text("Until date") },
+                                label = { Text(stringResource(R.string.alarm_delete_after_date)) },
                             )
                         }
                     }
@@ -184,7 +186,7 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                             OutlinedTextField(
                                 value = state.repeatCountText,
                                 onValueChange = viewModel::updateRepeatCountText,
-                                label = { Text("Number of occurrences") },
+                                label = { Text(stringResource(R.string.alarm_repeat_count_label)) },
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
@@ -192,7 +194,7 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                             var showDatePicker by remember { mutableStateOf(false) }
                             val dateLabel = state.repeatUntilEpochDay
                                 ?.let { java.time.LocalDate.ofEpochDay(it).toString() }
-                                ?: "Pick a date"
+                                ?: stringResource(R.string.alarm_pick_date)
                             OutlinedButton(onClick = { showDatePicker = true }, modifier = Modifier.fillMaxWidth()) {
                                 Text(dateLabel)
                             }
@@ -210,10 +212,10 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                                                 viewModel.updateRepeatUntilEpochDay(epochDay)
                                             }
                                             showDatePicker = false
-                                        }) { Text("OK") }
+                                        }) { Text(stringResource(R.string.action_ok)) }
                                     },
                                     dismissButton = {
-                                        TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                                        TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.action_cancel)) }
                                     },
                                 ) {
                                     DatePicker(state = datePickerState)
@@ -226,19 +228,19 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
 
                 item { HorizontalDivider() }
 
-                item { Text("Fires", style = MaterialTheme.typography.bodyLarge) }
+                item { Text(stringResource(R.string.alarm_fires_title), style = MaterialTheme.typography.bodyLarge) }
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FilterChip(
                             selected = !state.firesBlockTarget,
                             onClick = viewModel::clearTarget,
-                            label = { Text("Alarm") },
+                            label = { Text(stringResource(R.string.alarm_fires_alarm_chip)) },
                         )
                         FilterChip(
                             selected = state.firesBlockTarget,
                             onClick = viewModel::enableBlockTarget,
                             enabled = state.availableTargets.isNotEmpty(),
-                            label = { Text("Timer or Chain") },
+                            label = { Text(stringResource(R.string.alarm_fires_target_chip)) },
                         )
                     }
                 }
@@ -249,12 +251,13 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                         val current = state.availableTargets.firstOrNull { it.id == state.targetBlockId }
                         Box {
                             OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
-                                Text(current?.label ?: "Select a Timer or Chain")
+                                Text(current?.label ?: stringResource(R.string.alarm_select_target))
                             }
                             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                                 state.availableTargets.forEach { option ->
+                                    val kindLabel = stringResource(if (option.kind == BlockKind.CHAIN) R.string.block_kind_chain else R.string.block_kind_timer)
                                     DropdownMenuItem(
-                                        text = { Text("${option.label} (${if (option.kind == BlockKind.CHAIN) "Chain" else "Timer"})") },
+                                        text = { Text(stringResource(R.string.alarm_target_option_format, option.label, kindLabel)) },
                                         onClick = { viewModel.selectTarget(option); expanded = false },
                                     )
                                 }
@@ -263,20 +266,20 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                     }
                     item {
                         Text(
-                            "Uses that Timer/Chain's own sound and Stop/Restart/+1min prompt — sound and snooze below don't apply.",
+                            stringResource(R.string.alarm_target_note),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 } else {
                     item {
-                        SoundPickerRow("Sound", state.soundProfileId, viewModel::updateSoundProfileId)
+                        SoundPickerRow(stringResource(R.string.alarm_sound_label), state.soundProfileId, viewModel::updateSoundProfileId)
                     }
                     item {
                         OutlinedTextField(
                             value = state.snoozeMinutesText,
                             onValueChange = viewModel::updateSnoozeMinutesText,
-                            label = { Text("Snooze length (minutes)") },
+                            label = { Text(stringResource(R.string.alarm_snooze_minutes_label)) },
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
@@ -284,7 +287,7 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                         OutlinedTextField(
                             value = state.maxSnoozesText,
                             onValueChange = viewModel::updateMaxSnoozesText,
-                            label = { Text("Max snoozes (blank = unlimited)") },
+                            label = { Text(stringResource(R.string.alarm_max_snoozes_label)) },
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }

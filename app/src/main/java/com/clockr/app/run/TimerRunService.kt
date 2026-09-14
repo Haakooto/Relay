@@ -5,6 +5,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import com.clockr.app.R
 import androidx.core.content.ContextCompat
 import com.clockr.app.data.BlockRepository
 import com.clockr.app.data.ClockrDatabase
@@ -126,15 +127,15 @@ class TimerRunService : Service() {
             when (kind) {
                 BlockKind.TIMER -> {
                     val timer = db.timerDefDao().findById(blockId)
-                    if (timer == null) { abortRun("This Timer no longer exists"); return@launch }
-                    blockLabel = timer.label.ifBlank { "Timer" }
+                    if (timer == null) { abortRun(getString(R.string.run_error_timer_gone)); return@launch }
+                    blockLabel = timer.label.ifBlank { getString(R.string.block_kind_timer) }
                     persistent = timer.persistent
                     plan = RunPlanBuilder(db, repository).buildForTimer(timer)
                 }
                 BlockKind.CHAIN -> {
                     val chain = db.chainDefDao().findById(blockId)
-                    if (chain == null) { abortRun("This Chain no longer exists"); return@launch }
-                    blockLabel = chain.label.ifBlank { "Chain" }
+                    if (chain == null) { abortRun(getString(R.string.run_error_chain_gone)); return@launch }
+                    blockLabel = chain.label.ifBlank { getString(R.string.block_kind_chain) }
                     persistent = chain.persistent
                     plan = RunPlanBuilder(db, repository).buildForChain(chain, limits)
                 }
@@ -146,7 +147,7 @@ class TimerRunService : Service() {
             throw e
         } catch (e: Exception) {
             val label = blockLabel.ifBlank { "this run" }
-            abortRun("Couldn't start $label: ${e.message ?: e::class.simpleName}")
+            abortRun(getString(R.string.error_run_start_failed, label, e.message ?: e::class.simpleName ?: "unknown"))
         }
     }
 
