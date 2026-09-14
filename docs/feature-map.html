@@ -123,14 +123,14 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>A status snapshot across every pane, taken after the first real device test pass — not a roadmap, a ledger. Full design detail lives in the <a href="https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d">Clockr Spec</a>.</p>
     <div class="meta">
-      <span>2026-09-14, rev 9</span>
+      <span>2026-09-14, rev 10</span>
       <span>50 tracked items</span>
       <span>chainlang: 30/30 tests passing</span>
     </div>
 
     <div class="stats">
-      <div class="stat approved"><div class="n">28</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">13</div><div class="l">WIP</div></div>
+      <div class="stat approved"><div class="n">27</div><div class="l">Approved</div></div>
+      <div class="stat wip"><div class="n">14</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">2</div><div class="l">Lacking</div></div>
       <div class="stat"><div class="n">3</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">3</div><div class="l">Deferred</div></div>
@@ -197,7 +197,7 @@
         <tbody>
           <tr><td class="feature">Multiple concurrent, pause/resume/lap/restart-to-t₀</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
           <tr><td class="feature">Rename</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
-          <tr><td class="feature">Lap delta + cumulative display</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
+          <tr><td class="feature">Lap delta + cumulative display</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was Approved, downgraded — user found the first lap's delta included the stopwatch's starting offset (t0) instead of measuring from it, e.g. starting at 1m and lapping at +5s showed 1:05 instead of 0:05. Fixed. Needs retest.</td></tr>
           <tr><td class="feature">Editing recorded lap/total times</td><td><span class="chip declined">✕ Declined</span></td><td class="note">Agreed: undermines the point of a stopwatch as a factual record</td></tr>
         </tbody>
       </table></div>

@@ -168,7 +168,10 @@ private fun StopwatchCard(
             if (sw.laps.isNotEmpty()) {
                 Column(modifier = Modifier.padding(top = 8.dp)) {
                     sw.laps.forEachIndexed { index, cumulative ->
-                        val previous = sw.laps.getOrNull(index - 1) ?: 0L
+                        // The first lap's delta is measured from t0 (where the clock actually
+                        // started), not from zero — a stopwatch started with an offset otherwise
+                        // shows its first lap as if it included that offset.
+                        val previous = sw.laps.getOrNull(index - 1) ?: sw.t0Seconds
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
