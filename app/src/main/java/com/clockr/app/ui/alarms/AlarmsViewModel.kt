@@ -10,17 +10,26 @@ import com.clockr.app.data.ClockrDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 private const val TAG = "AlarmsViewModel"
 
 class AlarmsViewModel(application: Application) : AndroidViewModel(application) {
-    private val dao = ClockrDatabase.get(application).alarmDao()
+    private val db = ClockrDatabase.get(application)
+    private val dao = db.alarmDao()
     private val scheduler = AlarmScheduler(application)
 
     val alarms: StateFlow<List<AlarmEntity>> = dao.observeAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** blockId -> label, for alarms that fire by starting a Timer/Chain instead of themselves. */
+    val targetLabels: StateFlow<Map<String, String>> = combine(
+        db.timerDefDao().observeAll(),
+        db.chainDefDao().observeAll(),
+    ) { timers, chains -> (timers.associate { it.id to it.label } + chains.associate { it.id to it.label }) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error

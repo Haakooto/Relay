@@ -27,8 +27,18 @@ data class AlarmEntity(
     val maxSnoozes: Int?,
     val snoozesUsed: Int,
     val enabled: Boolean,
+    /**
+     * Spec §4.2's "generalizing: scheduled triggers" — null (both) means a plain alarm, exactly
+     * today's behavior. Non-null means firing starts this Timer/Chain via [com.clockr.app.run.TimerRunService]
+     * instead of showing the alarm dismiss/snooze notification; [soundProfileId]/[snoozeMinutes]/
+     * [maxSnoozes] are then unused (the run engine has its own sound and its own Stop/Restart/+1min
+     * prompt), and the config screen hides them rather than leave dead controls.
+     */
+    val targetBlockId: String? = null,
+    val targetBlockKind: String? = null,
 ) {
     val isRepeating: Boolean get() = repeatDays.isNotBlank()
+    val hasBlockTarget: Boolean get() = targetBlockId != null && targetBlockKind != null
 
     fun repeatDaySet(): Set<DayOfWeek> =
         repeatDays.split(",").filter { it.isNotBlank() }.map { DayOfWeek.valueOf(it) }.toSet()

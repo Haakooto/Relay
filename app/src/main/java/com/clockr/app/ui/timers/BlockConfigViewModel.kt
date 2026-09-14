@@ -268,10 +268,16 @@ class BlockConfigViewModel(application: Application, private val blockId: String
         }
     }
 
-    /** Deletes immediately if nothing references this block; otherwise asks for confirmation first. */
+    /** Deletes immediately if nothing references this block; otherwise asks for confirmation first.
+     *  "References" now includes an Alarm scheduled to start this block, not just other Chains —
+     *  deleting it out from under one wouldn't crash (the run engine handles a missing block
+     *  gracefully), but it would silently turn that alarm into a no-op the next time it fires. */
     fun requestDelete(onSuccess: () -> Unit) = viewModelScope.launch {
         val state = _uiState.value
-        val referencedBy = if (state.persistent) repository.usedBy(state.label, state.id) else emptyList()
+        val chainRefs = if (state.persistent) repository.usedBy(state.label, state.id) else emptyList()
+        val alarmRefs = db.alarmDao().getAllByTargetBlock(state.id)
+            .map { alarm -> "Alarm ${"%02d:%02d".format(alarm.hour, alarm.minute)}".let { it + alarm.label.takeIf { l -> l.isNotBlank() }?.let { l -> " ($l)" }.orEmpty() } }
+        val referencedBy = chainRefs + alarmRefs
         if (referencedBy.isEmpty()) {
             performDelete(state)
             onSuccess()

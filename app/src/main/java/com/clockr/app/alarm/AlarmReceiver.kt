@@ -7,6 +7,8 @@ import com.clockr.app.data.AlarmDao
 import com.clockr.app.data.AlarmEntity
 import com.clockr.app.data.ClockrDatabase
 import com.clockr.app.data.OneOffAfterFire
+import com.clockr.app.domain.BlockKind
+import com.clockr.app.run.TimerRunService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,8 +41,17 @@ class AlarmReceiver : BroadcastReceiver() {
 
         when (action) {
             AlarmActions.ACTION_FIRE -> {
-                NotificationHelper.showAlarmFiring(context, alarm)
-                if (alarm.isRepeating) advanceRepeatingAfterFire(dao, scheduler, alarm)
+                val targetKind = if (alarm.hasBlockTarget) runCatching { BlockKind.valueOf(alarm.targetBlockKind!!) }.getOrNull() else null
+                if (targetKind != null) {
+                    // Handing off to the run engine is the alarm's whole job here — there's no
+                    // Dismiss coming the way a plain alarm gets one, so a one-off's after-fire
+                    // bookkeeping (delete/mark-done) applies immediately instead of waiting for it.
+                    TimerRunService.start(context, alarm.targetBlockId!!, targetKind)
+                    if (alarm.isRepeating) advanceRepeatingAfterFire(dao, scheduler, alarm) else applyDismiss(dao, alarm)
+                } else {
+                    NotificationHelper.showAlarmFiring(context, alarm)
+                    if (alarm.isRepeating) advanceRepeatingAfterFire(dao, scheduler, alarm)
+                }
             }
             AlarmActions.ACTION_DISMISS -> {
                 NotificationHelper.cancel(context, alarm.id)

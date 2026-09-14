@@ -12,7 +12,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         TimerDefEntity::class, ChainDefEntity::class, SoundProfileEntity::class, AlarmEntity::class,
         LibraryHeaderEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 abstract class ClockrDatabase : RoomDatabase() {
@@ -40,9 +40,19 @@ abstract class ClockrDatabase : RoomDatabase() {
             }
         }
 
+        /** Spec §4.2 "generalizing: scheduled triggers" — an alarm can now target a Timer/Chain
+         *  instead of firing its own dismiss/snooze notification. Both columns null on every
+         *  existing row, which is exactly "plain alarm, unchanged behavior". */
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE alarms ADD COLUMN targetBlockId TEXT")
+                db.execSQL("ALTER TABLE alarms ADD COLUMN targetBlockKind TEXT")
+            }
+        }
+
         fun get(context: Context): ClockrDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, ClockrDatabase::class.java, "clockr.db")
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
                 .also { instance = it }
         }

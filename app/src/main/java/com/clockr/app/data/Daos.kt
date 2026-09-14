@@ -17,6 +17,9 @@ interface AlarmDao {
     @Query("SELECT * FROM alarms WHERE enabled = 1")
     suspend fun getAllEnabled(): List<AlarmEntity>
 
+    @Query("SELECT * FROM alarms WHERE targetBlockId = :blockId")
+    suspend fun getAllByTargetBlock(blockId: String): List<AlarmEntity>
+
     @Upsert
     suspend fun upsert(entity: AlarmEntity)
 

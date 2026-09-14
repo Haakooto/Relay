@@ -5,6 +5,11 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v0.2 — 2026-09-14
+
+- Alarms can now target a Timer or Chain instead of firing themselves — pick "Timer or Chain" in
+  an alarm's Fires row and it starts that block when it goes off, using the run engine's own
+  Stop/Restart/+1min prompt instead of a separate alarm notification. Plain alarms are unaffected.
 - App version is now shown at the bottom of Settings, and reflects the actual build: the tagged
   release name (`v0.1`) when built exactly at a tag, or `v0.1+<commit>` for anything since.
 - Fixed the home-screen widget freezing permanently after a single missed tick (any failure

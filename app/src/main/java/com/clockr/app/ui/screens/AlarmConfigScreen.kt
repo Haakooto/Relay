@@ -16,6 +16,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -44,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.clockr.app.data.OneOffAfterFire
+import com.clockr.app.domain.BlockKind
 import com.clockr.app.ui.common.SoundPickerRow
 import com.clockr.app.ui.alarms.AlarmConfigViewModel
 import com.clockr.app.ui.alarms.AlarmConfigViewModelFactory
@@ -223,25 +226,68 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
 
                 item { HorizontalDivider() }
 
+                item { Text("Fires", style = MaterialTheme.typography.bodyLarge) }
                 item {
-                    SoundPickerRow("Sound", state.soundProfileId, viewModel::updateSoundProfileId)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = !state.firesBlockTarget,
+                            onClick = viewModel::clearTarget,
+                            label = { Text("Alarm") },
+                        )
+                        FilterChip(
+                            selected = state.firesBlockTarget,
+                            onClick = viewModel::enableBlockTarget,
+                            enabled = state.availableTargets.isNotEmpty(),
+                            label = { Text("Timer or Chain") },
+                        )
+                    }
                 }
 
-                item {
-                    OutlinedTextField(
-                        value = state.snoozeMinutesText,
-                        onValueChange = viewModel::updateSnoozeMinutesText,
-                        label = { Text("Snooze length (minutes)") },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                item {
-                    OutlinedTextField(
-                        value = state.maxSnoozesText,
-                        onValueChange = viewModel::updateMaxSnoozesText,
-                        label = { Text("Max snoozes (blank = unlimited)") },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                if (state.firesBlockTarget) {
+                    item {
+                        var expanded by remember { mutableStateOf(false) }
+                        val current = state.availableTargets.firstOrNull { it.id == state.targetBlockId }
+                        Box {
+                            OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
+                                Text(current?.label ?: "Select a Timer or Chain")
+                            }
+                            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                                state.availableTargets.forEach { option ->
+                                    DropdownMenuItem(
+                                        text = { Text("${option.label} (${if (option.kind == BlockKind.CHAIN) "Chain" else "Timer"})") },
+                                        onClick = { viewModel.selectTarget(option); expanded = false },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    item {
+                        Text(
+                            "Uses that Timer/Chain's own sound and Stop/Restart/+1min prompt — sound and snooze below don't apply.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else {
+                    item {
+                        SoundPickerRow("Sound", state.soundProfileId, viewModel::updateSoundProfileId)
+                    }
+                    item {
+                        OutlinedTextField(
+                            value = state.snoozeMinutesText,
+                            onValueChange = viewModel::updateSnoozeMinutesText,
+                            label = { Text("Snooze length (minutes)") },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    item {
+                        OutlinedTextField(
+                            value = state.maxSnoozesText,
+                            onValueChange = viewModel::updateMaxSnoozesText,
+                            label = { Text("Max snoozes (blank = unlimited)") },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
             }
         }

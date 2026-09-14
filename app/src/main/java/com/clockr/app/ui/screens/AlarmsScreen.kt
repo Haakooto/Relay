@@ -43,6 +43,7 @@ import com.clockr.app.util.formatTime
 fun AlarmsScreen(modifier: Modifier = Modifier, onAlarmClick: (String) -> Unit = {}) {
     val viewModel: AlarmsViewModel = viewModel()
     val alarms by viewModel.alarms.collectAsState()
+    val targetLabels by viewModel.targetLabels.collectAsState()
     val error by viewModel.error.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -78,6 +79,7 @@ fun AlarmsScreen(modifier: Modifier = Modifier, onAlarmClick: (String) -> Unit =
                 items(alarms, key = { it.id }) { alarm ->
                     AlarmCard(
                         alarm = alarm,
+                        targetLabel = alarm.targetBlockId?.let { targetLabels[it] },
                         onClick = { onAlarmClick(alarm.id) },
                         onEnabledChange = { viewModel.setEnabled(alarm, it) },
                         onDoneToggle = { viewModel.setDone(alarm, !alarm.done) },
@@ -91,6 +93,7 @@ fun AlarmsScreen(modifier: Modifier = Modifier, onAlarmClick: (String) -> Unit =
 @Composable
 private fun AlarmCard(
     alarm: AlarmEntity,
+    targetLabel: String?,
     onClick: () -> Unit,
     onEnabledChange: (Boolean) -> Unit,
     onDoneToggle: () -> Unit,
@@ -105,11 +108,12 @@ private fun AlarmCard(
                 if (alarm.label.isNotBlank()) {
                     Text(alarm.label, style = MaterialTheme.typography.bodyLarge)
                 }
-                val summary = when {
+                val recurrence = when {
                     alarm.isRepeating -> formatDays(alarm.repeatDaySet())
                     alarm.done -> "Done"
                     else -> "Once"
                 }
+                val summary = if (alarm.hasBlockTarget) "$recurrence · Starts ${targetLabel ?: "…"}" else recurrence
                 Text(summary, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Column(horizontalAlignment = Alignment.End) {

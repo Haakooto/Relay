@@ -123,16 +123,16 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>A status snapshot across every pane, taken after the first real device test pass — not a roadmap, a ledger. Full design detail lives in the <a href="https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d">Clockr Spec</a>.</p>
     <div class="meta">
-      <span>2026-09-14, rev 7</span>
+      <span>2026-09-14, rev 9</span>
       <span>50 tracked items</span>
       <span>chainlang: 30/30 tests passing</span>
     </div>
 
     <div class="stats">
-      <div class="stat approved"><div class="n">22</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">18</div><div class="l">WIP</div></div>
+      <div class="stat approved"><div class="n">28</div><div class="l">Approved</div></div>
+      <div class="stat wip"><div class="n">13</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">2</div><div class="l">Lacking</div></div>
-      <div class="stat"><div class="n">4</div><div class="l">Planned</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">3</div><div class="l">Deferred</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
     </div>
@@ -161,6 +161,7 @@
           <tr><td class="feature">Fire → notification → dismiss/snooze</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device</td></tr>
           <tr><td class="feature">Reschedule after reboot</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Boot receiver reschedules every enabled alarm, per-alarm error isolation</td></tr>
           <tr><td class="feature">Continuous ring until dismissed</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">Alarm sound is a one-shot notification-channel sound, not a looping siren — a competing notification (e.g. an incoming text) firing its own sound stops the alarm's from continuing. Known, deliberately low priority.</td></tr>
+          <tr><td class="feature"><strong>Scheduled triggers</strong> — target a Timer/Chain instead of firing itself</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Spec §4.2, moved out of design-only. An alarm can now target a persistent Timer/Chain (config screen: "Fires" → Alarm / Timer or Chain) — firing starts it via the run engine instead of showing the dismiss/snooze notification, reusing its existing Stop/Restart/+1min prompt rather than building a second one. The plain-alarm path is untouched code, not just untouched behavior. Stopwatch as a target is still unbuilt (spec itself leaves its "seed row" mechanism unresolved). Needs on-device test — first time, never run.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -219,7 +220,7 @@
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Digital home-screen widget (Glance)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was Approved, downgraded — user found it prone to freezing. Two real bugs fixed: the self-rescheduling tick chain died permanently on any single failed update (no error handling), and never resumed after a device reboot (only armed once, in onEnabled, not on boot). Needs retest, ideally including an overnight/reboot check.</td></tr>
+          <tr><td class="feature">Digital home-screen widget (Glance)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device after the tick-chain and reboot-resume fixes</td></tr>
           <tr><td class="feature">Customization axes (color, font, background, shape)</td><td><span class="chip planned">Planned</span></td><td class="note">Confirmed gap: no way to configure the widget's display yet</td></tr>
         </tbody>
       </table></div>
@@ -231,12 +232,12 @@
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
           <tr><td class="feature">Theme (light/dark/AMOLED)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">"Themes work well"</td></tr>
-          <tr><td class="feature">24h clock format</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — was persisted but never read (Clock and the alarm time picker both hardcoded 24h). Needs retest.</td></tr>
-          <tr><td class="feature">First day of week</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — was persisted but unused; the alarm day-picker now starts from it. Needs retest.</td></tr>
+          <tr><td class="feature">24h clock format</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
+          <tr><td class="feature">First day of week</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
           <tr><td class="feature">Language (dropdown, locale only)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was buggy (flicker/dropped letters) — root-caused and fixed this session</td></tr>
           <tr><td class="feature">Full i18n — translated UI strings</td><td><span class="chip deferred">Deferred</span></td><td class="note">Zero strings are actually translated today — every screen is hardcoded English</td></tr>
-          <tr><td class="feature">Default snooze minutes</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — was hardcoded to 9; a new alarm's default and the save-time fallback now read the setting. Needs retest.</td></tr>
-          <tr><td class="feature">Haptics</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — toggle was entirely dead (no vibration call existed anywhere). Now gates notification-channel vibration for alarms and timer/chain alerts, with existing channels invalidated on toggle so the change actually takes effect. Needs retest.</td></tr>
+          <tr><td class="feature">Default snooze minutes</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
+          <tr><td class="feature">Haptics</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
           <tr><td class="feature">Max execution plan size</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Wired into the run engine's safety limit</td></tr>
           <tr><td class="feature">Reset all data</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Cancels alarms + stops any run, then clears all Room tables, correct order. Confirmation dialog, doesn't touch Settings itself.</td></tr>
         </tbody>
@@ -265,20 +266,11 @@
           <tr><td class="feature">Exact-alarm permission</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Was missing entirely, now requested with a rationale screen; confirmed alarms fire on-device</td></tr>
           <tr><td class="feature">Crash → graceful error handling</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed this exact round: the permission error surfaced as a clear message, not a crash</td></tr>
           <tr><td class="feature">Bottom-nav pane switching</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">User reports sometimes landing on the wrong pane after tapping a nav icon. Code matches the standard Navigation-Compose bottom-bar pattern with nothing obviously wrong; couldn't reproduce or root-cause without a device. Needs exact repro steps (which pane → which pane, single/rapid taps, does it follow visiting a detail screen like block/alarm config first).</td></tr>
-          <tr><td class="feature">App version display</td><td><span class="chip wip">◐ WIP</span></td><td class="note">New — Settings now shows the build's actual version (git tag, or tag+commit-hash between tags), computed in <code>app/build.gradle.kts</code>. Needs on-device confirmation it renders right.</td></tr>
+          <tr><td class="feature">App version display</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
         </tbody>
       </table></div>
     </section>
 
-    <section>
-      <h2>Design-only (spec written, zero code)</h2>
-      <div class="tablewrap"><table>
-        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
-        <tbody>
-          <tr><td class="feature">Scheduled triggers — Alarm generalizes to Timer/Chain/Stopwatch targets</td><td><span class="chip planned">Planned</span></td><td class="note">Spec §4.2 — blocked on the run engine existing first</td></tr>
-        </tbody>
-      </table></div>
-    </section>
   </main>
 
   <footer class="doc"><div class="shell">Clockr — feature map · a living ledger, not a roadmap; update it as things move</div></footer>
