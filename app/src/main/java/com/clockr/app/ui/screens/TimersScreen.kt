@@ -163,7 +163,7 @@ fun TimersScreen(modifier: Modifier = Modifier, onBlockClick: (String) -> Unit =
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("New header") },
+                        text = { Text("New Header") },
                         onClick = {
                             menuExpanded = false
                             showAddHeaderDialog = true

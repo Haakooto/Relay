@@ -47,8 +47,12 @@ class WidgetTickReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                ClockrGlanceWidget().updateAll(appContext)
-                WidgetTickScheduler.scheduleNextTick(appContext)
+                // Each tick reschedules the next one — that chain has no other way to resume once
+                // broken, so a failure updating this tick's view must never skip rescheduling the
+                // next one, or the widget silently freezes forever. The two are independent
+                // failures on purpose.
+                runCatching { ClockrGlanceWidget().updateAll(appContext) }
+                runCatching { WidgetTickScheduler.scheduleNextTick(appContext) }
             } finally {
                 pendingResult.finish()
             }

@@ -5,6 +5,28 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+/**
+ * The nearest annotated git tag is the real version — manual, deliberate, one per release.
+ * Every commit between tags shows as `<tag>+<short-hash>` (e.g. "v0.1+797fbfc") rather than
+ * silently reusing the last tag's number, so a build installed from an untagged commit is never
+ * mistaken for the tagged release it's actually a few commits ahead of. Falls back to "v0.0" if
+ * this checkout has no tags at all (a fresh clone before the first release).
+ */
+fun gitVersionName(): String {
+    fun run(vararg command: String): String? = try {
+        val process = ProcessBuilder(*command).directory(rootDir).redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText().trim()
+        if (process.waitFor() == 0) output else null
+    } catch (e: Exception) {
+        null
+    }
+
+    run("git", "describe", "--tags", "--exact-match")?.let { return it }
+    val nearestTag = run("git", "describe", "--tags", "--abbrev=0") ?: "v0.0"
+    val shortHash = run("git", "rev-parse", "--short", "HEAD") ?: "unknown"
+    return "$nearestTag+$shortHash"
+}
+
 android {
     namespace = "com.clockr.app"
     compileSdk = 35
@@ -14,7 +36,7 @@ android {
         minSdk = 33
         targetSdk = 35
         versionCode = 1
-        versionName = "0.1"
+        versionName = gitVersionName()
     }
 
     buildTypes {

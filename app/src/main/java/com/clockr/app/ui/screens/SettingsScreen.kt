@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,6 +35,12 @@ import com.clockr.app.ui.theme.ClockrTheme
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
+
+/** Reads the versionName Gradle computed at build time (git tag, or `tag+shortHash` between
+ *  tags) — no BuildConfig field needed, this is just the platform's own package metadata. */
+private fun appVersionName(context: android.content.Context): String = runCatching {
+    context.packageManager.getPackageInfo(context.packageName, android.content.pm.PackageManager.PackageInfoFlags.of(0)).versionName
+}.getOrNull() ?: "unknown"
 
 /**
  * Deliberately a short, fixed list rather than free text: no UI string in this app is actually
@@ -137,6 +144,15 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             ) {
                 Text("Reset all data")
             }
+
+            HorizontalDivider()
+
+            val context = LocalContext.current
+            Text(
+                "Clockr ${appVersionName(context)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 
