@@ -10,9 +10,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         TimerDefEntity::class, ChainDefEntity::class, SoundProfileEntity::class, AlarmEntity::class,
-        LibraryHeaderEntity::class,
+        LibraryHeaderEntity::class, AlarmExceptionEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false,
 )
 abstract class ClockrDatabase : RoomDatabase() {
@@ -21,6 +21,7 @@ abstract class ClockrDatabase : RoomDatabase() {
     abstract fun soundProfileDao(): SoundProfileDao
     abstract fun alarmDao(): AlarmDao
     abstract fun libraryHeaderDao(): LibraryHeaderDao
+    abstract fun alarmExceptionDao(): AlarmExceptionDao
 
     companion object {
         @Volatile private var instance: ClockrDatabase? = null
@@ -50,9 +51,23 @@ abstract class ClockrDatabase : RoomDatabase() {
             }
         }
 
+        /** Alarm schedule exceptions — skip or retime a repeating alarm for a date range. New
+         *  table, no existing rows affected. */
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS alarm_exceptions (" +
+                        "id TEXT NOT NULL PRIMARY KEY, alarmId TEXT NOT NULL, " +
+                        "startEpochDay INTEGER NOT NULL, endEpochDay INTEGER NOT NULL, " +
+                        "overrideHour INTEGER, overrideMinute INTEGER)",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_alarm_exceptions_alarmId ON alarm_exceptions(alarmId)")
+            }
+        }
+
         fun get(context: Context): ClockrDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, ClockrDatabase::class.java, "clockr.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
                 .also { instance = it }
         }

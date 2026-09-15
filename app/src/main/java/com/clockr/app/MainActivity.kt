@@ -30,6 +30,9 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -126,9 +129,16 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun ClockrApp(openClock: Boolean = false, clockFormat24h: Boolean = true) {
     val navController = rememberNavController()
+    // rememberSaveable (not remember) so this survives an Activity recreate — e.g. a locale
+    // change via LocaleManager.applicationLocales — without re-consuming the same widget-launch
+    // intent's EXTRA_OPEN_CLOCK and force-navigating back to Clock on every recreate.
+    var openClockConsumed by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(openClock) {
-        if (openClock) navController.navigate(Pane.Clock.route)
+        if (openClock && !openClockConsumed) {
+            navController.navigate(Pane.Clock.route)
+            openClockConsumed = true
+        }
     }
 
     Scaffold(

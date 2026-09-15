@@ -28,6 +28,27 @@ interface AlarmDao {
 }
 
 @Dao
+interface AlarmExceptionDao {
+    @Query("SELECT * FROM alarm_exceptions WHERE alarmId = :alarmId ORDER BY startEpochDay")
+    fun observeForAlarm(alarmId: String): Flow<List<AlarmExceptionEntity>>
+
+    @Query("SELECT * FROM alarm_exceptions WHERE alarmId = :alarmId ORDER BY startEpochDay")
+    suspend fun getForAlarm(alarmId: String): List<AlarmExceptionEntity>
+
+    @Query("SELECT * FROM alarm_exceptions WHERE alarmId = :alarmId AND endEpochDay >= :todayEpochDay ORDER BY startEpochDay")
+    suspend fun getUpcomingForAlarm(alarmId: String, todayEpochDay: Long): List<AlarmExceptionEntity>
+
+    @Upsert
+    suspend fun upsert(entity: AlarmExceptionEntity)
+
+    @Delete
+    suspend fun delete(entity: AlarmExceptionEntity)
+
+    @Query("DELETE FROM alarm_exceptions WHERE alarmId = :alarmId")
+    suspend fun deleteAllForAlarm(alarmId: String)
+}
+
+@Dao
 interface LibraryHeaderDao {
     @Query("SELECT * FROM library_headers ORDER BY sortOrder")
     fun observeAll(): Flow<List<LibraryHeaderEntity>>

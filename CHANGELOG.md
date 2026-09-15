@@ -5,6 +5,17 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v0.4 — 2026-09-15
+
+- Alarms can now have schedule exceptions: skip a single day or a whole date range (or ring at a
+  different time instead) without disabling the alarm outright — for a one-off "no alarm
+  tomorrow" or a whole vacation week. Manage them from the alarm's own config screen, with the
+  option to apply one exception to several alarms at once.
+- Fixed a bug where the Timer and Settings tabs would stop switching panes and always land on
+  Clock instead. Any change that recreates the app's screen (switching Language, rotating the
+  device, changing system theme) was re-triggering the "jump to Clock" behavior meant only for
+  opening the app from the home-screen widget.
+
 ## v0.3 — 2026-09-14
 
 - Fixed a stopwatch bug: the first lap after starting with an offset (e.g. "start from 1m")

@@ -5,14 +5,19 @@ package com.clockr.app.ui.screens
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -47,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.clockr.app.R
+import com.clockr.app.data.AlarmExceptionEntity
 import com.clockr.app.data.OneOffAfterFire
 import com.clockr.app.domain.BlockKind
 import com.clockr.app.ui.common.SoundPickerRow
@@ -54,12 +60,15 @@ import com.clockr.app.ui.alarms.AlarmConfigViewModel
 import com.clockr.app.ui.alarms.AlarmConfigViewModelFactory
 import com.clockr.app.ui.alarms.DeleteAfterMode
 import com.clockr.app.ui.alarms.NEW_ALARM_ROUTE_ID
+import com.clockr.app.ui.alarms.OtherAlarmOption
 import com.clockr.app.ui.theme.ClockrTheme
 import java.time.DayOfWeek
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.TextStyle
 import java.util.Locale
+import java.util.UUID
 
 @Composable
 fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
@@ -226,6 +235,43 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                     }
                 }
 
+                if (!state.isNew) {
+                    item { Text(stringResource(R.string.alarm_exceptions_title), style = MaterialTheme.typography.bodyLarge) }
+                    item {
+                        var showAddExceptionDialog by remember { mutableStateOf(false) }
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (state.exceptions.isEmpty()) {
+                                Text(
+                                    stringResource(R.string.alarm_exceptions_empty),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            state.exceptions.forEach { exception ->
+                                ExceptionRow(
+                                    exception = exception,
+                                    onDelete = { viewModel.deleteException(exception) },
+                                )
+                            }
+                            OutlinedButton(onClick = { showAddExceptionDialog = true }, modifier = Modifier.fillMaxWidth()) {
+                                Text(stringResource(R.string.alarm_exception_add_button))
+                            }
+                        }
+                        if (showAddExceptionDialog) {
+                            AddExceptionDialog(
+                                alarmId = state.id,
+                                is24Hour = state.is24Hour,
+                                otherAlarms = state.otherAlarms,
+                                onDismiss = { showAddExceptionDialog = false },
+                                onConfirm = { exception, alsoApplyToAlarmIds ->
+                                    viewModel.addException(exception, alsoApplyToAlarmIds)
+                                    showAddExceptionDialog = false
+                                },
+                            )
+                        }
+                    }
+                }
+
                 item { HorizontalDivider() }
 
                 item { Text(stringResource(R.string.alarm_fires_title), style = MaterialTheme.typography.bodyLarge) }
@@ -293,6 +339,165 @@ fun AlarmConfigScreen(alarmId: String, onBack: () -> Unit = {}) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ExceptionRow(exception: AlarmExceptionEntity, onDelete: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(formatExceptionSummary(exception))
+        IconButton(onClick = onDelete) {
+            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.alarm_exception_delete_desc))
+        }
+    }
+}
+
+@Composable
+private fun formatExceptionSummary(exception: AlarmExceptionEntity): String {
+    val start = LocalDate.ofEpochDay(exception.startEpochDay).toString()
+    val end = LocalDate.ofEpochDay(exception.endEpochDay).toString()
+    val dateRange = if (exception.startEpochDay == exception.endEpochDay) start else "$start – $end"
+    val detail = if (exception.isOverride) {
+        "%02d:%02d".format(exception.overrideHour, exception.overrideMinute)
+    } else {
+        stringResource(R.string.alarm_exception_skip_label)
+    }
+    return "$dateRange – $detail"
+}
+
+@Composable
+private fun AddExceptionDialog(
+    alarmId: String,
+    is24Hour: Boolean,
+    otherAlarms: List<OtherAlarmOption>,
+    onDismiss: () -> Unit,
+    onConfirm: (AlarmExceptionEntity, Set<String>) -> Unit,
+) {
+    var startEpochDay by remember { mutableStateOf<Long?>(null) }
+    var endEpochDay by remember { mutableStateOf<Long?>(null) }
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
+    var isOverride by remember { mutableStateOf(false) }
+    var selectedOtherIds by remember { mutableStateOf(emptySet<String>()) }
+
+    val timePickerState = rememberTimePickerState(is24Hour = is24Hour)
+
+    val effectiveEnd = endEpochDay ?: startEpochDay
+    val isValid = startEpochDay != null && effectiveEnd != null && effectiveEnd >= startEpochDay!!
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.alarm_exception_dialog_title)) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(stringResource(R.string.alarm_exception_start_date_label), style = MaterialTheme.typography.bodySmall)
+                OutlinedButton(onClick = { showStartDatePicker = true }, modifier = Modifier.fillMaxWidth()) {
+                    Text(startEpochDay?.let { LocalDate.ofEpochDay(it).toString() } ?: stringResource(R.string.alarm_exception_pick_start_date))
+                }
+                Text(stringResource(R.string.alarm_exception_end_date_label), style = MaterialTheme.typography.bodySmall)
+                OutlinedButton(onClick = { showEndDatePicker = true }, modifier = Modifier.fillMaxWidth()) {
+                    Text(effectiveEnd?.let { LocalDate.ofEpochDay(it).toString() } ?: stringResource(R.string.alarm_exception_pick_end_date))
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = !isOverride,
+                        onClick = { isOverride = false },
+                        label = { Text(stringResource(R.string.alarm_exception_skip_chip)) },
+                    )
+                    FilterChip(
+                        selected = isOverride,
+                        onClick = { isOverride = true },
+                        label = { Text(stringResource(R.string.alarm_exception_override_chip)) },
+                    )
+                }
+                if (isOverride) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        TimePicker(state = timePickerState)
+                    }
+                }
+
+                if (otherAlarms.isNotEmpty()) {
+                    Text(stringResource(R.string.alarm_exception_apply_to_others_title), style = MaterialTheme.typography.bodySmall)
+                    otherAlarms.forEach { option ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = option.id in selectedOtherIds,
+                                onCheckedChange = { checked ->
+                                    selectedOtherIds = if (checked) selectedOtherIds + option.id else selectedOtherIds - option.id
+                                },
+                            )
+                            Text(option.label)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = isValid,
+                onClick = {
+                    val exception = AlarmExceptionEntity(
+                        id = UUID.randomUUID().toString(),
+                        alarmId = alarmId,
+                        startEpochDay = startEpochDay!!,
+                        endEpochDay = effectiveEnd!!,
+                        overrideHour = if (isOverride) timePickerState.hour else null,
+                        overrideMinute = if (isOverride) timePickerState.minute else null,
+                    )
+                    onConfirm(exception, selectedOtherIds)
+                },
+            ) { Text(stringResource(R.string.action_ok)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
+        },
+    )
+
+    if (showStartDatePicker) {
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = startEpochDay?.let { it * 86_400_000L })
+        DatePickerDialog(
+            onDismissRequest = { showStartDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        startEpochDay = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate().toEpochDay()
+                    }
+                    showStartDatePicker = false
+                }) { Text(stringResource(R.string.action_ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStartDatePicker = false }) { Text(stringResource(R.string.action_cancel)) }
+            },
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+    if (showEndDatePicker) {
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = effectiveEnd?.let { it * 86_400_000L })
+        DatePickerDialog(
+            onDismissRequest = { showEndDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        endEpochDay = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate().toEpochDay()
+                    }
+                    showEndDatePicker = false
+                }) { Text(stringResource(R.string.action_ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndDatePicker = false }) { Text(stringResource(R.string.action_cancel)) }
+            },
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.clockr.app.R
 import com.clockr.app.alarm.AlarmScheduler
 import com.clockr.app.data.AlarmEntity
+import com.clockr.app.data.AlarmExceptionEntity
 import com.clockr.app.data.ClockrDatabase
 import com.clockr.app.data.OneOffAfterFire
 import com.clockr.app.data.SettingsRepository
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.util.UUID
 
 const val NEW_ALARM_ROUTE_ID = "new_alarm"
@@ -24,6 +26,9 @@ enum class DeleteAfterMode { NONE, COUNT, DATE }
 
 /** One persistent Timer/Chain this alarm could target instead of firing itself — spec §4.2. */
 data class AlarmTargetOption(val id: String, val label: String, val kind: BlockKind)
+
+/** Another alarm this alarm's config screen can also apply a new exception to. */
+data class OtherAlarmOption(val id: String, val label: String)
 
 data class AlarmConfigUiState(
     val loading: Boolean = true,
@@ -53,6 +58,8 @@ data class AlarmConfigUiState(
     val targetBlockId: String? = null,
     val targetBlockKind: BlockKind? = null,
     val availableTargets: List<AlarmTargetOption> = emptyList(),
+    val exceptions: List<AlarmExceptionEntity> = emptyList(),
+    val otherAlarms: List<OtherAlarmOption> = emptyList(),
 ) {
     val isRepeating: Boolean get() = repeatDays.isNotEmpty()
     val hasBlockTarget: Boolean get() = targetBlockId != null && targetBlockKind != null
@@ -61,6 +68,7 @@ data class AlarmConfigUiState(
 class AlarmConfigViewModel(application: Application, private val alarmId: String) : AndroidViewModel(application) {
     private val db = ClockrDatabase.get(application)
     private val dao = db.alarmDao()
+    private val exceptionDao = db.alarmExceptionDao()
     private val scheduler = AlarmScheduler(application)
     private val settingsRepository = SettingsRepository(application)
 
@@ -71,6 +79,7 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
         viewModelScope.launch {
             val settings = settingsRepository.current()
             val targets = loadAvailableTargets()
+            val others = loadOtherAlarms(excludingId = if (alarmId == NEW_ALARM_ROUTE_ID) null else alarmId)
             if (alarmId == NEW_ALARM_ROUTE_ID) {
                 _uiState.value = AlarmConfigUiState(
                     loading = false,
@@ -80,6 +89,7 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
                     is24Hour = settings.clockFormat24h,
                     firstDayOfWeek = settings.firstDayOfWeek,
                     availableTargets = targets,
+                    otherAlarms = others,
                 )
                 return@launch
             }
@@ -91,6 +101,7 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
                     is24Hour = settings.clockFormat24h,
                     firstDayOfWeek = settings.firstDayOfWeek,
                     availableTargets = targets,
+                    otherAlarms = others,
                 )
                 return@launch
             }
@@ -120,9 +131,16 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
                 targetBlockId = alarm.targetBlockId,
                 targetBlockKind = alarm.targetBlockKind?.let { runCatching { BlockKind.valueOf(it) }.getOrNull() },
                 availableTargets = targets,
+                exceptions = exceptionDao.getUpcomingForAlarm(alarm.id, LocalDate.now().toEpochDay()),
+                otherAlarms = others,
             )
         }
     }
+
+    private suspend fun loadOtherAlarms(excludingId: String?): List<OtherAlarmOption> =
+        dao.observeAll().first()
+            .filter { it.id != excludingId }
+            .map { OtherAlarmOption(it.id, it.label.ifBlank { "%02d:%02d".format(it.hour, it.minute) }) }
 
     /** Only persistent blocks are referenceable/targetable — same rule as chain references. */
     private suspend fun loadAvailableTargets(): List<AlarmTargetOption> {
@@ -196,10 +214,37 @@ class AlarmConfigViewModel(application: Application, private val alarmId: String
     fun delete(onSuccess: () -> Unit) = viewModelScope.launch {
         try {
             dao.findById(_uiState.value.id)?.let { scheduler.cancel(it); dao.delete(it) }
+            exceptionDao.deleteAllForAlarm(_uiState.value.id)
             onSuccess()
         } catch (e: Exception) {
             Log.e("AlarmConfigViewModel", "Failed to delete alarm ${_uiState.value.id}", e)
             _uiState.value = _uiState.value.copy(error = getApplication<Application>().getString(R.string.error_alarm_delete, e.message ?: e::class.simpleName ?: "unknown"))
         }
+    }
+
+    /** Persists immediately (this screen has no unsaved-draft state for most fields) and re-arms
+     *  every affected alarm right away, so a skip/override takes effect without waiting for a
+     *  save. [alsoApplyToAlarmIds] gets its own independent copy of the same exception. */
+    fun addException(exception: AlarmExceptionEntity, alsoApplyToAlarmIds: Set<String>) = viewModelScope.launch {
+        exceptionDao.upsert(exception)
+        alsoApplyToAlarmIds.forEach { otherId ->
+            exceptionDao.upsert(exception.copy(id = UUID.randomUUID().toString(), alarmId = otherId))
+        }
+        (setOf(exception.alarmId) + alsoApplyToAlarmIds).forEach { id ->
+            dao.findById(id)?.let { scheduler.schedule(it) }
+        }
+        refreshExceptions()
+    }
+
+    fun deleteException(exception: AlarmExceptionEntity) = viewModelScope.launch {
+        exceptionDao.delete(exception)
+        dao.findById(exception.alarmId)?.let { scheduler.schedule(it) }
+        refreshExceptions()
+    }
+
+    private suspend fun refreshExceptions() {
+        _uiState.value = _uiState.value.copy(
+            exceptions = exceptionDao.getUpcomingForAlarm(_uiState.value.id, LocalDate.now().toEpochDay()),
+        )
     }
 }

@@ -20,6 +20,7 @@ private const val TAG = "AlarmsViewModel"
 class AlarmsViewModel(application: Application) : AndroidViewModel(application) {
     private val db = ClockrDatabase.get(application)
     private val dao = db.alarmDao()
+    private val exceptionDao = db.alarmExceptionDao()
     private val scheduler = AlarmScheduler(application)
 
     val alarms: StateFlow<List<AlarmEntity>> = dao.observeAll()
@@ -62,6 +63,7 @@ class AlarmsViewModel(application: Application) : AndroidViewModel(application) 
         runCatching {
             scheduler.cancel(alarm)
             dao.delete(alarm)
+            exceptionDao.deleteAllForAlarm(alarm.id)
         }.onFailure {
             Log.e(TAG, "Failed to delete alarm ${alarm.id}", it)
             _error.value = getApplication<Application>().getString(R.string.error_alarm_list_delete, it.message ?: it::class.simpleName ?: "unknown")

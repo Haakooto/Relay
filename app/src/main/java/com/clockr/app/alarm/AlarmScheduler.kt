@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import com.clockr.app.MainActivity
 import com.clockr.app.data.AlarmEntity
+import com.clockr.app.data.ClockrDatabase
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -17,8 +18,9 @@ import java.time.ZoneId
  */
 class AlarmScheduler(private val context: Context) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val exceptionDao = ClockrDatabase.get(context).alarmExceptionDao()
 
-    fun schedule(alarm: AlarmEntity) {
+    suspend fun schedule(alarm: AlarmEntity) {
         setAlarmClock(alarm, nextTriggerMillis(alarm))
     }
 
@@ -53,17 +55,42 @@ class AlarmScheduler(private val context: Context) {
         )
     }
 
-    /** Next wall-clock instant this alarm should ring, strictly after now. */
-    private fun nextTriggerMillis(alarm: AlarmEntity): Long {
+    /**
+     * Next wall-clock instant this alarm should ring, strictly after now. Schedule exceptions
+     * (skip or override the fire time for a date range) are looked up here so every caller gets
+     * exception-aware scheduling for free; an alarm with no exception rows produces identical
+     * output to before this existed.
+     */
+    private suspend fun nextTriggerMillis(alarm: AlarmEntity): Long {
+        val exceptions = exceptionDao.getForAlarm(alarm.id)
         val zone = ZoneId.systemDefault()
         val now = LocalDateTime.now(zone)
         var candidate = now.toLocalDate().atTime(alarm.hour, alarm.minute)
         if (!candidate.isAfter(now)) candidate = candidate.plusDays(1)
 
-        if (alarm.isRepeating) {
-            val days = alarm.repeatDaySet()
-            while (candidate.dayOfWeek !in days) candidate = candidate.plusDays(1)
+        while (true) {
+            if (alarm.isRepeating && candidate.dayOfWeek !in alarm.repeatDaySet()) {
+                candidate = candidate.plusDays(1)
+                continue
+            }
+            val epochDay = candidate.toLocalDate().toEpochDay()
+            val exception = exceptions.firstOrNull { epochDay in it.startEpochDay..it.endEpochDay }
+            if (exception != null && !exception.isOverride) {
+                // Skipped day — advance. Bounded even for a one-off alarm: the loop only keeps
+                // advancing while inside this exception's finite date range.
+                candidate = candidate.plusDays(1)
+                continue
+            }
+            val fireTime = if (exception != null) {
+                candidate.toLocalDate().atTime(exception.overrideHour!!, exception.overrideMinute!!)
+            } else {
+                candidate
+            }
+            if (!fireTime.isAfter(now)) {
+                candidate = candidate.plusDays(1)
+                continue
+            }
+            return fireTime.atZone(zone).toInstant().toEpochMilli()
         }
-        return candidate.atZone(zone).toInstant().toEpochMilli()
     }
 }

@@ -123,16 +123,16 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>A status snapshot across every pane, taken after the first real device test pass — not a roadmap, a ledger. Full design detail lives in the <a href="https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d">Clockr Spec</a>.</p>
     <div class="meta">
-      <span>2026-09-14, rev 11</span>
-      <span>50 tracked items</span>
+      <span>2026-09-15, rev 12</span>
+      <span>53 tracked items</span>
       <span>chainlang: 30/30 tests passing</span>
     </div>
 
     <div class="stats">
-      <div class="stat approved"><div class="n">27</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">15</div><div class="l">WIP</div></div>
-      <div class="stat lacking"><div class="n">2</div><div class="l">Lacking</div></div>
-      <div class="stat"><div class="n">3</div><div class="l">Planned</div></div>
+      <div class="stat approved"><div class="n">32</div><div class="l">Approved</div></div>
+      <div class="stat wip"><div class="n">12</div><div class="l">WIP</div></div>
+      <div class="stat lacking"><div class="n">1</div><div class="l">Lacking</div></div>
+      <div class="stat"><div class="n">5</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">2</div><div class="l">Deferred</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
     </div>
@@ -161,14 +161,17 @@
           <tr><td class="feature">Fire → notification → dismiss/snooze</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device</td></tr>
           <tr><td class="feature">Reschedule after reboot</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Boot receiver reschedules every enabled alarm, per-alarm error isolation</td></tr>
           <tr><td class="feature">Continuous ring until dismissed</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">Alarm sound is a one-shot notification-channel sound, not a looping siren — a competing notification (e.g. an incoming text) firing its own sound stops the alarm's from continuing. Known, deliberately low priority.</td></tr>
-          <tr><td class="feature"><strong>Scheduled triggers</strong> — target a Timer/Chain instead of firing itself</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Spec §4.2, moved out of design-only. An alarm can now target a persistent Timer/Chain (config screen: "Fires" → Alarm / Timer or Chain) — firing starts it via the run engine instead of showing the dismiss/snooze notification, reusing its existing Stop/Restart/+1min prompt rather than building a second one. The plain-alarm path is untouched code, not just untouched behavior. Stopwatch as a target is still unbuilt (spec itself leaves its "seed row" mechanism unresolved). Needs on-device test — first time, never run.</td></tr>
+          <tr><td class="feature"><strong>Scheduled triggers</strong> — target a Timer/Chain instead of firing itself</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Spec §4.2. Confirmed working on-device. An alarm can target a persistent Timer/Chain (config screen: "Fires" → Alarm / Timer or Chain) — firing starts it via the run engine instead of showing the dismiss/snooze notification, reusing its existing Stop/Restart/+1min prompt rather than building a second one. The plain-alarm path is untouched code, not just untouched behavior. Stopwatch as a target is still unbuilt (spec itself leaves its "seed row" mechanism unresolved).</td></tr>
+          <tr><td class="feature"><strong>Schedule exceptions</strong> — skip or retime specific dates</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Built this session: an alarm's config screen has a new "Exceptions" section — add a one-off or ranged date exception that either skips the alarm entirely or fires it at a different time that day, with a quick multi-select to apply the same exception to other alarms at once (e.g. the whole vacation week). New <code>alarm_exceptions</code> table (Room migration 3→4), enforced in <code>AlarmScheduler.nextTriggerMillis</code> so an alarm with no exceptions behaves byte-identically to before. Needs first on-device pass — never run.</td></tr>
+          <tr><td class="feature">Heads-up notification before firing (disable next occurrence)</td><td><span class="chip planned">Planned</span></td><td class="note">Idea, not designed: a notification a configurable lead time before a repeating alarm fires (stock-app default is 2h), with a one-tap "disable" that creates a one-off skip exception for just that occurrence — ties directly into schedule exceptions above. Would need its own AlarmManager scheduling (a second per-alarm trigger ahead of the main one), a Settings row for lead time, and a per-alarm on/off toggle. Deferred by request — roadmapped, not built.</td></tr>
+          <tr><td class="feature">Full-screen wake-the-phone alarm UI</td><td><span class="chip planned">Planned</span></td><td class="note">Idea, not designed: replace/supplement the current plain heads-up notification with a full-screen takeover like stock alarm apps (wakes the screen, shows over the lock screen, big dismiss/snooze). Researched: <code>NotificationHelper.showAlarmFiring</code> already sets <code>PRIORITY_HIGH</code>/<code>CATEGORY_ALARM</code> on an <code>IMPORTANCE_HIGH</code> channel but never calls <code>setFullScreenIntent(...)</code>; there's no dedicated alarm-firing Activity anywhere in the app (only <code>MainActivity</code>) and no <code>USE_FULL_SCREEN_INTENT</code> manifest permission. Would need a new lock-screen-capable Activity, that permission, and an API 34+ <code>canUseFullScreenIntent()</code> gate with graceful fallback. Deferred by request — roadmapped, not built.</td></tr>
         </tbody>
       </table></div>
     </section>
 
     <section>
       <h2>Timers &amp; Chains</h2>
-      <p class="sub">A device test surfaced two run-engine bugs — the alert sound firing immediately on start instead of at completion, and a crash on start — both root-caused and fixed this session. Still needs a fresh on-device pass.</p>
+      <p class="sub">A device test surfaced two run-engine bugs — the alert sound firing immediately on start instead of at completion, and a crash on start — both root-caused, fixed, and confirmed on a fresh on-device pass.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
@@ -180,7 +183,7 @@
           <tr><td class="feature">Chain live preview (resolved steps)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
           <tr><td class="feature">Newline as separator + syntax-help dialog</td><td><span class="chip wip">◐ WIP</span></td><td class="note">chainlang side has 30 passing tests; UI use unconfirmed</td></tr>
           <tr><td class="feature">Deleting a block still referenced elsewhere</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed — confirms first, naming which chains reference it</td></tr>
-          <tr><td class="feature"><strong>Run engine</strong> — start, live countdown, chain-step advance, completion prompt</td><td><span class="chip wip">◐ WIP</span></td><td class="note">First on-device pass found: sound firing on start (fixed — split notification channel), a chain crashing on start (fixed — chain resolution was hitting Room's blocking DAO from the main thread; now forced onto <code>Dispatchers.IO</code>), and the in-app countdown card frozen at the step's full duration (fixed — it now ticks from a real end-timestamp instead of a static field). Needs retest.</td></tr>
+          <tr><td class="feature"><strong>Run engine</strong> — start, live countdown, chain-step advance, completion prompt</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Fixes: sound firing on start (split notification channel), a chain crashing on start (chain resolution was hitting Room's blocking DAO from the main thread; now forced onto <code>Dispatchers.IO</code>), and the in-app countdown card frozen at the step's full duration (now ticks from a real end-timestamp).</td></tr>
           <tr><td class="feature">Start button + in-app active-run card</td><td><span class="chip wip">◐ WIP</span></td><td class="note">▶ on each library card; a card at the top of Timers mirrors the notification's controls</td></tr>
           <tr><td class="feature">Per-chain seamless transition sound</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Open design tension (filed, not acted on): the point was independent soundscapes, but a per-<em>Chain</em> setting means varying the cue within one chain's own steps requires splitting it into several small chains just to attach different tones — the real fix is <strong>Per-step transition/sound override</strong> (below, spec §6.3, still Planned), which would let one chain vary its own boundary sound per step instead.</td></tr>
           <tr><td class="feature">Library organization — headers, drag-to-reorder</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Headers reorder via up/down buttons (by design, not drag); blocks freely drag under any header.</td></tr>
@@ -197,7 +200,7 @@
         <tbody>
           <tr><td class="feature">Multiple concurrent, pause/resume/lap/restart-to-t₀</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
           <tr><td class="feature">Rename</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
-          <tr><td class="feature">Lap delta + cumulative display</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was Approved, downgraded — user found the first lap's delta included the stopwatch's starting offset (t0) instead of measuring from it, e.g. starting at 1m and lapping at +5s showed 1:05 instead of 0:05. Fixed. Needs retest.</td></tr>
+          <tr><td class="feature">Lap delta + cumulative display</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Was briefly downgraded — the first lap's delta included the stopwatch's starting offset (t0) instead of measuring from it, e.g. starting at 1m and lapping at +5s showed 1:05 instead of 0:05. Fixed and retested.</td></tr>
           <tr><td class="feature">Editing recorded lap/total times</td><td><span class="chip declined">✕ Declined</span></td><td class="note">Agreed: undermines the point of a stopwatch as a factual record</td></tr>
         </tbody>
       </table></div>
@@ -208,7 +211,7 @@
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Live ticking digital face</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed this session — was hardcoded to 24h regardless of Settings; now reads the setting. Needs retest.</td></tr>
+          <tr><td class="feature">Live ticking digital face</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Was hardcoded to 24h regardless of Settings; now reads the setting.</td></tr>
           <tr><td class="feature">Visual customization (color/font/analogue)</td><td><span class="chip planned">Planned</span></td><td class="note">Spec §07's axes, unbuilt</td></tr>
           <tr><td class="feature">World clock / multiple timezones</td><td><span class="chip deferred">Deferred</span></td><td class="note">Your call</td></tr>
         </tbody>
@@ -235,7 +238,7 @@
           <tr><td class="feature">24h clock format</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
           <tr><td class="feature">First day of week</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
           <tr><td class="feature">Language (dropdown, locale only)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was buggy (flicker/dropped letters) — root-caused and fixed this session</td></tr>
-          <tr><td class="feature">Full i18n — translated UI strings</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Every hardcoded UI string moved to <code>strings.xml</code> — screens, notifications/channels, and ViewModel-surfaced error messages — with a full English+Norwegian (nb) translation, verified with no <code>MissingTranslation</code> lint errors. Known scope boundary: chainlang's own exception messages (duration/chain-syntax parse errors) stay English — that module has no Android dependency by design, so localizing them needs chainlang to expose error codes for the app to map, not a quick fix. Needs on-device confirmation switching to Norsk actually renders right.</td></tr>
+          <tr><td class="feature">Full i18n — translated UI strings</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device switching to Norsk renders correctly. Every hardcoded UI string moved to <code>strings.xml</code> — screens, notifications/channels, and ViewModel-surfaced error messages — with a full English+Norwegian (nb) translation, verified with no <code>MissingTranslation</code> lint errors. Known scope boundary: chainlang's own exception messages (duration/chain-syntax parse errors) stay English — that module has no Android dependency by design, so localizing them needs chainlang to expose error codes for the app to map, not a quick fix.</td></tr>
           <tr><td class="feature">Default snooze minutes</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
           <tr><td class="feature">Haptics</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
           <tr><td class="feature">Max execution plan size</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Wired into the run engine's safety limit</td></tr>
@@ -265,7 +268,7 @@
           <tr><td class="feature">Notification permission flow</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Requested correctly at startup</td></tr>
           <tr><td class="feature">Exact-alarm permission</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Was missing entirely, now requested with a rationale screen; confirmed alarms fire on-device</td></tr>
           <tr><td class="feature">Crash → graceful error handling</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed this exact round: the permission error surfaced as a clear message, not a crash</td></tr>
-          <tr><td class="feature">Bottom-nav pane switching</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">User reports sometimes landing on the wrong pane after tapping a nav icon. Code matches the standard Navigation-Compose bottom-bar pattern with nothing obviously wrong; couldn't reproduce or root-cause without a device. Needs exact repro steps (which pane → which pane, single/rapid taps, does it follow visiting a detail screen like block/alarm config first).</td></tr>
+          <tr><td class="feature">Bottom-nav pane switching</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Root-caused and fixed this session: switching Language triggers an implicit Activity recreate (no <code>configChanges</code> declared), and <code>MainActivity</code>'s <code>LaunchedEffect(openClock)</code> re-read the retained launch <code>Intent</code>'s <code>EXTRA_OPEN_CLOCK</code> extra on every recreate, force-navigating to Clock whenever the app had ever been opened from the widget — a general defect (any recreate: rotation, theme, locale). Now consumed once via <code>rememberSaveable</code>. Needs on-device retest: open a non-Clock pane, change Language, confirm it stays put.</td></tr>
           <tr><td class="feature">App version display</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
         </tbody>
       </table></div>
