@@ -1,6 +1,7 @@
 package com.clockr.app.domain
 
-/** Spec §03 RunnableBlock's two concrete shapes. */
+/** Spec §03 RunnableBlock's two concrete shapes. CHAIN is shown to the user as "Relay" (v0.5
+ *  rename, UI-only — see CLAUDE.md's naming note). */
 enum class BlockKind { TIMER, CHAIN }
 
 /** Spec §6.2 — governs advancing between a Chain's own steps. */

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clockr Spec</title>
+<title>Relay Spec</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   :root{
@@ -211,7 +211,7 @@
 
 <div class="shell cover">
   <div class="cover-top">
-    <div class="wordmark"><span class="dot"></span>CLOCKR</div>
+    <div class="wordmark"><span class="dot"></span>RELAY</div>
     <div class="meta-row">
       <span>v0.5 — scheduling &amp; modularity</span>
       <span>2026-09-08</span>
@@ -219,8 +219,8 @@
     </div>
   </div>
   <h1>A clock app worth keeping.</h1>
-  <p class="tagline">Full technical specification for a custom Android alarms / timers / stopwatch app — built because the stock one is ugly and the timer can't chain.</p>
-  <div class="cover-note">Rev 5: design-only pass, nothing built yet — an alarm generalizes to a <strong>scheduled trigger</strong> with a target (anonymous / Timer-or-Chain / Stopwatch), chains get an optional per-step transition override, and the completion UI (Stop/Restart/+1min vs. Dismiss/Snooze) is meant to be one shared, pluggable module. Flags real rework needed in already-built code — see §04.2 and §11.</div>
+  <p class="tagline">Full technical specification for a custom Android alarms / timers / stopwatch app — built because the stock one is ugly and the timer can't relay.</p>
+  <div class="cover-note">Rev 5: design-only pass, nothing built yet — an alarm generalizes to a <strong>scheduled trigger</strong> with a target (anonymous / Timer-or-Relay / Stopwatch), relays get an optional per-step transition override, and the completion UI (Stop/Restart/+1min vs. Dismiss/Snooze) is meant to be one shared, pluggable module. Flags real rework needed in already-built code — see §04.2 and §11.</div>
 </div>
 
 <div class="shell layout">
@@ -232,7 +232,7 @@
       <li><a href="#data">Data model</a></li>
       <li><a href="#alarms">Alarms</a></li>
       <li><a href="#stopwatches">Stopwatches</a></li>
-      <li><a href="#timers">Timers &amp; chains</a></li>
+      <li><a href="#timers">Timers &amp; relays</a></li>
       <li><a href="#widgets">Widgets</a></li>
       <li><a href="#settings">Settings</a></li>
       <li><a href="#reliability">Permissions &amp; reliability</a></li>
@@ -256,7 +256,7 @@
             <tr><td>Widgets</td><td><code>Glance</code></td><td>Compose-based widget toolkit — same design tokens as the app</td></tr>
             <tr><td>Persistence</td><td><code>Room</code></td><td>Local SQLite ORM; fully local, no sync layer needed</td></tr>
             <tr><td>Alarms</td><td><code>AlarmManager</code> (exact)</td><td>Only reliable way to fire at a precise wall-clock time</td></tr>
-            <tr><td>Timers/chains</td><td>Foreground <code>Service</code> + <code>WorkManager</code> fallback</td><td>Survives Doze; shows a live notification with controls</td></tr>
+            <tr><td>Timers/relays</td><td>Foreground <code>Service</code> + <code>WorkManager</code> fallback</td><td>Survives Doze; shows a live notification with controls</td></tr>
             <tr><td>Alarm sound picker</td><td><code>RingtoneManager</code> (<code>TYPE_ALARM</code>)</td><td>Reuses the system alarm-sound picker UI for free</td></tr>
             <tr><td>Min SDK</td><td>33 (Android 13)</td><td>Single notification-permission code path; no legacy branches needed on your hardware</td></tr>
             <tr><td>Target SDK</td><td>Latest stable (36)</td><td>Current Play requirements</td></tr>
@@ -283,7 +283,7 @@
         </ul></div>
         <div class="card"><h4>Timers</h4><ul>
           <li><span class="fname">Active runs front and center</span></li>
-          <li><span class="fname">Library of saved Timer / Chain blocks below</span></li>
+          <li><span class="fname">Library of saved Timer / Relay blocks below</span></li>
           <li><span class="fname">Quick-build + advanced editor</span></li>
         </ul></div>
         <div class="card"><h4>Stopwatch</h4><ul>
@@ -310,7 +310,7 @@
     <section id="data">
       <span class="eyebrow">03 — Persistence</span>
       <h2>Data model</h2>
-      <p class="lede">Room entities. Everything local, nothing synced. <code>TimerDef</code> and <code>ChainDef</code> both implement a common <strong>RunnableBlock</strong> shape — id, label, persistent flag, own sound profile, computed total duration — which is what lets either one be started standalone <em>or</em> referenced from inside another chain.</p>
+      <p class="lede">Room entities. Everything local, nothing synced. <code>TimerDef</code> and <code>ChainDef</code> both implement a common <strong>RunnableBlock</strong> shape — id, label, persistent flag, own sound profile, computed total duration — which is what lets either one be started standalone <em>or</em> referenced from inside another relay.</p>
       <div class="grid cols-3">
         <div class="card"><h4>Alarm</h4><ul>
           <li><span class="fname">id</span><span class="ftype">UUID</span></li>
@@ -332,7 +332,7 @@
           <li><span class="fname">duration</span><span class="ftype">DurationExpr</span></li>
           <li><span class="fname">soundProfileId</span><span class="ftype">FK</span></li>
           <li><span class="fname">persistent</span><span class="ftype">Boolean</span></li>
-        </ul><p class="note">Referenceable by label from any Chain once persistent.</p></div>
+        </ul><p class="note">Referenceable by label from any Relay once persistent.</p></div>
         <div class="card"><h4>ChainDef <span style="opacity:.6;font-weight:400;">— composite</span></h4><ul>
           <li><span class="fname">id</span><span class="ftype">UUID</span></li>
           <li><span class="fname">label</span><span class="ftype">String</span></li>
@@ -344,7 +344,7 @@
           <li><span class="fname">totalDuration</span><span class="ftype">computed, cached</span></li>
         </ul></div>
         <div class="card"><h4>ChainElement <span style="opacity:.6;font-weight:400;">— sealed</span></h4><ul>
-          <li><span class="fname">Anonymous(duration, note?)</span><span class="ftype">inherits chain default sound</span></li>
+          <li><span class="fname">Anonymous(duration, note?)</span><span class="ftype">inherits relay default sound</span></li>
           <li><span class="fname">FunctionGroup(fn, of)</span><span class="ftype">repeat / range / arange</span></li>
           <li><span class="fname">Reference(blockId)</span><span class="ftype">→ TimerDef or ChainDef</span></li>
         </ul><p class="note"><code>note</code> is a display-only tag on an Anonymous element (e.g. "lunch") — not a reusable label, doesn't create a block.</p></div>
@@ -404,11 +404,11 @@
       </ul>
 
       <h3>4.2 — Generalizing: scheduled triggers <span style="opacity:.6;font-weight:400;">(design-only, not built)</span></h3>
-      <p class="lede">An alarm is a special case of a more general primitive: <strong>a scheduled trigger</strong> — a time, a repeat pattern, and a target that fires. A zero-duration Timer <em>is</em> today's alarm; the same time+repeat machinery can just as well start a Timer, a Chain, or a Stopwatch. Dropping the Alarms pane in favor of "just schedule a zero-second timer" would be a worse product for purely human reasons — people think in alarms — so the pane stays, but what it can point at grows.</p>
+      <p class="lede">An alarm is a special case of a more general primitive: <strong>a scheduled trigger</strong> — a time, a repeat pattern, and a target that fires. A zero-duration Timer <em>is</em> today's alarm; the same time+repeat machinery can just as well start a Timer, a Relay, or a Stopwatch. Dropping the Alarms pane in favor of "just schedule a zero-second timer" would be a worse product for purely human reasons — people think in alarms — so the pane stays, but what it can point at grows.</p>
       <ul>
-        <li>The Alarms pane gets <strong>three sub-panes</strong>: <strong>Anonymous</strong> (today's alarm, unchanged), <strong>Timer/Chain</strong> (fires by starting a persistent Timer or Chain block), <strong>Stopwatch</strong> (fires by starting a stopwatch, optionally with a name and t₀).</li>
+        <li>The Alarms pane gets <strong>three sub-panes</strong>: <strong>Anonymous</strong> (today's alarm, unchanged), <strong>Timer/Relay</strong> (fires by starting a persistent Timer or Relay block), <strong>Stopwatch</strong> (fires by starting a stopwatch, optionally with a name and t₀).</li>
         <li>The scheduling config — time, repeat days, delete-after, snooze — is <strong>shared</strong> across all three; only the target and what "firing" means differs.</li>
-        <li>A repeating <strong>Timer/Chain</strong> trigger is the natural way to get "run my Workday chain every weekday at 8am" — the payoff for building this at all.</li>
+        <li>A repeating <strong>Timer/Relay</strong> trigger is the natural way to get "run my Workday relay every weekday at 8am" — the payoff for building this at all.</li>
         <li>Snooze generalizes cleanly to "delay the trigger" regardless of target — no new concept needed.</li>
         <li><strong>Stopwatch</strong> triggers are the one wrinkle: stopwatches are deliberately in-memory-only (spec §05), but "start at T" only needs one small persisted seed (start timestamp + name + t₀) that the Stopwatch pane reads back on next open to reconstruct "this has been running since T" — it doesn't mean abandoning the in-memory design for manually-started stopwatches.</li>
         <li>Scheduling a <em>lap</em> on an already-running stopwatch at a future time (also raised alongside this) is a separate, smaller feature — a per-stopwatch mini-scheduler, not a target type under Alarms. Tracked, not designed yet.</li>
@@ -441,30 +441,30 @@
 
     <section id="timers">
       <span class="eyebrow">06 — The hard part · reworked in v0.2</span>
-      <h2>Timers &amp; chains</h2>
-      <p class="lede">The core shift: a Timer or a Chain is no longer a one-shot expression that gets flattened and forgotten. Either one can be a <strong>named, persistent block</strong> that other chains reference by label — define "Work" once, reuse it everywhere, and editing it later ripples everywhere it's used. This already matches the "atom" framing from the modularity discussion: a Timer is the atom (labeled, startable, chainable), a Chain is atoms plus ordering plus per-transition metadata, and neither cares who's driving it — a person tapping Start, or (once §4.2 lands) a scheduled trigger.</p>
+      <h2>Timers &amp; relays</h2>
+      <p class="lede">The core shift: a Timer or a Relay is no longer a one-shot expression that gets flattened and forgotten. Either one can be a <strong>named, persistent block</strong> that other relays reference by label — define "Work" once, reuse it everywhere, and editing it later ripples everywhere it's used. This already matches the "atom" framing from the modularity discussion: a Timer is the atom (labeled, startable, relayable), a Relay is atoms plus ordering plus per-transition metadata, and neither cares who's driving it — a person tapping Start, or (once §4.2 lands) a scheduled trigger.</p>
 
       <h3>6.1 — Library &amp; config screen</h3>
-      <p>The Timers pane is a library list: each card shows only <strong>label, kind (Timer/Chain), and total duration</strong> — no content or sound details cluttering the list. Tapping a card pushes a full-screen <strong>config screen</strong> onto the nav stack (not a modal or bottom sheet), the same screen shape for both Timer and Chain. A Timer's config is short (label, duration, sound, persistent) and a Chain's is long (adds transition mode, default sound, overrides, content) — deliberately one pattern for both rather than two, even though it's more screen than a bare Timer strictly needs.</p>
+      <p>The Timers pane is a library list: each card shows only <strong>label, kind (Timer/Relay), and total duration</strong> — no content or sound details cluttering the list. Tapping a card pushes a full-screen <strong>config screen</strong> onto the nav stack (not a modal or bottom sheet), the same screen shape for both Timer and Relay. A Timer's config is short (label, duration, sound, persistent) and a Relay's is long (adds transition mode, default sound, overrides, content) — deliberately one pattern for both rather than two, even though it's more screen than a bare Timer strictly needs.</p>
 
       <h3>6.2 — Timer (leaf block)</h3>
       <p>Configuring a Timer means setting: a <strong>duration</strong>, a <strong>label</strong>, a <strong>sound profile</strong> (tune + vibration), and whether it's <strong>persistent</strong> (off by default).</p>
       <ul>
         <li>Creating a Timer always starts it immediately — persistent only decides whether the definition is <em>kept</em> afterward.</li>
         <li><strong>Not persistent:</strong> starts immediately; if you choose "stop" when it ends, it's completely gone, no trace.</li>
-        <li><strong>Persistent:</strong> saved to the library <em>and</em> started immediately; "stop" just ends that run — the definition stays, ready to start again or be referenced by a chain.</li>
+        <li><strong>Persistent:</strong> saved to the library <em>and</em> started immediately; "stop" just ends that run — the definition stays, ready to start again or be referenced by a relay.</li>
       </ul>
 
-      <h3>6.3 — Chain (composite block)</h3>
-      <p>Configuring a Chain means setting: a <strong>label</strong>, <strong>persistent</strong>, a <strong>default sound profile</strong> (for anonymous content), optional <strong>sound-profile overrides</strong> (per referenced block, scoped to this chain only), a <strong>transition mode</strong>, and the <strong>content</strong> itself.</p>
+      <h3>6.3 — Relay (composite block)</h3>
+      <p>Configuring a Relay means setting: a <strong>label</strong>, <strong>persistent</strong>, a <strong>default sound profile</strong> (for anonymous content), optional <strong>sound-profile overrides</strong> (per referenced block, scoped to this relay only), a <strong>transition mode</strong>, and the <strong>content</strong> itself.</p>
       <p>Content is an ordered list where each element is one of:</p>
       <ul>
-        <li><strong>Anonymous</strong> — a bare duration (<code>3</code>, <code>30m</code>) with no identity of its own. Inherits the chain's default sound profile. May carry a display-only note ("lunch") that's just a label in the UI, not a reusable block.</li>
+        <li><strong>Anonymous</strong> — a bare duration (<code>3</code>, <code>30m</code>) with no identity of its own. Inherits the relay's default sound profile. May carry a display-only note ("lunch") that's just a label in the UI, not a reusable block.</li>
         <li><strong>A function of anonymous timers</strong> — <code>range</code> / <code>arange</code> / <code>repeat</code>, exactly as before, expanding to more Anonymous elements (or to a repeated group of any element, including references).</li>
-        <li><strong>A reference</strong> — the label of an existing persistent Timer or Chain. Its duration and sound profile are looked up <em>live</em> from the source block, not copied in — so re-tuning "Work" updates every chain that references it, automatically. A reference keeps the source's own sound profile unless this chain explicitly overrides it.</li>
+        <li><strong>A reference</strong> — the label of an existing persistent Timer or Relay. Its duration and sound profile are looked up <em>live</em> from the source block, not copied in — so re-tuning "Work" updates every relay that references it, automatically. A reference keeps the source's own sound profile unless this relay explicitly overrides it.</li>
       </ul>
-      <p>Every Chain also declares its <strong>transition mode</strong>: require an interaction to advance between steps, or sound the alert and continue immediately (seamless). This is the chain's own default — it governs advancing between its steps regardless of what those steps are.</p>
-      <p class="callout">Per-step override, not per-step-by-default: rather than every step pair carrying its own transition config (real flexibility — "seamless into Break, but confirm before Work starts back up" — at the cost of configuring N−1 transitions instead of one), the recommended mechanism reuses the <code>soundOverrides</code> pattern that already exists for exactly this shape of problem. Extend it from <code>Map&lt;blockId, soundProfileId&gt;</code> to <code>Map&lt;blockId, StepOverride&gt;</code> where <code>StepOverride</code> carries an optional sound profile <em>and</em> an optional transition-mode override for the transition immediately following that step. Unlisted steps keep the chain's default. Not built — this is the resolution to the "does every level need its own transition metadata" question raised alongside §4.2.</p>
+      <p>Every Relay also declares its <strong>transition mode</strong>: require an interaction to advance between steps, or sound the alert and continue immediately (seamless). This is the relay's own default — it governs advancing between its steps regardless of what those steps are.</p>
+      <p class="callout">Per-step override, not per-step-by-default: rather than every step pair carrying its own transition config (real flexibility — "seamless into Break, but confirm before Work starts back up" — at the cost of configuring N−1 transitions instead of one), the recommended mechanism reuses the <code>soundOverrides</code> pattern that already exists for exactly this shape of problem. Extend it from <code>Map&lt;blockId, soundProfileId&gt;</code> to <code>Map&lt;blockId, StepOverride&gt;</code> where <code>StepOverride</code> carries an optional sound profile <em>and</em> an optional transition-mode override for the transition immediately following that step. Unlisted steps keep the relay's default. Not built — this is the resolution to the "does every level need its own transition metadata" question raised alongside §4.2.</p>
 
       <h3>6.4 — Expression grammar</h3>
       <div class="panel"><pre style="margin:0;white-space:pre-wrap;">chain_content  = "(" element ("," element)* ")"
@@ -482,7 +482,7 @@ int_expr       = int_term (("+" | "-") int_term)*
 int_term       = NUMBER | time_func | <span class="c2">"RANDOM"</span> "(" int_expr "," int_expr ")" | "(" int_expr ")"
 time_func      = ("MINUTE" | "HOUR" | "SECOND") "(" time_expr ")"
 time_expr      = "NOW" (("+" | "-") literal_duration)?</pre></div>
-      <p class="callout">Evaluation is still <strong>eager for durations</strong> (<code>NOW</code> resolves once, at start time) but <strong>lazy for references</strong>: a reference's duration and sound are read from the live source block each time it matters (display, start, total-duration calc) — that's what makes "editing Work updates every chain" true.</p>
+      <p class="callout">Evaluation is still <strong>eager for durations</strong> (<code>NOW</code> resolves once, at start time) but <strong>lazy for references</strong>: a reference's duration and sound are read from the live source block each time it matters (display, start, total-duration calc) — that's what makes "editing Work updates every relay" true.</p>
 
       <h3>6.5 — Worked example</h3>
       <div class="tablewrap">
@@ -512,7 +512,7 @@ time_expr      = "NOW" (("+" | "-") literal_duration)?</pre></div>
       <p class="mono" style="color:var(--ink-soft);font-size:.85rem;">Workday total: 5h 55m — recomputed live; retuning Work's 25m changes this number without touching Workday's own definition.</p>
 
       <h3>6.6 — Safety limits</h3>
-      <p class="lede">A flat "100 links" cap stops making sense once chains legitimately run for hours across dozens of referenced steps. It's replaced by graph-shape limits instead of a raw count:</p>
+      <p class="lede">A flat "100 links" cap stops making sense once relays legitimately run for hours across dozens of referenced steps. It's replaced by graph-shape limits instead of a raw count:</p>
       <div class="tablewrap">
         <table>
           <thead><tr><th>Limit</th><th>Default</th><th>Configurable</th></tr></thead>
@@ -528,12 +528,12 @@ time_expr      = "NOW" (("+" | "-") literal_duration)?</pre></div>
       <p class="callout danger"><strong>Cycle detection</strong> is mandatory, not optional: saving a reference that would make a block contain itself — directly (Work → Work) or indirectly (Workday → Session → Workday) — is rejected at save time, with the cycle path shown in the error. Without this, total-duration can't even be computed. Plan size is still checked symbolically before expansion, the same nesting-bomb hedge as before, just against the new, bigger cap.</p>
 
       <h3>6.7 — On completion</h3>
-      <p>Whenever a run reaches a terminal point — a standalone Timer finishes, or the last step of a Chain finishes, with nothing to auto-advance to — three options appear: <strong>Stop</strong>, <strong>Restart</strong>, <strong>+1 minute</strong>, applied to whichever timer just hit zero.</p>
+      <p>Whenever a run reaches a terminal point — a standalone Timer finishes, or the last step of a Relay finishes, with nothing to auto-advance to — three options appear: <strong>Stop</strong>, <strong>Restart</strong>, <strong>+1 minute</strong>, applied to whichever timer just hit zero.</p>
       <ul>
-        <li>Mid-chain, between two steps, this prompt does <em>not</em> appear — the chain's transition mode (interaction-required / seamless) governs advancing instead.</li>
+        <li>Mid-relay, between two steps, this prompt does <em>not</em> appear — the relay's transition mode (interaction-required / seamless) governs advancing instead.</li>
         <li><strong>Stop</strong> on a non-persistent run discards it entirely. <strong>Stop</strong> on a persistent run just ends the active session; the definition stays in the library.</li>
-        <li><strong>Restart</strong> re-runs the whole thing from the top when the terminal step was the end of a chain — back to the chain's first step, not just its last leaf. For a standalone Timer (no chain involved) it just restarts that timer.</li>
-        <li><strong>+1 minute</strong> extends only the terminal step in place, whether standalone or the last leaf of a chain. Neither option changes the saved definition.</li>
+        <li><strong>Restart</strong> re-runs the whole thing from the top when the terminal step was the end of a relay — back to the relay's first step, not just its last leaf. For a standalone Timer (no relay involved) it just restarts that timer.</li>
+        <li><strong>+1 minute</strong> extends only the terminal step in place, whether standalone or the last leaf of a relay. Neither option changes the saved definition.</li>
       </ul>
     </section>
 
@@ -584,7 +584,7 @@ time_expr      = "NOW" (("+" | "-") literal_duration)?</pre></div>
           <li><span class="fname">Default alarm/timer sound</span><span class="ftype">Uri</span></li>
           <li><span class="fname">Haptics</span><span class="ftype">on / off</span></li>
           <li><span class="fname">Max execution-plan size</span><span class="ftype">Int, ≤1000</span></li>
-          <li><span class="fname">Long-chain warning threshold</span><span class="ftype">Duration</span></li>
+          <li><span class="fname">Long-relay warning threshold</span><span class="ftype">Duration</span></li>
         </ul></div>
       </div>
     </section>
@@ -600,8 +600,8 @@ time_expr      = "NOW" (("+" | "-") literal_duration)?</pre></div>
       <ul>
         <li><code>SCHEDULE_EXACT_ALARM</code> — required at 33+ for alarms to fire on time; requested with a plain-language rationale screen, not buried.</li>
         <li><code>POST_NOTIFICATIONS</code> — requested once at first alarm/timer creation.</li>
-        <li>Foreground service + battery-optimization exemption prompt — needed once, so a seamless timer chain survives Doze and isn't killed mid-chain.</li>
-        <li>Dedicated notification channels per surface (alarms, timers, chain-transitions) so the user can tune importance/sound independently in system settings.</li>
+        <li>Foreground service + battery-optimization exemption prompt — needed once, so a seamless timer relay survives Doze and isn't killed mid-relay.</li>
+        <li>Dedicated notification channels per surface (alarms, timers, relay-transitions) so the user can tune importance/sound independently in system settings.</li>
       </ul>
     </section>
 
@@ -633,18 +633,18 @@ time_expr      = "NOW" (("+" | "-") literal_duration)?</pre></div>
       <span class="eyebrow">11 — Where to go from here</span>
       <h2>Open items &amp; next steps</h2>
       <ul>
-        <li><strong>Name:</strong> Clockr — settled.</li>
+        <li><strong>Name:</strong> Relay (renamed from Clockr, v0.5) — settled.</li>
         <li><strong>Done:</strong> Room + chainlang data layer, Timers/Alarms/Stopwatch/Clock/Settings wired to real state, a first Glance clock widget. See the repo for what's actually built vs. this document's design-ahead sections.</li>
-        <li><strong>Next, and the biggest remaining gap:</strong> the Timer/Chain <em>run</em> engine doesn't exist yet — creating and editing definitions works, but there's no foreground service, live countdown, chain-step advancement, or the §6.7 completion prompt. Nothing in §4.2's scheduled-triggers idea is buildable until this exists, since there's nothing yet to schedule <em>into</em>.</li>
-        <li><strong>Build the completion/firing UI as one shared, pluggable module from the start</strong> — not an alarm-only screen generalized later. One controller, parameterized by which actions are valid for the context: Alarm firing gets Dismiss/Snooze; a Timer/Chain run finishing gets Stop/Restart/+1min (spec §6.7). Getting this right now avoids reconciling two divergent implementations afterward.</li>
+        <li><strong>Next, and the biggest remaining gap:</strong> the Timer/Relay <em>run</em> engine doesn't exist yet — creating and editing definitions works, but there's no foreground service, live countdown, relay-step advancement, or the §6.7 completion prompt. Nothing in §4.2's scheduled-triggers idea is buildable until this exists, since there's nothing yet to schedule <em>into</em>.</li>
+        <li><strong>Build the completion/firing UI as one shared, pluggable module from the start</strong> — not an alarm-only screen generalized later. One controller, parameterized by which actions are valid for the context: Alarm firing gets Dismiss/Snooze; a Timer/Relay run finishing gets Stop/Restart/+1min (spec §6.7). Getting this right now avoids reconciling two divergent implementations afterward.</li>
         <li><strong>Known refactor debt once §4.2 is adopted:</strong> <code>AlarmEntity</code>, <code>AlarmReceiver</code>, and <code>NotificationHelper</code> as built are alarm-specific (hard-wired dismiss/snooze, <code>oneOffAfterFire</code>/<code>done</code> baked into the entity) rather than shaped around a generic scheduled-trigger + pluggable target. <code>AlarmScheduler</code>'s actual time/repeat math, by contrast, is already target-agnostic and should carry over largely as-is.</li>
-        <li>Still open: exact wording/flow for the sound/transition-override UI on a Chain (picking which step to override, per chain); final default for the execution-plan-size cap; the Stopwatch-target "seed row" mechanism (§4.2).</li>
+        <li>Still open: exact wording/flow for the sound/transition-override UI on a Relay (picking which step to override, per relay); final default for the execution-plan-size cap; the Stopwatch-target "seed row" mechanism (§4.2).</li>
       </ul>
     </section>
 
   </main>
 </div>
 
-<footer class="doc"><div class="shell">Clockr — technical spec v0.5 · living document, expect revisions as screens get built</div></footer>
+<footer class="doc"><div class="shell">Relay — technical spec v0.5 · living document, expect revisions as screens get built</div></footer>
 </body>
 </html>

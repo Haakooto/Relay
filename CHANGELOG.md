@@ -5,6 +5,14 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v0.5 — 2026-09-15
+
+- Renamed the app from Clockr to Relay: new launcher icon (adaptive, a two-clock-face mark), new
+  app name, and every on-screen mention of "Chain" (the Timer/Chain block kind) now reads "Relay"
+  — "Timer or Relay", "New relay", "Writing a relay", and so on. This is a user-facing rename
+  only: the database, the `chainlang` module, and internal Kotlin class names are unchanged, so
+  existing installs and data are unaffected.
+
 ## v0.4 — 2026-09-15
 
 - Alarms can now have schedule exceptions: skip a single day or a whole date range (or ring at a

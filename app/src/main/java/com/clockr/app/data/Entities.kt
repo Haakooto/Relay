@@ -46,6 +46,8 @@ data class TimerDefEntity(
  *  different chains sound different at their own seamless boundaries. */
 enum class TransitionBeepTone { BEEP, DOUBLE_BEEP, CHIME, PIP, SILENT }
 
+/** Shown to the user as "Relay" (v0.5 rename, UI-only — see CLAUDE.md's naming note); table/class
+ *  names kept as "chain" deliberately, no schema/code rename. */
 @Entity(tableName = "chain_defs")
 data class ChainDefEntity(
     @PrimaryKey val id: String,

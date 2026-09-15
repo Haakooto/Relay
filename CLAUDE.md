@@ -1,7 +1,16 @@
-# Clockr
+# Relay
 
-Personal Android app: alarms, chainable timers, stopwatch, clock, home-screen widget. Built
+Personal Android app: alarms, relayable timers, stopwatch, clock, home-screen widget. Built
 because the stock alarm/timer app is ugly and can't chain timers together.
+
+> **Naming note (v0.5):** the app was renamed Clockr → Relay, user-facing only. In-app strings say
+> "Relay"; the code, database, and the standalone `chainlang/` module still say "Chain"/"chain"
+> throughout (`ChainDefEntity`, `ChainDefDao`, `BlockKind.CHAIN`, the `chain_defs` table,
+> `ClockrDatabase`, `ClockrTheme`, `applicationId "com.clockr.app"`, etc.) — these are the same
+> thing as what the UI calls a "Relay." Deliberately not renamed internally: no user-visible
+> benefit, and renaming the DB table or the `chainlang` module's own package/AST types would be a
+> much larger, riskier change for zero functional gain. When working in this codebase, "chain" and
+> "relay" refer to the same concept.
 
 ## Docs
 
@@ -19,7 +28,8 @@ because the stock alarm/timer app is ugly and can't chain timers together.
 - Kotlin + Jetpack Compose (Material 3), Room (persistence), DataStore (settings), Glance
   (home-screen widget), AlarmManager (exact alarms).
 - `app/` — the Android app. `chainlang/` — standalone Kotlin/JVM parser+evaluator for the
-  timer-chain DSL, no Android dependency (`./gradlew :chainlang:test`, currently 30/30 passing).
+  timer-relay DSL (module/package name kept as "chainlang" internally, see the naming note
+  above), no Android dependency (`./gradlew :chainlang:test`, currently 30/30 passing).
 - `minSdk = 33` deliberately — single code path, no legacy branches.
 
 ## Versioning

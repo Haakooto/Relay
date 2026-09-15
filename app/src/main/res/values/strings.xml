@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Clockr</string>
+    <string name="app_name" translatable="false">Relay</string>
 
     <!-- Shared actions, reused across screens/dialogs -->
     <string name="action_save">Save</string>
@@ -16,9 +16,9 @@
     <!-- Timers pane -->
     <string name="timers_new_block_desc">New block</string>
     <string name="timers_new_timer">New timer</string>
-    <string name="timers_new_chain">New chain</string>
+    <string name="timers_new_chain">New relay</string>
     <string name="timers_new_header">New header</string>
-    <string name="timers_empty">No timers or chains yet — tap + to add one</string>
+    <string name="timers_empty">No timers or relays yet — tap + to add one</string>
     <string name="timers_library_title">Library</string>
     <string name="timers_new_header_dialog_title">New header</string>
     <string name="timers_rename_header_dialog_title">Rename header</string>
@@ -27,10 +27,10 @@
     <string name="timers_header_rename_desc">Rename header</string>
     <string name="timers_header_delete_desc">Delete header</string>
     <string name="timers_block_summary">%1$s · %2$s</string>
-    <string name="block_kind_chain">Chain</string>
+    <string name="block_kind_chain">Relay</string>
     <string name="block_kind_timer">Timer</string>
 
-    <!-- Timer/Chain run — the active-run card and its notification -->
+    <!-- Timer/Relay run — the active-run card and its notification -->
     <string name="run_step_fallback">Step %1$d</string>
     <string name="run_step_with_count">%1$s (%2$d/%3$d)</string>
     <string name="run_awaiting_interaction">Done — waiting for you</string>
@@ -83,10 +83,10 @@
     <string name="alarm_exception_apply_to_others_title">Also apply to</string>
     <string name="alarm_fires_title">Fires</string>
     <string name="alarm_fires_alarm_chip">Alarm</string>
-    <string name="alarm_fires_target_chip">Timer or Chain</string>
-    <string name="alarm_select_target">Select a Timer or Chain</string>
+    <string name="alarm_fires_target_chip">Timer or Relay</string>
+    <string name="alarm_select_target">Select a Timer or Relay</string>
     <string name="alarm_target_option_format">%1$s (%2$s)</string>
-    <string name="alarm_target_note">Uses that Timer/Chain\'s own sound and Stop/Restart/+1min prompt — sound and snooze below don\'t apply.</string>
+    <string name="alarm_target_note">Uses that Timer/Relay\'s own sound and Stop/Restart/+1min prompt — sound and snooze below don\'t apply.</string>
     <string name="alarm_sound_label">Sound</string>
     <string name="alarm_snooze_minutes_label">Snooze length (minutes)</string>
     <string name="alarm_max_snoozes_label">Max snoozes (blank = unlimited)</string>
@@ -94,14 +94,14 @@
     <!-- Shared sound/tone picker -->
     <string name="sound_default">Default</string>
 
-    <!-- Seamless-transition beep options (per-Chain) -->
+    <!-- Seamless-transition beep options (per-Relay) -->
     <string name="beep_tone_beep">Beep</string>
     <string name="beep_tone_double_beep">Double beep</string>
     <string name="beep_tone_chime">Chime</string>
     <string name="beep_tone_pip">Pip</string>
     <string name="beep_tone_silent">Silent</string>
 
-    <!-- Timer/Chain config screen -->
+    <!-- Timer/Relay config screen -->
     <string name="block_config_untitled">Untitled</string>
     <string name="block_config_label_required">Label (required)</string>
     <string name="block_config_label_optional">Label (optional)</string>
@@ -116,7 +116,7 @@
     <string name="block_config_transition_require_interaction">Require interaction</string>
     <string name="block_config_transition_seamless">Seamless</string>
     <string name="block_config_beep_title">Seamless transition sound</string>
-    <string name="block_config_beep_desc">Plays at each step boundary in this chain, since seamless steps advance with no other alert. Tap to preview, tap again to pick.</string>
+    <string name="block_config_beep_desc">Plays at each step boundary in this relay, since seamless steps advance with no other alert. Tap to preview, tap again to pick.</string>
     <string name="block_config_content_title">Content</string>
     <string name="block_config_syntax_help_desc">Syntax help</string>
     <string name="block_config_content_hint">e.g. (Work, Break) or repeat(4, (Work, Break)) — one line per step also works</string>
@@ -124,19 +124,21 @@
     <string name="block_config_step_placeholder">—</string>
     <string name="block_config_still_in_use_title">Still in use</string>
     <string name="block_config_still_in_use_message">Referenced by: %1$s. Deleting it will break %2$s. Delete anyway?</string>
-    <string name="block_config_ref_singular">that chain</string>
-    <string name="block_config_ref_plural">those chains</string>
+    <string name="block_config_ref_singular">that relay</string>
+    <string name="block_config_ref_plural">those relays</string>
     <string name="block_config_delete_anyway">Delete anyway</string>
 
-    <!-- Chain syntax help dialog. The code fragments (e.g. "(Work, Break)", "repeat(N, step)")
-         are chainlang syntax, not prose — identical across languages by design, since the DSL
+    <!-- Relay syntax help dialog. "Relay" is the user-facing name for what the code still calls
+         a "chain" (ChainDefEntity, BlockKind.CHAIN, the chainlang module) — renamed on-screen
+         only, see CLAUDE.md. The code fragments (e.g. "(Work, Break)", "repeat(N, step)") are
+         chainlang syntax, not prose — identical across languages by design, since the DSL
          keywords themselves are fixed (see RESERVED_WORDS), not translated. -->
-    <string name="chain_help_title">Writing a chain</string>
-    <string name="chain_help_intro">A chain is a list of steps in parentheses, one per line (or comma-separated — whichever\'s easier):</string>
+    <string name="chain_help_title">Writing a relay</string>
+    <string name="chain_help_intro">A relay is a list of steps in parentheses, one per line (or comma-separated — whichever\'s easier):</string>
     <string name="chain_help_example_syntax" translatable="false">(Work, Break)</string>
     <string name="chain_help_step_types">Each step is one of:</string>
     <string name="chain_help_step_duration">• A plain duration: 3, 20m, 2h30m10s</string>
-    <string name="chain_help_step_reference">• The name of an existing Timer or Chain, to reuse it</string>
+    <string name="chain_help_step_reference">• The name of an existing Timer or Relay, to reuse it</string>
     <string name="chain_help_step_repeat">• repeat(N, step) — repeat a step N times</string>
     <string name="chain_help_step_range">• range(start, stop, step) or arange(...) — a numpy-style count sequence</string>
     <string name="chain_help_example">Example: repeat(4, (Work, Break)) runs Work then Break, four times in a row.</string>
@@ -162,12 +164,12 @@
     <string name="settings_haptics_label">Haptics</string>
     <string name="settings_max_plan_size_label">Max execution-plan size (≤1000)</string>
     <string name="settings_danger_zone_title">Danger zone</string>
-    <string name="settings_danger_zone_desc">Deletes every alarm, timer, and chain. Can\'t be undone.</string>
+    <string name="settings_danger_zone_desc">Deletes every alarm, timer, and relay. Can\'t be undone.</string>
     <string name="settings_reset_button">Reset all data</string>
     <string name="settings_reset_dialog_title">Reset all data?</string>
-    <string name="settings_reset_dialog_message">Every alarm, timer, and chain will be deleted. This can\'t be undone.</string>
+    <string name="settings_reset_dialog_message">Every alarm, timer, and relay will be deleted. This can\'t be undone.</string>
     <string name="settings_reset_confirm">Reset</string>
-    <string name="settings_app_version" translatable="false">Clockr %1$s</string>
+    <string name="settings_app_version" translatable="false">Relay %1$s</string>
 
     <!-- Stopwatch pane -->
     <string name="stopwatch_new_desc">New stopwatch</string>
@@ -201,10 +203,10 @@
     <string name="error_alarm_list_delete">Couldn\'t delete alarm: %1$s</string>
     <string name="error_alarm_save">Couldn\'t save: %1$s</string>
     <string name="error_alarm_delete">Couldn\'t delete: %1$s</string>
-    <string name="error_alarm_no_target">Pick a Timer or Chain, or switch back to Alarm</string>
+    <string name="error_alarm_no_target">Pick a Timer or Relay, or switch back to Alarm</string>
     <string name="block_label_error_required">Persistent blocks need a label</string>
     <string name="block_label_error_start_letter">Must start with a letter</string>
-    <string name="block_label_error_reserved">\"%1$s\" is reserved by the chain syntax</string>
+    <string name="block_label_error_reserved">\"%1$s\" is reserved by the relay syntax</string>
     <string name="block_label_error_in_use">\"%1$s\" is already in use</string>
     <string name="block_alarm_ref_format">Alarm %1$s</string>
     <string name="block_alarm_ref_with_label_format">Alarm %1$s (%2$s)</string>
@@ -216,15 +218,15 @@
     <string name="alarm_channel_name">Alarms</string>
     <string name="alarm_channel_description">Alarm firing notifications</string>
 
-    <!-- Timer/Chain run notifications (run/RunNotificationHelper) -->
+    <!-- Timer/Relay run notifications (run/RunNotificationHelper) -->
     <string name="run_notification_awaiting_interaction">%1$s done — tap Continue</string>
     <string name="run_starting_title">Starting…</string>
-    <string name="run_progress_channel_name">Timer/chain progress</string>
-    <string name="run_progress_channel_desc">Ongoing countdown while a timer/chain runs — silent by design</string>
-    <string name="run_alert_channel_name">Timer/chain alerts</string>
+    <string name="run_progress_channel_name">Timer/relay progress</string>
+    <string name="run_progress_channel_desc">Ongoing countdown while a timer/relay runs — silent by design</string>
+    <string name="run_alert_channel_name">Timer/relay alerts</string>
     <string name="run_alert_channel_desc">Step-complete and finished-run alerts</string>
-    <string name="run_error_channel_name">Timer/chain errors</string>
-    <string name="run_error_channel_desc">A timer/chain run that couldn\'t start</string>
+    <string name="run_error_channel_name">Timer/relay errors</string>
+    <string name="run_error_channel_desc">A timer/relay run that couldn\'t start</string>
     <string name="run_error_timer_gone">This Timer no longer exists</string>
-    <string name="run_error_chain_gone">This Chain no longer exists</string>
+    <string name="run_error_chain_gone">This Relay no longer exists</string>
 </resources>
