@@ -12,6 +12,8 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
   — "Timer or Relay", "New relay", "Writing a relay", and so on. This is a user-facing rename
   only: the database, the `chainlang` module, and internal Kotlin class names are unchanged, so
   existing installs and data are unaffected.
+- Fixed the launcher icon glyph filling the whole canvas edge-to-edge with no padding, which read
+  as oversized once masked into a launcher's icon shape compared to other apps' icons.
 
 ## v0.4 — 2026-09-15
 
