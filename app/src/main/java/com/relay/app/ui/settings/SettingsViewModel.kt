@@ -25,4 +25,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setClockFormat24h(value: Boolean) = viewModelScope.launch { repository.setClockFormat24h(value) }
     fun setFirstDayOfWeek(value: DayOfWeek) = viewModelScope.launch { repository.setFirstDayOfWeek(value) }
     fun setHaptics(value: Boolean) = viewModelScope.launch { repository.setHaptics(value) }
+    fun setDefaultSnoozeMinutes(value: Int) = viewModelScope.launch { repository.setDefaultSnoozeMinutes(value) }
+    fun setDefaultAlarmSoundUri(value: String?) = viewModelScope.launch { repository.setDefaultAlarmSoundUri(value) }
+    fun setDefaultRampSeconds(value: Int) = viewModelScope.launch { repository.setDefaultRampSeconds(value) }
+    fun setRingTimeoutMinutes(value: Int) = viewModelScope.launch { repository.setRingTimeoutMinutes(value) }
+    fun setUpcomingLeadMinutes(value: Int) = viewModelScope.launch {
+        repository.setUpcomingLeadMinutes(value)
+        // The lead time decides when upcoming notifications are armed: re-arm everything.
+        getApplication<Application>().appContainer.schedules.rescheduleAll()
+    }
 }

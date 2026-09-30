@@ -27,6 +27,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
 import com.relay.app.data.settings.ThemeSetting
+import com.relay.app.ui.common.OptionChips
+import com.relay.app.ui.common.SoundPickerRow
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
@@ -80,6 +82,40 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 )
             }
         }
+
+        HorizontalDivider()
+        SectionTitle(R.string.settings_alarms_title)
+        OptionChips(
+            title = stringResource(R.string.settings_default_snooze),
+            options = listOf(5, 10, 15, 20, 30), selected = current.defaultSnoozeMinutes,
+            label = { stringResource(R.string.minutes_short, it) },
+            onSelect = viewModel::setDefaultSnoozeMinutes,
+        )
+        SoundPickerRow(stringResource(R.string.settings_default_alarm_sound), current.defaultAlarmSoundUri, viewModel::setDefaultAlarmSoundUri)
+        OptionChips(
+            title = stringResource(R.string.settings_default_ramp),
+            options = listOf(0, 15, 30, 60), selected = current.defaultRampSeconds,
+            label = { if (it == 0) stringResource(R.string.option_off) else stringResource(R.string.seconds_short, it) },
+            onSelect = viewModel::setDefaultRampSeconds,
+        )
+        OptionChips(
+            title = stringResource(R.string.settings_ring_timeout),
+            options = listOf(5, 10, 15, 20, 30), selected = current.ringTimeoutMinutes,
+            label = { stringResource(R.string.minutes_short, it) },
+            onSelect = viewModel::setRingTimeoutMinutes,
+        )
+        OptionChips(
+            title = stringResource(R.string.settings_upcoming_lead),
+            options = listOf(0, 30, 60, 120, 240), selected = current.upcomingLeadMinutes,
+            label = {
+                when {
+                    it == 0 -> stringResource(R.string.option_off)
+                    it < 60 -> stringResource(R.string.minutes_short, it)
+                    else -> stringResource(R.string.hours_short, it / 60)
+                }
+            },
+            onSelect = viewModel::setUpcomingLeadMinutes,
+        )
 
         HorizontalDivider()
         SectionTitle(R.string.settings_general_title)

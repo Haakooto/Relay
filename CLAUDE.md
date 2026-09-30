@@ -37,10 +37,10 @@ Only `chainlang/` was carried over as-is.
 
 ## Versioning
 
-- Releases are manual annotated git tags in three parts, `vX.Y.Z`. No auto-bumping.
+- Releases are manual annotated git tags in two parts, `vX.Y`. No auto-bumping.
 - Work that is built but not yet tested on the device is tagged as a pre-release:
-  `vX.Y.Z-alpha.N` (for example `v1.0.0-alpha.1` for build step 1). The plain `vX.Y.Z` tag is only
-  for a release that has passed the user's device test.
+  `vX.Y-alpha.N` (for example `v1.0-alpha.1` for build step 1). The plain `vX.Y` tag is only for
+  a release that has passed the user's device test.
 - `versionName` is computed from git at build time (`gitVersionName()` in `app/build.gradle.kts`):
   the exact tag on a tagged commit, else `<nearest-tag>+<short-hash>`.
 - Tag a release, then add a `CHANGELOG.md` entry for it in the same session.

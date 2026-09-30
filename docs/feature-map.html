@@ -123,16 +123,16 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>v1.0 clean restart. A ledger, not a roadmap, grouped by the build order in the <a href="spec.html">Relay spec</a> (§16). The v0.5 ledger is in git history.</p>
     <div class="meta">
-      <span>2026-09-30, rev 1 (v1.0)</span>
-      <span>45 tracked items</span>
+      <span>2026-09-30, rev 2 (v1.0)</span>
+      <span>46 tracked items</span>
       <span>chainlang: 30/30 tests passing</span>
     </div>
 
     <div class="stats">
       <div class="stat approved"><div class="n">0</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">8</div><div class="l">WIP</div></div>
-      <div class="stat lacking"><div class="n">0</div><div class="l">Lacking</div></div>
-      <div class="stat"><div class="n">33</div><div class="l">Planned</div></div>
+      <div class="stat wip"><div class="n">18</div><div class="l">WIP</div></div>
+      <div class="stat lacking"><div class="n">1</div><div class="l">Lacking</div></div>
+      <div class="stat"><div class="n">23</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">3</div><div class="l">Deferred</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
     </div>
@@ -166,20 +166,21 @@
 
     <section>
       <h2>Alarms + firing module</h2>
-      <p class="sub">Build step 2. Spec §04, §13.</p>
+      <p class="sub">Build step 2. Spec §04, §13. Built, compiles, 30 unit tests on the scheduling logic pass. Nothing run on a device yet.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Plain alarm: create / edit / delete / toggle</td><td><span class="chip planned">Planned</span></td><td class="note">Time picker first, list sorted by next fire time</td></tr>
-          <tr><td class="feature">One-off (delete or disable after firing) and repeating (weekdays, end date / count)</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
-          <tr><td class="feature">Schedule exceptions: skip or retime dates, apply to several alarms</td><td><span class="chip planned">Planned</span></td><td class="note">v0.5 scheduler math is a salvage candidate</td></tr>
-          <tr><td class="feature">Full-screen ringing over the lock screen</td><td><span class="chip planned">Planned</span></td><td class="note"><code>USE_FULL_SCREEN_INTENT</code> with a heads-up fallback</td></tr>
-          <tr><td class="feature">Continuous looping audio, volume ramp, vibration</td><td><span class="chip planned">Planned</span></td><td class="note">Own playback with <code>USAGE_ALARM</code>, not a channel sound</td></tr>
-          <tr><td class="feature">Snooze with per-alarm length and max count</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
-          <tr><td class="feature">Upcoming-alarm notification with Dismiss now</td><td><span class="chip planned">Planned</span></td><td class="note">Adds a one-off skip exception</td></tr>
-          <tr><td class="feature">Late-fire notice</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
-          <tr><td class="feature">Reschedule on boot, time change, time-zone change, update</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
-          <tr><td class="feature">Several things ringing at once, stacked</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Plain alarm: create / edit / delete / toggle</td><td><span class="chip wip">◐ WIP</span></td><td class="note">List sorted by next fire, with "rings in" and a set-for toast. New alarms open straight into the time picker</td></tr>
+          <tr><td class="feature">One-off (delete or disable after firing) and repeating (weekdays, end date / count)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">One-off keeps its row until the ring is over, so snooze works, then deletes or switches off</td></tr>
+          <tr><td class="feature">Schedule exceptions: skip or retime dates, apply to several alarms</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Skip or retime a day or range, bulk-apply to other alarms. Editing existing alarms only (save first)</td></tr>
+          <tr><td class="feature">Full-screen ringing over the lock screen</td><td><span class="chip wip">◐ WIP</span></td><td class="note"><code>RingActivity</code> over the lock screen. The readiness banner links to the system setting if full-screen is blocked</td></tr>
+          <tr><td class="feature">Continuous looping audio, volume ramp, vibration</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Looping <code>USAGE_ALARM</code> playback with a fallback chain ending in a generated tone. Ramp and vibration per alarm</td></tr>
+          <tr><td class="feature">Snooze with per-alarm length and max count</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Snooze hides once max snoozes is reached. A "Snoozed until" notification has Dismiss</td></tr>
+          <tr><td class="feature">Upcoming-alarm notification with Dismiss now</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Lead time in Settings (default 2 h). Dismiss now skips just that occurrence</td></tr>
+          <tr><td class="feature">Late-fire notice</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Missed by up to 60 min (phone off, clock change): rings now with "Delayed from". Older: a missed-alarm notification</td></tr>
+          <tr><td class="feature">Reschedule on boot, time change, time-zone change, update</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Also on every app start, since a force-stop clears alarms silently. Covered by unit tests, including the fire-vs-restart race</td></tr>
+          <tr><td class="feature">Several things ringing at once, stacked</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Stacked cards on the ringing screen, each dismissed on its own. Ring timeout (default 10 min) stops and notifies</td></tr>
+          <tr><td class="feature">Alarms after a reboot, before the first unlock</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">Relay isn't direct-boot aware yet, so alarms are re-armed only after you unlock once. Needs device-protected storage for the schedule table</td></tr>
         </tbody>
       </table></div>
     </section>

@@ -3,6 +3,8 @@ package com.relay.app.data
 import androidx.room.testing.MigrationTestHelper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,8 +33,27 @@ class MigrationTest {
         helper.runMigrationsAndValidate(TEST_DB, LATEST_VERSION, true, *RelayDatabase.MIGRATIONS).close()
     }
 
+    @Test
+    fun migrate1To2KeepsHeadersAndAddsSchedules() {
+        helper.createDatabase(TEST_DB, 1).apply {
+            execSQL("INSERT INTO library_headers (id, title, sortOrder) VALUES ('h1', 'Work', 1)")
+            close()
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 2, true, *RelayDatabase.MIGRATIONS).apply {
+            query("SELECT title FROM library_headers WHERE id = 'h1'").use {
+                assertTrue(it.moveToFirst())
+                assertEquals("Work", it.getString(0))
+            }
+            query("SELECT COUNT(*) FROM schedules").use {
+                assertTrue(it.moveToFirst())
+                assertEquals(0, it.getInt(0))
+            }
+            close()
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test"
-        const val LATEST_VERSION = 1
+        const val LATEST_VERSION = 2
     }
 }

@@ -17,6 +17,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.relay.app.R
+import com.relay.app.ui.alarms.AlarmEditScreen
+import com.relay.app.ui.alarms.AlarmsScreen
 import com.relay.app.ui.panes.PlaceholderPane
 import com.relay.app.ui.settings.SettingsScreen
 
@@ -31,7 +33,8 @@ fun RelayApp() {
             NavigationBar {
                 Pane.entries.forEach { pane ->
                     NavigationBarItem(
-                        selected = current?.hierarchy?.any { it.route == pane.route } == true,
+                        selected = current?.hierarchy?.any { it.route == pane.route } == true ||
+                            (pane == Pane.ALARMS && current?.route?.startsWith("$ALARM_EDIT/") == true),
                         onClick = {
                             navController.navigate(pane.route) {
                                 popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -51,7 +54,13 @@ fun RelayApp() {
             startDestination = Pane.ALARMS.route,
             modifier = Modifier.padding(padding),
         ) {
-            composable(Pane.ALARMS.route) { PlaceholderPane(Pane.ALARMS, R.string.placeholder_alarms) }
+            composable(Pane.ALARMS.route) {
+                AlarmsScreen(onOpen = { id -> navController.navigate("$ALARM_EDIT/${id ?: NEW}") })
+            }
+            composable("$ALARM_EDIT/{id}") { entry ->
+                val id = entry.arguments?.getString("id")?.takeIf { it != NEW }
+                AlarmEditScreen(scheduleId = id, onDone = { navController.popBackStack() })
+            }
             composable(Pane.TIMERS.route) { PlaceholderPane(Pane.TIMERS, R.string.placeholder_timers) }
             composable(Pane.STOPWATCH.route) { PlaceholderPane(Pane.STOPWATCH, R.string.placeholder_stopwatch) }
             composable(Pane.CLOCK.route) { PlaceholderPane(Pane.CLOCK, R.string.placeholder_clock) }
@@ -59,3 +68,6 @@ fun RelayApp() {
         }
     }
 }
+
+private const val ALARM_EDIT = "alarm"
+private const val NEW = "new"

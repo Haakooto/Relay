@@ -5,7 +5,26 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
-## v1.0.0-alpha.1 (2026-09-30)
+## v1.0-alpha.2 (2026-09-30)
+
+Untested pre-release: alarms. Not tried on a device yet.
+
+- Alarms work: one-off or repeating on chosen weekdays, ending on a date or after a number of
+  times. Each alarm has its own label, sound, vibration, gradual volume increase, snooze length
+  and snooze limit. New alarms open straight into the time picker.
+- Alarms ring full screen over the lock screen and keep ringing until you act (or until the
+  ring timeout, 10 minutes by default). Several alarms ringing at once stack on one screen.
+- Skip or move an alarm on a given day or date range, and apply that to several alarms at once,
+  for example for a holiday week.
+- A notification shows before an alarm (2 hours by default), with "Dismiss now" to skip just
+  that one. A snoozed alarm can be dismissed from its notification.
+- An alarm missed while the phone was off rings when it's back, if it's less than an hour late,
+  and says it was delayed. Older ones leave a "missed alarm" notification.
+- The Alarms pane warns when something would stop alarms from working (notifications off,
+  full-screen blocked, battery optimization, alarm volume at zero), with a button to fix it.
+- Known gap: after a restart, alarms come back only once the phone has been unlocked.
+
+## v1.0-alpha.1 (2026-09-30)
 
 Untested pre-release: the start of the v1.0 rebuild. Not tried on a device yet.
 

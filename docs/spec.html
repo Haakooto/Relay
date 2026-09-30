@@ -395,7 +395,8 @@
         <li>Gradually increasing volume (configurable ramp) and vibration. <span class="tag new">new</span></li>
         <li>Snooze length and max-snooze count are per alarm. When snoozes run out, Snooze is hidden. <span class="tag keep">keep</span></li>
         <li><strong>Upcoming-alarm notification</strong> a configurable lead time before firing (stock default: 2 h), with "Dismiss now". On a repeating alarm, that adds a one-off skip exception. <span class="tag new">new</span></li>
-        <li>If it fires late (device off, clock change), it rings with a clear "delayed from 07:00" notice instead of silently skipping.</li>
+        <li>If it fires late (device off, clock change), it rings with a clear "delayed from 07:00" notice instead of silently skipping. That applies up to 60 minutes late. Anything older only gets a "missed alarm" notification, since a 07:00 alarm ringing at 15:00 helps nobody.</li>
+        <li>When the ring timeout passes unanswered, the alarm stops and leaves a notification saying so. It counts as dismissed.</li>
       </ul>
       <div class="callout">Snooze only applies to the Ring target. For Timer, Relay and Stopwatch targets, the run's own controls take over when it fires. Their "snooze" is simply the relay itself (see the wake-up example in §06).</div>
     </section>
