@@ -178,6 +178,50 @@
         <item quantity="other">%1$d runder</item>
     </plurals>
 
+    <!-- Clocks pane (list) -->
+    <string name="clocks_title">Klokker</string>
+    <string name="clocks_new_desc">Ny klokke</string>
+    <string name="clocks_empty">Ingen klokker ennå — trykk + for å legge til en</string>
+    <string name="clocks_unnamed">Uten navn</string>
+    <string name="clocks_move_up_desc">Flytt klokke opp</string>
+    <string name="clocks_move_down_desc">Flytt klokke ned</string>
+    <string name="clocks_edit_desc">Rediger klokke</string>
+    <string name="clocks_delete_desc">Slett klokke</string>
+
+    <!-- Clock config screen + shared style fields (also used by the widget configure Activity) -->
+    <string name="clock_config_title_new">Ny klokke</string>
+    <string name="clock_config_title_edit">Rediger klokke</string>
+    <string name="clock_config_widget_title">Sett opp modul</string>
+    <string name="clock_name_label">Navn</string>
+    <string name="clock_style_title">Stil</string>
+    <string name="clock_style_digital">Digital</string>
+    <string name="clock_style_analogue">Analog</string>
+    <string name="clock_font_title">Skrift</string>
+    <string name="clock_font_default">Standard</string>
+    <string name="clock_font_serif">Serif</string>
+    <string name="clock_font_monospace">Fastbredde</string>
+    <string name="clock_face_title">Urskive</string>
+    <string name="clock_face_minimal">Minimalistisk</string>
+    <string name="clock_face_sleek">Elegant</string>
+    <string name="clock_face_classic">Klassisk</string>
+    <string name="clock_face_techy">Teknisk</string>
+    <string name="clock_color_title">Farge</string>
+    <string name="clock_color_ink">Blekk</string>
+    <string name="clock_color_accent">Aksent</string>
+    <string name="clock_color_teal">Blågrønn</string>
+    <string name="clock_color_brass">Messing</string>
+    <string name="clock_show_seconds_label">Vis sekunder</string>
+    <string name="clock_show_date_label">Vis dato</string>
+    <string name="clock_background_title">Bakgrunn</string>
+    <string name="clock_background_follow_theme">Følg tema</string>
+    <string name="clock_background_transparent">Gjennomsiktig</string>
+    <string name="clock_background_solid">Ensfarget</string>
+    <string name="clock_shape_title">Form</string>
+    <string name="clock_shape_sharp">Skarp</string>
+    <string name="clock_shape_rounded">Avrundet</string>
+    <string name="clock_shape_pill">Pillformet</string>
+    <string name="clock_border_label">Ramme</string>
+
     <!-- Bottom navigation panes -->
     <string name="pane_alarms">Alarmer</string>
     <string name="pane_timers">Tidtakere</string>

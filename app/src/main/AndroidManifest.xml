@@ -44,6 +44,15 @@
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name=".widget.ClockConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Clockr">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <receiver
             android:name=".widget.ClockrWidgetReceiver"
             android:exported="false">

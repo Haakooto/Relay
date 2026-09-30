@@ -123,16 +123,16 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>A status snapshot across every pane, taken after the first real device test pass — not a roadmap, a ledger. Full design detail lives in the <a href="https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d">Relay Spec</a>.</p>
     <div class="meta">
-      <span>2026-09-15, rev 12</span>
-      <span>53 tracked items</span>
+      <span>2026-09-15, rev 13</span>
+      <span>56 tracked items</span>
       <span>chainlang: 30/30 tests passing</span>
     </div>
 
     <div class="stats">
       <div class="stat approved"><div class="n">32</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">12</div><div class="l">WIP</div></div>
+      <div class="stat wip"><div class="n">17</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">1</div><div class="l">Lacking</div></div>
-      <div class="stat"><div class="n">5</div><div class="l">Planned</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">2</div><div class="l">Deferred</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
     </div>
@@ -212,8 +212,9 @@
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
           <tr><td class="feature">Live ticking digital face</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Was hardcoded to 24h regardless of Settings; now reads the setting.</td></tr>
-          <tr><td class="feature">Visual customization (color/font/analogue)</td><td><span class="chip planned">Planned</span></td><td class="note">Spec §07's axes, unbuilt</td></tr>
-          <tr><td class="feature">World clock / multiple timezones</td><td><span class="chip deferred">Deferred</span></td><td class="note">Your call</td></tr>
+          <tr><td class="feature"><strong>Multiple independent clocks (in-app)</strong></td><td><span class="chip wip">◐ WIP</span></td><td class="note">Built this session: the Clock pane is now a small library (spec §02's "full customization preview" idea) — add/edit/delete/reorder several named clocks, each with its own style. New <code>clock_configs</code> table (Room migration 4→5), one row per in-app clock or per placed widget instance. First run after this update auto-seeds one default clock so existing behavior doesn't regress into an empty list. Needs first on-device pass — never run.</td></tr>
+          <tr><td class="feature">Visual customization (color/font/analogue)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Spec §07's axes, built this session. Digital gets a font choice (Default/Serif/Monospace); analogue gets four face variants (Minimal/Sleek/Classic/Techy) drawn via Compose <code>Canvas</code>, sharing hand-angle/variant-proportion logic with the widget's renderer so both surfaces agree on what each variant looks like. Color picks from the existing brand palette rather than a free picker. Background always follows the app theme in-app (no separate setting) — that axis is widget-only. Needs on-device visual check — never run.</td></tr>
+          <tr><td class="feature">World clock / multiple timezones</td><td><span class="chip deferred">Deferred</span></td><td class="note">Your call. Schema now has a reserved, unused <code>timezoneId</code> column on each clock config so this won't need another migration when it lands — no picker UI yet.</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -224,7 +225,9 @@
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
           <tr><td class="feature">Digital home-screen widget (Glance)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device after the tick-chain and reboot-resume fixes</td></tr>
-          <tr><td class="feature">Customization axes (color, font, background, shape)</td><td><span class="chip planned">Planned</span></td><td class="note">Confirmed gap: no way to configure the widget's display yet</td></tr>
+          <tr><td class="feature"><strong>Per-instance widget configuration</strong></td><td><span class="chip wip">◐ WIP</span></td><td class="note">First widget-configure Activity in this app. New `ClockConfigActivity` (registered via <code>android:configure</code> + <code>APPWIDGET_CONFIGURE</code>) lets each placed widget pick its own style, independent of every other widget and of any in-app clock — one <code>clock_configs</code> row per <code>appWidgetId</code>. Removing a widget cleans up its row (<code>onDeleted</code>). Needs on-device test: placing a new widget, long-press → "Widget settings" on an existing one, and confirming independent styling across several simultaneous widgets — none of this is exercisable outside a real device/launcher.</td></tr>
+          <tr><td class="feature">Customization axes (color, font, background, shape)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Spec §07's axes, built this session, shared with the in-app editor (one field-editing composable for both surfaces). Background: follow theme / transparent / solid-from-palette. Shape: sharp/rounded/pill corner radius (Glance's <code>cornerRadius</code> modifier). Border: faked via a nested-Box padding trick since Glance/RemoteViews has no native border — color always matches the accent color, not separately pickable.</td></tr>
+          <tr><td class="feature"><strong>Analogue widget face</strong></td><td><span class="chip wip">◐ WIP</span></td><td class="note">Glance can't render Compose <code>Canvas</code> or rotate elements, so this pre-renders a small bitmap via plain <code>android.graphics.Canvas</code> once per minute tick — riding the existing tick-alarm cadence (<code>WidgetTickScheduler</code>) rather than adding any new timer, so it stays cheap. Same four face variants as the in-app analogue face. Needs on-device confirmation the bitmap actually updates each minute without lag, and that a render failure (if any) doesn't break the reschedule chain.</td></tr>
         </tbody>
       </table></div>
     </section>

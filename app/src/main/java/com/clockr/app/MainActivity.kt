@@ -49,7 +49,9 @@ import com.clockr.app.data.ThemeSetting
 import com.clockr.app.ui.screens.AlarmConfigScreen
 import com.clockr.app.ui.screens.AlarmsScreen
 import com.clockr.app.ui.screens.BlockConfigScreen
+import com.clockr.app.ui.screens.ClockConfigScreen
 import com.clockr.app.ui.screens.ClockScreen
+import com.clockr.app.ui.screens.ClocksScreen
 import com.clockr.app.ui.screens.SettingsScreen
 import com.clockr.app.ui.screens.StopwatchScreen
 import com.clockr.app.ui.screens.TimersScreen
@@ -177,7 +179,12 @@ private fun ClockrApp(openClock: Boolean = false, clockFormat24h: Boolean = true
                 TimersScreen(onBlockClick = { blockId -> navController.navigate("block_config/$blockId") })
             }
             composable(Pane.Stopwatch.route) { StopwatchScreen() }
-            composable(Pane.Clock.route) { ClockScreen(is24Hour = clockFormat24h) }
+            composable(Pane.Clock.route) {
+                ClocksScreen(
+                    onClockClick = { clockId -> navController.navigate("clock_display/$clockId") },
+                    onEditClick = { clockId -> navController.navigate("clock_config/$clockId") },
+                )
+            }
             composable(Pane.Settings.route) { SettingsScreen() }
             composable(
                 "block_config/{blockId}",
@@ -192,6 +199,20 @@ private fun ClockrApp(openClock: Boolean = false, clockFormat24h: Boolean = true
             ) { backStackEntry ->
                 val alarmId = backStackEntry.arguments?.getString("alarmId") ?: return@composable
                 AlarmConfigScreen(alarmId = alarmId, onBack = { navController.popBackStack() })
+            }
+            composable(
+                "clock_display/{clockId}",
+                arguments = listOf(navArgument("clockId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val clockId = backStackEntry.arguments?.getString("clockId") ?: return@composable
+                ClockScreen(configId = clockId, is24Hour = clockFormat24h)
+            }
+            composable(
+                "clock_config/{clockId}",
+                arguments = listOf(navArgument("clockId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val clockId = backStackEntry.arguments?.getString("clockId") ?: return@composable
+                ClockConfigScreen(clockId = clockId, onBack = { navController.popBackStack() })
             }
         }
     }

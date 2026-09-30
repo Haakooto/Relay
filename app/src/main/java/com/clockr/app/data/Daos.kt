@@ -49,6 +49,27 @@ interface AlarmExceptionDao {
 }
 
 @Dao
+interface ClockConfigDao {
+    @Query("SELECT * FROM clock_configs WHERE appWidgetId IS NULL ORDER BY sortOrder")
+    fun observeInApp(): Flow<List<ClockConfigEntity>>
+
+    @Query("SELECT * FROM clock_configs WHERE id = :id LIMIT 1")
+    suspend fun findById(id: String): ClockConfigEntity?
+
+    @Query("SELECT * FROM clock_configs WHERE appWidgetId = :appWidgetId LIMIT 1")
+    suspend fun findByAppWidgetId(appWidgetId: Int): ClockConfigEntity?
+
+    @Upsert
+    suspend fun upsert(entity: ClockConfigEntity)
+
+    @Delete
+    suspend fun delete(entity: ClockConfigEntity)
+
+    @Query("DELETE FROM clock_configs WHERE appWidgetId = :appWidgetId")
+    suspend fun deleteByAppWidgetId(appWidgetId: Int)
+}
+
+@Dao
 interface LibraryHeaderDao {
     @Query("SELECT * FROM library_headers ORDER BY sortOrder")
     fun observeAll(): Flow<List<LibraryHeaderEntity>>

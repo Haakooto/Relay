@@ -10,9 +10,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         TimerDefEntity::class, ChainDefEntity::class, SoundProfileEntity::class, AlarmEntity::class,
-        LibraryHeaderEntity::class, AlarmExceptionEntity::class,
+        LibraryHeaderEntity::class, AlarmExceptionEntity::class, ClockConfigEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 abstract class ClockrDatabase : RoomDatabase() {
@@ -22,6 +22,7 @@ abstract class ClockrDatabase : RoomDatabase() {
     abstract fun alarmDao(): AlarmDao
     abstract fun libraryHeaderDao(): LibraryHeaderDao
     abstract fun alarmExceptionDao(): AlarmExceptionDao
+    abstract fun clockConfigDao(): ClockConfigDao
 
     companion object {
         @Volatile private var instance: ClockrDatabase? = null
@@ -65,9 +66,25 @@ abstract class ClockrDatabase : RoomDatabase() {
             }
         }
 
+        /** Clock/widget customization — multiple independently-styled clocks, in-app and per
+         *  placed widget instance. New table, no existing rows affected. */
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS clock_configs (" +
+                        "id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, style TEXT NOT NULL, " +
+                        "digitalFont TEXT NOT NULL, analogueVariant TEXT NOT NULL, color TEXT NOT NULL, " +
+                        "showSeconds INTEGER NOT NULL, showDate INTEGER NOT NULL, background TEXT NOT NULL, " +
+                        "backgroundColor TEXT NOT NULL, cornerStyle TEXT NOT NULL, borderEnabled INTEGER NOT NULL, " +
+                        "borderWidthDp INTEGER NOT NULL, sortOrder INTEGER NOT NULL, appWidgetId INTEGER, timezoneId TEXT)",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_clock_configs_appWidgetId ON clock_configs(appWidgetId)")
+            }
+        }
+
         fun get(context: Context): ClockrDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, ClockrDatabase::class.java, "clockr.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                 .build()
                 .also { instance = it }
         }

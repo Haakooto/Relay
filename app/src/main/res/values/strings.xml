@@ -189,6 +189,50 @@
         <item quantity="other">%1$d laps</item>
     </plurals>
 
+    <!-- Clocks pane (list) -->
+    <string name="clocks_title">Clocks</string>
+    <string name="clocks_new_desc">New clock</string>
+    <string name="clocks_empty">No clocks yet — tap + to add one</string>
+    <string name="clocks_unnamed">Unnamed</string>
+    <string name="clocks_move_up_desc">Move clock up</string>
+    <string name="clocks_move_down_desc">Move clock down</string>
+    <string name="clocks_edit_desc">Edit clock</string>
+    <string name="clocks_delete_desc">Delete clock</string>
+
+    <!-- Clock config screen + shared style fields (also used by the widget configure Activity) -->
+    <string name="clock_config_title_new">New clock</string>
+    <string name="clock_config_title_edit">Edit clock</string>
+    <string name="clock_config_widget_title">Configure widget</string>
+    <string name="clock_name_label">Name</string>
+    <string name="clock_style_title">Style</string>
+    <string name="clock_style_digital">Digital</string>
+    <string name="clock_style_analogue">Analogue</string>
+    <string name="clock_font_title">Font</string>
+    <string name="clock_font_default">Default</string>
+    <string name="clock_font_serif">Serif</string>
+    <string name="clock_font_monospace">Monospace</string>
+    <string name="clock_face_title">Face</string>
+    <string name="clock_face_minimal">Minimal</string>
+    <string name="clock_face_sleek">Sleek</string>
+    <string name="clock_face_classic">Classic</string>
+    <string name="clock_face_techy">Techy</string>
+    <string name="clock_color_title">Color</string>
+    <string name="clock_color_ink">Ink</string>
+    <string name="clock_color_accent">Accent</string>
+    <string name="clock_color_teal">Teal</string>
+    <string name="clock_color_brass">Brass</string>
+    <string name="clock_show_seconds_label">Show seconds</string>
+    <string name="clock_show_date_label">Show date</string>
+    <string name="clock_background_title">Background</string>
+    <string name="clock_background_follow_theme">Follow theme</string>
+    <string name="clock_background_transparent">Transparent</string>
+    <string name="clock_background_solid">Solid</string>
+    <string name="clock_shape_title">Shape</string>
+    <string name="clock_shape_sharp">Sharp</string>
+    <string name="clock_shape_rounded">Rounded</string>
+    <string name="clock_shape_pill">Pill</string>
+    <string name="clock_border_label">Border</string>
+
     <!-- Bottom navigation panes -->
     <string name="pane_alarms">Alarms</string>
     <string name="pane_timers">Timers</string>
