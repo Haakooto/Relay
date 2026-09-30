@@ -23,12 +23,22 @@ fun interface BlockResolver {
     fun resolve(label: String): ResolvedBlockInfo
 }
 
-/** One step of a chain's own execution plan — a reference stays opaque, it is never inlined. */
+/** One step of a relay's own execution plan: a reference stays opaque, it is never inlined. */
 sealed interface ResolvedStep {
     val durationSeconds: Long
 }
 
-data class LeafStep(override val durationSeconds: Long, val soundProfile: String?) : ResolvedStep
+/**
+ * An anonymous step. [soundProfile] is set when the step's length came from arithmetic on
+ * exactly one name (`Test2 - 2`): it inherits that block's sound (spec §06). Otherwise it's the
+ * evaluator's default, usually null for "use the relay's default".
+ */
+data class LeafStep(
+    override val durationSeconds: Long,
+    val soundProfile: String?,
+    val label: String? = null,
+) : ResolvedStep
+
 data class BlockRefStep(val refLabel: String, override val durationSeconds: Long, val soundProfile: String?) : ResolvedStep
 
 class Evaluator(
@@ -37,7 +47,7 @@ class Evaluator(
     private val random: Random = Random.Default,
     private val defaultSoundProfile: String? = null,
 ) {
-    /** Flattens one chain's own `Group` — `repeat`/`range`/`arange` expand, `Ref`s stay opaque. */
+    /** Flattens one relay's own `Group`: `repeat`/`range` expand, `Ref`s stay opaque. */
     fun evaluate(root: Group): List<ResolvedStep> = root.elements.flatMap { evalElement(it) }
 
     private fun evalElement(node: ChainNode): List<ResolvedStep> = when (node) {
@@ -46,35 +56,66 @@ class Evaluator(
             val block = resolver.resolve(node.label)
             listOf(BlockRefStep(node.label, block.durationSeconds, block.soundProfile))
         }
-        is DurationLiteral -> listOf(LeafStep(node.seconds, defaultSoundProfile))
-        is DurationExpr -> listOf(LeafStep(evalInt(node.minutes) * 60, defaultSoundProfile))
+        is DurationNode -> listOf(evalDuration(node))
         is RepeatCall -> {
             val n = evalInt(node.count)
             List(n.toInt()) { evalElement(node.body) }.flatten()
         }
-        is RangeCall -> evalRangeLike(node.start, node.stop, node.step).map { LeafStep(it * 60, defaultSoundProfile) }
-        is ArangeCall -> evalRangeLike(node.start, node.stop, node.step).map { LeafStep(it * 60, defaultSoundProfile) }
+        is RangeCall -> evalRange(node.start, node.stop, node.step).map { LeafStep(positive(it, "range"), defaultSoundProfile) }
     }
 
-    /** `range`/`arange` share numpy's half-open, direction-aware stepping. */
-    private fun evalRangeLike(startExpr: IntExpr, stopExpr: IntExpr, stepExpr: IntExpr?): List<Long> {
-        val start = evalInt(startExpr)
-        val stop = evalInt(stopExpr)
-        val rawStep = stepExpr?.let { evalInt(it) } ?: 1L
-        if (rawStep == 0L) throw ChainSyntaxException("range/arange step must not be 0", -1)
-        val step = if (stop < start) -kotlin.math.abs(rawStep) else kotlin.math.abs(rawStep)
+    private fun evalDuration(node: DurationNode): LeafStep {
+        var seconds = 0L
+        val refs = mutableListOf<ResolvedBlockInfo>()
+        for ((negative, term) in node.terms) {
+            val value = when (term) {
+                is SecondsTerm -> term.seconds
+                is MinutesTerm -> evalInt(term.minutes) * 60
+                is RefValueTerm -> resolver.resolve(term.label).also { refs += it }.durationSeconds
+            }
+            seconds += if (negative) -value else value
+        }
+        val sound = refs.singleOrNull()?.soundProfile ?: defaultSoundProfile
+        return LeafStep(positive(seconds, node.label ?: "step"), sound, node.label)
+    }
 
+    private fun positive(seconds: Long, what: String): Long {
+        if (seconds <= 0) throw NonPositiveDurationException(what, seconds)
+        return seconds
+    }
+
+    /**
+     * numpy-style half-open, direction-aware stepping, in minutes, returned as whole seconds.
+     * Values are computed as start + i * step rather than accumulated, so 0.1 steps don't drift.
+     */
+    private fun evalRange(startExpr: IntExpr, stopExpr: IntExpr, stepExpr: IntExpr?): List<Long> {
+        val start = evalNum(startExpr)
+        val stop = evalNum(stopExpr)
+        val rawStep = stepExpr?.let { evalNum(it) } ?: 1.0
+        if (rawStep == 0.0) throw ChainSyntaxException("range step must not be 0", -1)
+        val step = if (stop < start) -kotlin.math.abs(rawStep) else kotlin.math.abs(rawStep)
+        val epsilon = 1e-9
         val values = mutableListOf<Long>()
-        var v = start
-        while (if (step > 0) v < stop else v > stop) {
-            values += v
-            v += step
+        var i = 0
+        while (true) {
+            val v = start + i * step
+            if (if (step > 0) v >= stop - epsilon else v <= stop + epsilon) break
+            values += kotlin.math.round(v * 60).toLong()
+            i++
         }
         return values
     }
 
+    private fun evalNum(expr: IntExpr): Double = when (expr) {
+        is DecimalLiteral -> expr.value
+        is IntAdd -> evalNum(expr.left) + evalNum(expr.right)
+        is IntSub -> evalNum(expr.left) - evalNum(expr.right)
+        else -> evalInt(expr).toDouble()
+    }
+
     private fun evalInt(expr: IntExpr): Long = when (expr) {
         is IntLiteral -> expr.value
+        is DecimalLiteral -> throw ChainSyntaxException("decimals only work inside range()", -1)
         is IntAdd -> evalInt(expr.left) + evalInt(expr.right)
         is IntSub -> evalInt(expr.left) - evalInt(expr.right)
         is RandomCall -> {

@@ -37,7 +37,19 @@ data class AppSettings(
     val ringTimeoutMinutes: Int = 10,
     /** 0 = no upcoming-alarm notification. */
     val upcomingLeadMinutes: Int = 120,
+
+    // Timers and relays (build steps 3-4).
+    /** The four quick-start chips, in seconds (spec §05; stock: 1, 5, 10, 15 min). */
+    val quickTimerSeconds: List<Long> = DEFAULT_QUICK_TIMERS,
+    /** Null = the system default alarm sound. */
+    val defaultTimerSoundUri: String? = null,
+    /** Spec §06: default 300 steps, hard ceiling 1000. */
+    val maxPlanSize: Int = 300,
+    /** Relays longer than this get a warning in the editor. */
+    val longRelayWarningHours: Int = 24,
 )
+
+val DEFAULT_QUICK_TIMERS = listOf(60L, 300L, 600L, 900L)
 
 class SettingsRepository(context: Context) {
     private val store = context.applicationContext.settingsStore
@@ -53,6 +65,11 @@ class SettingsRepository(context: Context) {
             defaultRampSeconds = prefs[DEFAULT_RAMP] ?: 0,
             ringTimeoutMinutes = prefs[RING_TIMEOUT] ?: 10,
             upcomingLeadMinutes = prefs[UPCOMING_LEAD] ?: 120,
+            quickTimerSeconds = prefs[QUICK_TIMERS]?.split(",")?.mapNotNull { it.toLongOrNull() }
+                ?.takeIf { it.size == DEFAULT_QUICK_TIMERS.size } ?: DEFAULT_QUICK_TIMERS,
+            defaultTimerSoundUri = prefs[DEFAULT_TIMER_SOUND],
+            maxPlanSize = (prefs[MAX_PLAN_SIZE] ?: 300).coerceIn(1, MAX_PLAN_CEILING),
+            longRelayWarningHours = prefs[LONG_RELAY_HOURS] ?: 24,
         )
     }
 
@@ -69,6 +86,16 @@ class SettingsRepository(context: Context) {
     suspend fun setDefaultRampSeconds(value: Int) = store.edit { it[DEFAULT_RAMP] = value }
     suspend fun setRingTimeoutMinutes(value: Int) = store.edit { it[RING_TIMEOUT] = value }
     suspend fun setUpcomingLeadMinutes(value: Int) = store.edit { it[UPCOMING_LEAD] = value }
+    suspend fun setQuickTimer(index: Int, seconds: Long) = store.edit { prefs ->
+        val current = prefs[QUICK_TIMERS]?.split(",")?.mapNotNull { it.toLongOrNull() }
+            ?.takeIf { it.size == DEFAULT_QUICK_TIMERS.size } ?: DEFAULT_QUICK_TIMERS
+        prefs[QUICK_TIMERS] = current.toMutableList().also { it[index] = seconds }.joinToString(",")
+    }
+    suspend fun setDefaultTimerSoundUri(value: String?) = store.edit {
+        if (value == null) it.remove(DEFAULT_TIMER_SOUND) else it[DEFAULT_TIMER_SOUND] = value
+    }
+    suspend fun setMaxPlanSize(value: Int) = store.edit { it[MAX_PLAN_SIZE] = value.coerceIn(1, MAX_PLAN_CEILING) }
+    suspend fun setLongRelayWarningHours(value: Int) = store.edit { it[LONG_RELAY_HOURS] = value }
 
     private companion object {
         val THEME = stringPreferencesKey("theme")
@@ -80,6 +107,11 @@ class SettingsRepository(context: Context) {
         val DEFAULT_RAMP = intPreferencesKey("default_ramp_seconds")
         val RING_TIMEOUT = intPreferencesKey("ring_timeout_minutes")
         val UPCOMING_LEAD = intPreferencesKey("upcoming_lead_minutes")
+        val QUICK_TIMERS = stringPreferencesKey("quick_timer_seconds")
+        val DEFAULT_TIMER_SOUND = stringPreferencesKey("default_timer_sound_uri")
+        val MAX_PLAN_SIZE = intPreferencesKey("max_plan_size")
+        val LONG_RELAY_HOURS = intPreferencesKey("long_relay_warning_hours")
+        const val MAX_PLAN_CEILING = 1000
     }
 }
 

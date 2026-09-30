@@ -74,15 +74,10 @@ class RingActivity : ComponentActivity() {
                 RingScreen(
                     items = items,
                     is24h = settings?.clockFormat24h ?: true,
-                    onSnooze = { send(RingService.ACTION_SNOOZE, it) },
-                    onDismiss = { send(RingService.ACTION_DISMISS, it) },
+                    onAct = { key, verb -> startService(RingService.actIntent(this, key, verb)) },
                 )
             }
         }
-    }
-
-    private fun send(action: String, scheduleId: String) {
-        startService(RingService.actionIntent(this, action, scheduleId))
     }
 
     private companion object {
@@ -91,7 +86,7 @@ class RingActivity : ComponentActivity() {
 }
 
 @Composable
-private fun RingScreen(items: List<RingItem>, is24h: Boolean, onSnooze: (String) -> Unit, onDismiss: (String) -> Unit) {
+private fun RingScreen(items: List<RingItem>, is24h: Boolean, onAct: (String, RingVerb) -> Unit) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -112,8 +107,8 @@ private fun RingScreen(items: List<RingItem>, is24h: Boolean, onSnooze: (String)
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 reverseLayout = true, // newest at the bottom, nearest the thumb
             ) {
-                items(items.reversed(), key = { it.scheduleId }) { item ->
-                    RingCard(item, is24h, onSnooze, onDismiss)
+                items(items.reversed(), key = { it.key }) { item ->
+                    RingCard(item, is24h, onAct)
                 }
             }
         }
@@ -121,7 +116,7 @@ private fun RingScreen(items: List<RingItem>, is24h: Boolean, onSnooze: (String)
 }
 
 @Composable
-private fun RingCard(item: RingItem, is24h: Boolean, onSnooze: (String) -> Unit, onDismiss: (String) -> Unit) {
+private fun RingCard(item: RingItem, is24h: Boolean, onAct: (String, RingVerb) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -130,10 +125,11 @@ private fun RingCard(item: RingItem, is24h: Boolean, onSnooze: (String) -> Unit,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            item.label.ifBlank { stringResource(R.string.ring_default_label) },
+            item.label.ifBlank { stringResource(FiringNotifications.defaultLabel(item.context)) },
             style = MaterialTheme.typography.headlineMedium,
         )
-        Text(TimeText.ofMillis(item.scheduledAtMillis, is24h), style = MaterialTheme.typography.bodyLarge)
+        val secondLine = item.detail ?: if (item.context == RingContext.ALARM) TimeText.ofMillis(item.scheduledAtMillis, is24h) else null
+        if (secondLine != null) Text(secondLine, style = MaterialTheme.typography.bodyLarge)
         if (item.isLate) {
             Text(
                 stringResource(R.string.ring_delayed_from, TimeText.ofMillis(item.scheduledAtMillis, is24h)),
@@ -143,17 +139,18 @@ private fun RingCard(item: RingItem, is24h: Boolean, onSnooze: (String) -> Unit,
         }
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            if (item.canSnooze) {
-                OutlinedButton(onClick = { onSnooze(item.scheduleId) }, modifier = Modifier.weight(1f).height(56.dp)) {
-                    Text(stringResource(R.string.ring_snooze_minutes, item.snoozeMinutes))
+            val verbs = item.verbs
+            verbs.forEachIndexed { i, verb ->
+                val text = if (verb == RingVerb.SNOOZE) stringResource(R.string.ring_snooze_minutes, item.snoozeMinutes)
+                else stringResource(FiringNotifications.verbLabel(verb))
+                // The last verb is the primary action: filled, and nearest the thumb.
+                if (i == verbs.lastIndex) {
+                    Button(onClick = { onAct(item.key, verb) }, modifier = Modifier.weight(1f).height(56.dp), colors = ButtonDefaults.buttonColors()) {
+                        Text(text)
+                    }
+                } else {
+                    OutlinedButton(onClick = { onAct(item.key, verb) }, modifier = Modifier.weight(1f).height(56.dp)) { Text(text) }
                 }
-            }
-            Button(
-                onClick = { onDismiss(item.scheduleId) },
-                modifier = Modifier.weight(1f).height(56.dp),
-                colors = ButtonDefaults.buttonColors(),
-            ) {
-                Text(stringResource(R.string.action_dismiss))
             }
         }
     }

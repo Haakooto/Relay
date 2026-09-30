@@ -9,7 +9,6 @@
     <string name="pane_settings">Settings</string>
 
     <!-- Placeholders until each pane's build step lands -->
-    <string name="placeholder_timers">Timers and relays arrive in build steps 3 and 4.</string>
     <string name="placeholder_stopwatch">Stopwatches arrive in build step 6.</string>
     <string name="placeholder_clock">The clock and locations arrive in build step 7.</string>
 
@@ -121,5 +120,98 @@
     <plurals name="ring_more_ringing">
         <item quantity="one">%1$s, and %2$d more</item>
         <item quantity="other">%1$s, and %2$d more</item>
+    </plurals>
+    <string name="option_none">None</string>
+    <string name="option_custom">Custom</string>
+    <string name="number_range">%1$d to %2$d</string>
+
+    <!-- Timers and relays (build steps 3-4) -->
+    <string name="channel_timers">Timers and relays</string>
+    <string name="kind_timer">Timer</string>
+    <string name="kind_relay">Relay</string>
+    <string name="run_pause">Pause</string>
+    <string name="run_resume">Resume</string>
+    <string name="run_reset">Reset</string>
+    <string name="run_add_minute">+1 min</string>
+    <string name="run_stop">Stop</string>
+    <string name="run_stop_relay">Stop relay</string>
+    <string name="run_continue">Continue</string>
+    <string name="run_restart">Restart</string>
+    <string name="run_done">Done</string>
+    <string name="run_paused_left">Paused · %1$s left</string>
+    <string name="run_awaiting">Waiting for you · %1$s</string>
+    <string name="run_waiting_short">Waiting</string>
+    <string name="run_step_of">Step %1$d of %2$d</string>
+    <string name="ring_boundary_label">Next step</string>
+    <string name="ring_done_label">Timer done</string>
+    <string name="action_start">Start</string>
+    <string name="action_move_up">Move up</string>
+    <string name="action_move_down">Move down</string>
+    <string name="timers_library">Library</string>
+    <string name="timers_empty">Nothing saved yet. Tap + for a quick timer, or to build a timer or relay.</string>
+    <string name="timers_add">Add</string>
+    <string name="timers_quick_start">Quick start</string>
+    <string name="timers_new_timer">New timer</string>
+    <string name="timers_new_relay">New relay</string>
+    <string name="timers_new_header">New header</string>
+    <string name="timers_rename_header">Rename header</string>
+    <string name="timers_broken">can\'t run, open to fix</string>
+    <string name="timer_new">New timer</string>
+    <string name="timer_edit">Edit timer</string>
+    <string name="timer_duration">Duration</string>
+    <string name="timer_duration_is">= %1$s</string>
+    <string name="timer_one_duration">A timer is one duration, like 25m or 1h30m</string>
+    <string name="block_label">Label</string>
+    <string name="block_label_hint">Needed to save. Letters, digits and _ only, so relays can use it</string>
+    <string name="save_label_required">Give it a label to save it. To run it once, tap Start.</string>
+    <string name="save_label_invalid">Labels can only use letters, digits and _, starting with a letter (and not a word like repeat)</string>
+    <string name="save_label_taken">Another timer or relay already has that label</string>
+    <string name="save_cycle">A relay can\'t contain itself: %1$s</string>
+    <string name="delete_title">Delete %1$s?</string>
+    <string name="delete_breaks">These relays use it and will stop working: %1$s</string>
+    <string name="relay_new">New relay</string>
+    <string name="relay_edit">Edit relay</string>
+    <string name="relay_script">Steps</string>
+    <string name="relay_syntax_help">How to write steps</string>
+    <string name="relay_error_at">At %1$s:</string>
+    <string name="relay_tap_to_override">Tap a step to change its sound or what happens after it</string>
+    <string name="relay_anonymous_step">Step</string>
+    <string name="relay_transition">Between steps</string>
+    <string name="relay_seamless">Continue by itself</string>
+    <string name="relay_interaction">Wait for me</string>
+    <string name="relay_tone">Cue between steps</string>
+    <string name="relay_default_sound">Sound for unnamed steps</string>
+    <string name="tone_beep">Beep</string>
+    <string name="tone_double_beep">Double beep</string>
+    <string name="tone_chime">Chime</string>
+    <string name="tone_pip">Pip</string>
+    <string name="tone_silent">Silent</string>
+    <string name="override_sound">Sound for this step</string>
+    <string name="override_transition">After this step</string>
+    <string name="override_relay_default">Relay default</string>
+    <string name="override_clear">Clear</string>
+    <string name="override_sound_set">Own sound</string>
+    <string name="override_then">then: %1$s</string>
+    <string name="help_list">Steps in order, separated by commas or new lines.</string>
+    <string name="help_durations">A plain number is minutes. Or use h, m and s.</string>
+    <string name="help_refs">Names of saved timers and relays run as steps, with their own sounds. Editing them updates every relay that uses them.</string>
+    <string name="help_ref_math">A name in arithmetic is its length: with Test2 = 10m, this is one 8-minute step, with Test2\'s sound.</string>
+    <string name="help_repeat">Repeat anything, including names.</string>
+    <string name="help_range">Steps of 1, 1.5, 2 and 2.5 minutes. The end is left out; the step can be a fraction.</string>
+    <string name="help_label">A label on an unnamed step, shown while it runs and rings.</string>
+    <string name="help_time">Worked out once, when the relay starts.</string>
+    <string name="settings_timers_title">Timers</string>
+    <string name="settings_quick_timers">Quick-start timers (tap to change)</string>
+    <string name="settings_quick_timer_minutes">Minutes</string>
+    <string name="settings_default_timer_sound">Default timer sound</string>
+    <string name="settings_max_plan_size">Max steps in a relay</string>
+    <string name="settings_long_relay">Warn when a relay is longer than</string>
+    <plurals name="relay_total">
+        <item quantity="one">Total %1$s · %2$d step</item>
+        <item quantity="other">Total %1$s · %2$d steps</item>
+    </plurals>
+    <plurals name="relay_long_warning">
+        <item quantity="one">That\'s longer than %1$d hour. Intended?</item>
+        <item quantity="other">That\'s longer than %1$d hours. Intended?</item>
     </plurals>
 </resources>

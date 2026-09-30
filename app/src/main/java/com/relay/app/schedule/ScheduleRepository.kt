@@ -6,7 +6,9 @@ import com.relay.app.data.schedule.ScheduleDao
 import com.relay.app.data.schedule.ScheduleEntity
 import com.relay.app.data.schedule.ScheduleExceptionEntity
 import com.relay.app.data.settings.AppSettings
+import com.relay.app.firing.RingContext
 import com.relay.app.firing.RingItem
+import com.relay.app.firing.RingSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.sync.Mutex
@@ -146,8 +148,10 @@ class ScheduleRepository(
         val soundUri = s.ring.soundUri ?: settings().defaultAlarmSoundUri
         FireDecision.Ring(
             RingItem(
-                scheduleId = s.id,
+                source = RingSource.Schedule(s.id),
+                context = RingContext.ALARM,
                 label = s.label,
+                detail = null,
                 scheduledAtMillis = triggerAtMillis,
                 soundUri = soundUri,
                 vibrate = s.ring.vibrate,

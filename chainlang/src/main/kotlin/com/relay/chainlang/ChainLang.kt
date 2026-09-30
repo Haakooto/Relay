@@ -32,13 +32,24 @@ object ChainLang {
         return Evaluator(now, BlockResolver { throw UnknownReferenceException(it) }, random).evaluate(root).sumOf { it.durationSeconds }
     }
 
-    /** Every label a chain's content refers to directly — what the store needs for cycle checks (spec §6.6). */
+    /**
+     * Every label a relay's content depends on directly, including names used in arithmetic
+     * (`Test2 - 2` needs Test2's duration). What the store needs for cycle checks (spec §06).
+     */
     fun referencedLabels(source: String): Set<String> = referencedLabels(Parser.parse(source))
 
     fun referencedLabels(node: ChainNode): Set<String> = when (node) {
         is Group -> node.elements.flatMap { referencedLabels(it) }.toSet()
         is Ref -> setOf(node.label)
         is RepeatCall -> referencedLabels(node.body)
-        is DurationLiteral, is DurationExpr, is RangeCall, is ArangeCall -> emptySet()
+        is DurationNode -> node.terms.mapNotNull { (it.term as? RefValueTerm)?.label }.toSet()
+        is RangeCall -> emptySet()
     }
+
+    /** Reserved words: never valid as a block name. */
+    val KEYWORDS = setOf("repeat", "range", "arange", "RANDOM", "MINUTE", "HOUR", "SECOND", "NOW")
+
+    /** Whether [label] can be referenced from a script: an identifier that isn't a keyword. */
+    fun isReferenceableLabel(label: String): Boolean =
+        label.isNotEmpty() && label[0].isLetter() && label.all { it.isLetterOrDigit() || it == '_' } && label !in KEYWORDS
 }

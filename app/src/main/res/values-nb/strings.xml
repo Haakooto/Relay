@@ -5,7 +5,6 @@
     <string name="pane_clock">Klokke</string>
     <string name="pane_settings">Innstillinger</string>
 
-    <string name="placeholder_timers">Tidtakere og stafetter kommer i byggesteg 3 og 4.</string>
     <string name="placeholder_stopwatch">Stoppeklokker kommer i byggesteg 6.</string>
     <string name="placeholder_clock">Klokken og steder kommer i byggesteg 7.</string>
 
@@ -113,5 +112,98 @@
     <plurals name="ring_more_ringing">
         <item quantity="one">%1$s, og %2$d til</item>
         <item quantity="other">%1$s, og %2$d til</item>
+    </plurals>
+    <string name="option_none">Ingen</string>
+    <string name="option_custom">Egendefinert</string>
+    <string name="number_range">%1$d til %2$d</string>
+
+    <!-- Timers and relays (build steps 3-4) -->
+    <string name="channel_timers">Tidtakere og stafetter</string>
+    <string name="kind_timer">Tidtaker</string>
+    <string name="kind_relay">Stafett</string>
+    <string name="run_pause">Pause</string>
+    <string name="run_resume">Fortsett</string>
+    <string name="run_reset">Tilbakestill</string>
+    <string name="run_add_minute">+1 min</string>
+    <string name="run_stop">Stopp</string>
+    <string name="run_stop_relay">Stopp stafetten</string>
+    <string name="run_continue">Videre</string>
+    <string name="run_restart">Start på nytt</string>
+    <string name="run_done">Ferdig</string>
+    <string name="run_paused_left">Pause · %1$s igjen</string>
+    <string name="run_awaiting">Venter på deg · %1$s</string>
+    <string name="run_waiting_short">Venter</string>
+    <string name="run_step_of">Steg %1$d av %2$d</string>
+    <string name="ring_boundary_label">Neste steg</string>
+    <string name="ring_done_label">Tiden er ute</string>
+    <string name="action_start">Start</string>
+    <string name="action_move_up">Flytt opp</string>
+    <string name="action_move_down">Flytt ned</string>
+    <string name="timers_library">Bibliotek</string>
+    <string name="timers_empty">Ingenting lagret ennå. Trykk + for en rask tidtaker, eller for å lage en tidtaker eller stafett.</string>
+    <string name="timers_add">Legg til</string>
+    <string name="timers_quick_start">Hurtigstart</string>
+    <string name="timers_new_timer">Ny tidtaker</string>
+    <string name="timers_new_relay">Ny stafett</string>
+    <string name="timers_new_header">Ny overskrift</string>
+    <string name="timers_rename_header">Gi nytt navn</string>
+    <string name="timers_broken">kan ikke kjøre, åpne for å fikse</string>
+    <string name="timer_new">Ny tidtaker</string>
+    <string name="timer_edit">Rediger tidtaker</string>
+    <string name="timer_duration">Varighet</string>
+    <string name="timer_duration_is">= %1$s</string>
+    <string name="timer_one_duration">En tidtaker er én varighet, som 25m eller 1h30m</string>
+    <string name="block_label">Etikett</string>
+    <string name="block_label_hint">Trengs for å lagre. Bare bokstaver, tall og _, så stafetter kan bruke den</string>
+    <string name="save_label_required">Gi den en etikett for å lagre. Trykk Start for å kjøre den én gang.</string>
+    <string name="save_label_invalid">Etiketter kan bare ha bokstaver, tall og _, og må starte med en bokstav (og ikke være et ord som repeat)</string>
+    <string name="save_label_taken">En annen tidtaker eller stafett har allerede den etiketten</string>
+    <string name="save_cycle">En stafett kan ikke inneholde seg selv: %1$s</string>
+    <string name="delete_title">Slette %1$s?</string>
+    <string name="delete_breaks">Disse stafettene bruker den og slutter å virke: %1$s</string>
+    <string name="relay_new">Ny stafett</string>
+    <string name="relay_edit">Rediger stafett</string>
+    <string name="relay_script">Steg</string>
+    <string name="relay_syntax_help">Slik skriver du steg</string>
+    <string name="relay_error_at">Ved %1$s:</string>
+    <string name="relay_tap_to_override">Trykk på et steg for å endre lyden eller hva som skjer etterpå</string>
+    <string name="relay_anonymous_step">Steg</string>
+    <string name="relay_transition">Mellom stegene</string>
+    <string name="relay_seamless">Gå videre selv</string>
+    <string name="relay_interaction">Vent på meg</string>
+    <string name="relay_tone">Signal mellom stegene</string>
+    <string name="relay_default_sound">Lyd for steg uten navn</string>
+    <string name="tone_beep">Pip</string>
+    <string name="tone_double_beep">Dobbelt pip</string>
+    <string name="tone_chime">Klokke</string>
+    <string name="tone_pip">Kort pip</string>
+    <string name="tone_silent">Stille</string>
+    <string name="override_sound">Lyd for dette steget</string>
+    <string name="override_transition">Etter dette steget</string>
+    <string name="override_relay_default">Stafettens standard</string>
+    <string name="override_clear">Fjern</string>
+    <string name="override_sound_set">Egen lyd</string>
+    <string name="override_then">deretter: %1$s</string>
+    <string name="help_list">Stegene i rekkefølge, skilt med komma eller linjeskift.</string>
+    <string name="help_durations">Et tall alene er minutter. Eller bruk h, m og s.</string>
+    <string name="help_refs">Navn på lagrede tidtakere og stafetter kjøres som steg, med egne lyder. Endrer du dem, oppdateres alle stafetter som bruker dem.</string>
+    <string name="help_ref_math">Et navn i regnestykker er lengden: med Test2 = 10m blir dette ett steg på 8 minutter, med Test2 sin lyd.</string>
+    <string name="help_repeat">Gjenta hva som helst, også navn.</string>
+    <string name="help_range">Steg på 1, 1,5, 2 og 2,5 minutter. Slutten er ikke med; steget kan være en brøk.</string>
+    <string name="help_label">En etikett på et steg uten navn, vist mens det går og ringer.</string>
+    <string name="help_time">Regnes ut én gang, når stafetten starter.</string>
+    <string name="settings_timers_title">Tidtakere</string>
+    <string name="settings_quick_timers">Hurtigstart (trykk for å endre)</string>
+    <string name="settings_quick_timer_minutes">Minutter</string>
+    <string name="settings_default_timer_sound">Standard lyd for tidtakere</string>
+    <string name="settings_max_plan_size">Maks antall steg i en stafett</string>
+    <string name="settings_long_relay">Advar når en stafett er lenger enn</string>
+    <plurals name="relay_total">
+        <item quantity="one">Totalt %1$s · %2$d steg</item>
+        <item quantity="other">Totalt %1$s · %2$d steg</item>
+    </plurals>
+    <plurals name="relay_long_warning">
+        <item quantity="one">Det er lenger enn %1$d time. Med vilje?</item>
+        <item quantity="other">Det er lenger enn %1$d timer. Med vilje?</item>
     </plurals>
 </resources>

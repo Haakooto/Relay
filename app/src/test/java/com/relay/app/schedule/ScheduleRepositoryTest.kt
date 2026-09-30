@@ -152,6 +152,12 @@ class ScheduleRepositoryTest {
         assertFalse((repo.onFired("a", ms("2026-09-30T07:10"), true) as FireDecision.Ring).item.canSnooze)
     }
 
+    @Test fun maxSnoozesNoneNeverOffersSnooze() = runBlocking {
+        repo.save(alarm(maxSnoozes = 0))
+        clock = at("2026-09-30T07:00")
+        assertFalse((repo.onFired("a", ms("2026-09-30T07:00"), false) as FireDecision.Ring).item.canSnooze)
+    }
+
     @Test fun oneOffDeleteAfterDismiss() = runBlocking {
         repo.save(alarm(days = emptySet(), afterFire = AfterFire.DELETE))
         clock = at("2026-09-30T07:00")

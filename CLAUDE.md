@@ -18,6 +18,9 @@ Only `chainlang/` was carried over as-is.
   **Update it whenever you build, fix or retest a feature**: one row per feature, a status chip
   (Approved/WIP/Lacking/Planned/Deferred/Declined) and a one-line note. Keep the header counts in
   sync with the rows.
+- [`docs/device-tests.md`](docs/device-tests.md): the user's on-device checklist. **After every
+  build, add a section** with specific things to try (short, one action and one expected result
+  per line). When the user reports results, tick them there and update the feature map to match.
 - [`CHANGELOG.md`](CHANGELOG.md): human-readable notes per tagged release. Update only when
   tagging, and write what changed for the user, not how.
 

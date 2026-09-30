@@ -62,16 +62,14 @@ class FiringNotifications(private val context: Context, private val settings: Se
     suspend fun ringing(items: List<RingItem>): Notification {
         val top = items.last()
         val is24h = settings.current().clockFormat24h
+        val main = top.detail ?: if (top.context == RingContext.ALARM) TimeText.ofMillis(top.scheduledAtMillis, is24h) else null
         val builder = ringingBuilder()
-            .setContentTitle(top.label.ifBlank { context.getString(R.string.ring_default_label) })
+            .setContentTitle(top.label.ifBlank { context.getString(defaultLabel(top.context)) })
             .setContentText(
-                if (items.size > 1) context.resources.getQuantityString(R.plurals.ring_more_ringing, items.size - 1, TimeText.ofMillis(top.scheduledAtMillis, is24h), items.size - 1)
-                else TimeText.ofMillis(top.scheduledAtMillis, is24h),
+                if (items.size > 1) context.resources.getQuantityString(R.plurals.ring_more_ringing, items.size - 1, main.orEmpty(), items.size - 1)
+                else main,
             )
-        if (top.canSnooze) {
-            builder.addAction(0, context.getString(R.string.action_snooze), servicePending(RingService.ACTION_SNOOZE, top.scheduleId))
-        }
-        builder.addAction(0, context.getString(R.string.action_dismiss), servicePending(RingService.ACTION_DISMISS, top.scheduleId))
+        top.verbs.forEach { verb -> builder.addAction(0, context.getString(verbLabel(verb)), servicePending(top.key, verb)) }
         return builder.build()
     }
 
@@ -113,8 +111,9 @@ class FiringNotifications(private val context: Context, private val settings: Se
         manager.notify(tag(MISSED, s.id), 0, notification)
     }
 
-    /** Rang out its timeout without anyone acting on it. */
+    /** An alarm rang out its timeout without anyone acting on it. */
     suspend fun showTimedOut(item: RingItem) {
+        val scheduleId = (item.source as? RingSource.Schedule)?.id ?: return
         val is24h = settings.current().clockFormat24h
         val notification = NotificationCompat.Builder(context, CH_MISSED)
             .setSmallIcon(R.drawable.ic_launcher_monochrome)
@@ -123,10 +122,10 @@ class FiringNotifications(private val context: Context, private val settings: Se
             .setContentIntent(openApp())
             .setAutoCancel(true)
             .build()
-        manager.notify(tag(MISSED, item.scheduleId), 0, notification)
+        manager.notify(tag(MISSED, scheduleId), 0, notification)
     }
 
-    /** Used by FireReceiver if the ring service itself can't be started. */
+    /** Used by the receivers if the ring service itself can't be started. */
     fun showFallback(scheduleId: String) {
         val notification = NotificationCompat.Builder(context, CH_FALLBACK)
             .setSmallIcon(R.drawable.ic_launcher_monochrome)
@@ -168,11 +167,9 @@ class FiringNotifications(private val context: Context, private val settings: Se
         context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE,
     )
 
-    private fun servicePending(action: String, scheduleId: String): PendingIntent = PendingIntent.getService(
+    private fun servicePending(key: String, verb: RingVerb): PendingIntent = PendingIntent.getService(
         context, 0,
-        Intent(context, RingService::class.java).setAction(action)
-            .setData(Uri.parse("relay://ring/$scheduleId"))
-            .putExtra(RingService.EXTRA_SCHEDULE_ID, scheduleId),
+        RingService.actIntent(context, key, verb).setData(Uri.parse("relay://ring/$key/$verb")),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
@@ -188,6 +185,21 @@ class FiringNotifications(private val context: Context, private val settings: Se
 
     companion object {
         const val RINGING_NOTIFICATION_ID = 1
+
+        fun defaultLabel(ringContext: RingContext): Int = when (ringContext) {
+            RingContext.ALARM -> R.string.ring_default_label
+            RingContext.RELAY_BOUNDARY -> R.string.ring_boundary_label
+            RingContext.RUN_DONE -> R.string.ring_done_label
+        }
+
+        fun verbLabel(verb: RingVerb): Int = when (verb) {
+            RingVerb.SNOOZE -> R.string.action_snooze
+            RingVerb.DISMISS -> R.string.action_dismiss
+            RingVerb.STOP -> R.string.run_stop
+            RingVerb.CONTINUE -> R.string.run_continue
+            RingVerb.RESTART -> R.string.run_restart
+            RingVerb.ADD_MINUTE -> R.string.run_add_minute
+        }
         private const val CH_RINGING = "ringing"
         private const val CH_UPCOMING = "upcoming"
         private const val CH_SNOOZED = "snoozed"

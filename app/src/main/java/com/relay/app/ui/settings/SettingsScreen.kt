@@ -27,6 +27,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
 import com.relay.app.data.settings.ThemeSetting
+import com.relay.app.ui.alarms.SNOOZE_PRESETS
+import com.relay.app.ui.alarms.SNOOZE_RANGE
+import com.relay.app.ui.common.NumberDialog
+import com.relay.app.ui.common.NumberOptionChips
+import com.relay.app.util.DurationText
+import androidx.compose.material3.AssistChip
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.relay.app.ui.common.OptionChips
 import com.relay.app.ui.common.SoundPickerRow
 import java.time.DayOfWeek
@@ -85,11 +94,11 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
 
         HorizontalDivider()
         SectionTitle(R.string.settings_alarms_title)
-        OptionChips(
+        NumberOptionChips(
             title = stringResource(R.string.settings_default_snooze),
-            options = listOf(5, 10, 15, 20, 30), selected = current.defaultSnoozeMinutes,
+            presets = SNOOZE_PRESETS, value = current.defaultSnoozeMinutes, range = SNOOZE_RANGE,
             label = { stringResource(R.string.minutes_short, it) },
-            onSelect = viewModel::setDefaultSnoozeMinutes,
+            onChange = viewModel::setDefaultSnoozeMinutes,
         )
         SoundPickerRow(stringResource(R.string.settings_default_alarm_sound), current.defaultAlarmSoundUri, viewModel::setDefaultAlarmSoundUri)
         OptionChips(
@@ -115,6 +124,35 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 }
             },
             onSelect = viewModel::setUpcomingLeadMinutes,
+        )
+
+        HorizontalDivider()
+        SectionTitle(R.string.settings_timers_title)
+        Text(stringResource(R.string.settings_quick_timers), style = MaterialTheme.typography.bodyLarge)
+        var editingQuick by remember { mutableStateOf<Int?>(null) }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            current.quickTimerSeconds.forEachIndexed { i, seconds ->
+                AssistChip(onClick = { editingQuick = i }, label = { Text(DurationText.short(seconds)) })
+            }
+        }
+        editingQuick?.let { i ->
+            NumberDialog(
+                stringResource(R.string.settings_quick_timer_minutes), (current.quickTimerSeconds[i] / 60).toInt().coerceAtLeast(1), 1..999,
+                onDismiss = { editingQuick = null },
+            ) { viewModel.setQuickTimerMinutes(i, it); editingQuick = null }
+        }
+        SoundPickerRow(stringResource(R.string.settings_default_timer_sound), current.defaultTimerSoundUri, viewModel::setDefaultTimerSoundUri)
+        NumberOptionChips(
+            title = stringResource(R.string.settings_max_plan_size),
+            presets = listOf(100, 300, 1000), value = current.maxPlanSize, range = 1..1000,
+            label = { it.toString() },
+            onChange = viewModel::setMaxPlanSize,
+        )
+        NumberOptionChips(
+            title = stringResource(R.string.settings_long_relay),
+            presets = listOf(12, 24, 48), value = current.longRelayWarningHours, range = 1..168,
+            label = { stringResource(R.string.hours_short, it) },
+            onChange = viewModel::setLongRelayWarningHours,
         )
 
         HorizontalDivider()

@@ -4,6 +4,10 @@ import android.content.Context
 import com.relay.app.data.RelayDatabase
 import com.relay.app.data.settings.SettingsRepository
 import com.relay.app.firing.FiringNotifications
+import com.relay.app.library.LibraryRepository
+import com.relay.app.run.RunNotifications
+import com.relay.app.run.RunRepository
+import com.relay.app.run.RunScheduler
 import com.relay.app.schedule.AlarmScheduler
 import com.relay.app.schedule.ScheduleRepository
 
@@ -16,6 +20,11 @@ class AppContainer(context: Context) {
     val firingNotifications: FiringNotifications by lazy { FiringNotifications(appContext, settings) }
     val schedules: ScheduleRepository by lazy {
         ScheduleRepository(database.scheduleDao(), alarmScheduler, firingNotifications, settings::current)
+    }
+    val runNotifications: RunNotifications by lazy { RunNotifications(appContext) }
+    val runs: RunRepository by lazy { RunRepository(database.runDao(), RunScheduler(appContext), runNotifications) }
+    val library: LibraryRepository by lazy {
+        LibraryRepository(database.libraryDao(), database.libraryHeaderDao(), runs, settings::current)
     }
 }
 

@@ -58,6 +58,14 @@
             android:exported="false" />
 
         <receiver
+            android:name=".run.RunStepReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".run.RunActionReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".schedule.RescheduleReceiver"
             android:exported="true">
             <intent-filter>

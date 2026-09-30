@@ -29,6 +29,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setDefaultAlarmSoundUri(value: String?) = viewModelScope.launch { repository.setDefaultAlarmSoundUri(value) }
     fun setDefaultRampSeconds(value: Int) = viewModelScope.launch { repository.setDefaultRampSeconds(value) }
     fun setRingTimeoutMinutes(value: Int) = viewModelScope.launch { repository.setRingTimeoutMinutes(value) }
+    fun setQuickTimerMinutes(index: Int, minutes: Int) = viewModelScope.launch { repository.setQuickTimer(index, minutes * 60L) }
+    fun setDefaultTimerSoundUri(value: String?) = viewModelScope.launch { repository.setDefaultTimerSoundUri(value) }
+    fun setMaxPlanSize(value: Int) = viewModelScope.launch { repository.setMaxPlanSize(value) }
+    fun setLongRelayWarningHours(value: Int) = viewModelScope.launch { repository.setLongRelayWarningHours(value) }
     fun setUpcomingLeadMinutes(value: Int) = viewModelScope.launch {
         repository.setUpcomingLeadMinutes(value)
         // The lead time decides when upcoming notifications are armed: re-arm everything.

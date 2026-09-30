@@ -38,6 +38,7 @@ internal class Lexer(private val input: String) {
                 c == '-' -> { pos++; Token.Minus }
                 c.isDigit() -> lexNumberOrDuration()
                 c.isLetter() -> lexIdent()
+                c == '"' -> lexString()
                 else -> throw ChainSyntaxException("unexpected character '$c'", start)
             }
             tokens += LexedToken(token, start, precededByNewline)
@@ -61,8 +62,25 @@ internal class Lexer(private val input: String) {
         return input.substring(start, pos).toLong()
     }
 
+    private fun lexString(): Token {
+        val start = pos
+        pos++ // opening quote
+        val end = input.indexOf('"', pos)
+        if (end < 0) throw ChainSyntaxException("unclosed \"", start)
+        val value = input.substring(pos, end)
+        if ('\n' in value) throw ChainSyntaxException("a label can't span lines", start)
+        pos = end + 1
+        return Token.Str(value)
+    }
+
     private fun lexNumberOrDuration(): Token {
+        val numberStart = pos
         val first = readDigits()
+        if (pos + 1 < input.length && input[pos] == '.' && input[pos + 1].isDigit()) {
+            pos++
+            readDigits()
+            return Token.Decimal(input.substring(numberStart, pos).toDouble())
+        }
         val unit = if (pos < input.length) input[pos] else null
         if (unit != 'h' && unit != 'm' && unit != 's') {
             return Token.Number(first)

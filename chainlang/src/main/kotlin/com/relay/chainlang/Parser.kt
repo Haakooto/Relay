@@ -3,15 +3,17 @@ package com.relay.chainlang
 /**
  * Recursive-descent parser for the grammar in spec §6.4.
  *
- * Known scope limit (documented, not accidental): a bare parenthesized arithmetic group like
- * `(3 + 4)` is only supported where an [IntExpr] is already expected (call arguments, the `NOW`
- * offset) — at the top of an "element", `(` always starts a nested chain-content group instead,
- * since that's the shape every real example in the spec actually uses.
+ * Known scope limit (documented, not accidental): at the start of an element, `(` always starts
+ * a nested group. Parenthesized arithmetic like `(3 + 4)` works only after an operator or inside
+ * call arguments.
  */
 internal class Parser(private val tokens: List<LexedToken>) {
     private var index = 0
 
     private val timeFns = setOf("MINUTE", "HOUR", "SECOND")
+
+    /** Reserved words: never a block name. Kept in sync with [ChainLang.KEYWORDS]. */
+    private val keywords = ChainLang.KEYWORDS
 
     companion object {
         fun parse(source: String): Group {
@@ -75,8 +77,9 @@ internal class Parser(private val tokens: List<LexedToken>) {
         val lexed = peek()
         return when (val tok = lexed.token) {
             is Token.LParen -> parseChainContent()
-            is Token.DurationLiteral -> { advance(); DurationLiteral(tok.seconds) }
-            is Token.Number -> DurationExpr(parseIntExpr())
+            is Token.DurationLiteral, is Token.Number -> parseDuration()
+            is Token.Decimal -> throw ChainSyntaxException("decimals only work inside range(); use 1m30s for a step", lexed.pos)
+            is Token.Str -> throw ChainSyntaxException("a label goes after a duration, like 5m \"stretch\"", lexed.pos)
             is Token.Ident -> parseIdentElement(tok.name, lexed.pos)
             else -> throw ChainSyntaxException("expected an element (duration, reference, or function)", lexed.pos)
         }
@@ -84,14 +87,51 @@ internal class Parser(private val tokens: List<LexedToken>) {
 
     private fun parseIdentElement(name: String, pos: Int): ChainNode = when {
         name == "repeat" -> parseRepeatCall()
-        name == "range" -> parseRangeLikeCall("range") { s, e, st -> RangeCall(s, e, st) }
-        name == "arange" -> parseRangeLikeCall("arange") { s, e, st -> ArangeCall(s, e, st) }
-        name in timeFns || name == "RANDOM" -> DurationExpr(parseIntExpr())
+        name == "range" -> parseRangeCall()
+        name == "arange" -> throw ChainSyntaxException("arange was removed: range now takes fractional steps", pos)
+        name in timeFns || name == "RANDOM" -> parseDuration()
         name == "NOW" -> throw ChainSyntaxException("NOW can only appear inside MINUTE()/HOUR()/SECOND()", pos)
         else -> {
-            if (peek().token is Token.LParen) throw ChainSyntaxException("unknown function \"$name\"", pos)
-            advance()
-            Ref(name)
+            if (tokens[index + 1].token is Token.LParen) throw ChainSyntaxException("unknown function \"$name\"", pos)
+            val next = tokens[index + 1].token
+            if (next is Token.Plus || next is Token.Minus) {
+                parseDuration() // a name inside arithmetic: its total duration
+            } else {
+                advance()
+                if (peek().token is Token.Str) {
+                    throw ChainSyntaxException("labels go on anonymous steps; \"$name\" already has its own name", peek().pos)
+                }
+                Ref(name)
+            }
+        }
+    }
+
+    /** `term ((+|-) term)* [STRING]`, see [DurationNode]. */
+    private fun parseDuration(): DurationNode {
+        val terms = mutableListOf(SignedTerm(false, parseDurationTerm()))
+        while (true) {
+            when (peek().token) {
+                is Token.Plus -> { advance(); terms += SignedTerm(false, parseDurationTerm()) }
+                is Token.Minus -> { advance(); terms += SignedTerm(true, parseDurationTerm()) }
+                else -> break
+            }
+        }
+        val label = (peek().token as? Token.Str)?.let { advance(); it.value }
+        return DurationNode(terms, label)
+    }
+
+    private fun parseDurationTerm(): DurationTerm {
+        val lexed = peek()
+        return when (val tok = lexed.token) {
+            is Token.DurationLiteral -> { advance(); SecondsTerm(tok.seconds) }
+            is Token.Number -> { advance(); MinutesTerm(IntLiteral(tok.value)) }
+            is Token.Ident -> when {
+                tok.name in timeFns || tok.name == "RANDOM" -> MinutesTerm(parseIdentIntTerm(tok.name, lexed.pos))
+                tok.name in keywords -> throw ChainSyntaxException("\"${tok.name}\" can't be used in arithmetic", lexed.pos)
+                else -> { advance(); RefValueTerm(tok.name) }
+            }
+            is Token.LParen -> { advance(); val e = parseIntExpr(); expect<Token.RParen>(); MinutesTerm(e) }
+            else -> throw ChainSyntaxException("expected a duration, a number or a name", lexed.pos)
         }
     }
 
@@ -105,19 +145,19 @@ internal class Parser(private val tokens: List<LexedToken>) {
         return RepeatCall(count, body)
     }
 
-    private fun parseRangeLikeCall(name: String, build: (IntExpr, IntExpr, IntExpr?) -> ChainNode): ChainNode {
-        expectIdent(name)
+    private fun parseRangeCall(): ChainNode {
+        expectIdent("range")
         expect<Token.LParen>()
-        val start = parseIntExpr()
+        val start = parseIntExpr(allowDecimal = true)
         expectComma()
-        val stop = parseIntExpr()
+        val stop = parseIntExpr(allowDecimal = true)
         var step: IntExpr? = null
         if (peek().token is Token.Comma) {
             advance()
-            step = parseIntExpr()
+            step = parseIntExpr(allowDecimal = true)
         }
         expect<Token.RParen>()
-        return build(start, stop, step)
+        return RangeCall(start, stop, step)
     }
 
     private fun expectComma() {
@@ -125,22 +165,27 @@ internal class Parser(private val tokens: List<LexedToken>) {
         if (lexed.token !is Token.Comma) throw ChainSyntaxException("expected \",\", found ${lexed.token}", lexed.pos)
     }
 
-    private fun parseIntExpr(): IntExpr {
-        var left = parseIntTerm()
+    private fun parseIntExpr(allowDecimal: Boolean = false): IntExpr {
+        var left = parseIntTerm(allowDecimal)
         while (true) {
             when (peek().token) {
-                is Token.Plus -> { advance(); left = IntAdd(left, parseIntTerm()) }
-                is Token.Minus -> { advance(); left = IntSub(left, parseIntTerm()) }
+                is Token.Plus -> { advance(); left = IntAdd(left, parseIntTerm(allowDecimal)) }
+                is Token.Minus -> { advance(); left = IntSub(left, parseIntTerm(allowDecimal)) }
                 else -> return left
             }
         }
     }
 
-    private fun parseIntTerm(): IntExpr {
+    private fun parseIntTerm(allowDecimal: Boolean = false): IntExpr {
         val lexed = peek()
         return when (val tok = lexed.token) {
             is Token.Number -> { advance(); IntLiteral(tok.value) }
-            is Token.LParen -> { advance(); val e = parseIntExpr(); expect<Token.RParen>(); e }
+            is Token.Decimal -> {
+                if (!allowDecimal) throw ChainSyntaxException("decimals only work inside range()", lexed.pos)
+                advance()
+                DecimalLiteral(tok.value)
+            }
+            is Token.LParen -> { advance(); val e = parseIntExpr(allowDecimal); expect<Token.RParen>(); e }
             is Token.Ident -> parseIdentIntTerm(tok.name, lexed.pos)
             else -> throw ChainSyntaxException("expected a number or expression", lexed.pos)
         }

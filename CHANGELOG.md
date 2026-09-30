@@ -5,6 +5,28 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v1.0-alpha.3 (2026-09-30)
+
+Untested pre-release: timers and relays. Not tried on a device yet.
+
+- Quick timers: the + button on Timers starts a 1, 5, 10 or 15 minute timer with one tap. The
+  four durations can be changed in Settings.
+- Timers can be saved to a library, and started as often as you like, even several at once.
+  Each running timer has its own card and notification, with pause, +1 min, reset and stop.
+  When it ends it rings full screen with Stop, Restart and +1 min.
+- Relays: chains of timers and other relays, written as short scripts like
+  `(repeat(4, (Work, Break)))`. Steps can pass by themselves with a short beep, or wait for you
+  to tap Continue. Tap a step to give it its own sound or change what happens after it.
+- The script editor closes brackets, indents, suggests names as you type, previews every step
+  and the total, and points at mistakes. A relay can't include itself.
+- New in the script language: `(Test2 - 2)` makes one step two minutes shorter than Test2,
+  `range(1, 3, 0.5)` counts in half minutes, and `5m "stretch"` labels a step.
+- Renaming a timer or relay updates every relay that uses it.
+- Timers keep running and ring on time even if the app is closed or the phone restarts.
+- Snooze length can be any number of minutes, and "Max snoozes" can be set to None.
+- Known gaps: a relay left waiting at a step, or a finished timer, doesn't ring again after a
+  phone restart (it still waits on the Timers pane). Relay error messages are in English only.
+
 ## v1.0-alpha.2 (2026-09-30)
 
 Untested pre-release: alarms. Not tried on a device yet.

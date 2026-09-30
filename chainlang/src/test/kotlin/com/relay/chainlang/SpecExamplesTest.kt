@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-/** One test per worked example from spec §6.4/§6.5, so a spec change shows up here directly. */
+/** One test per worked example from the spec's relay-language section, so a spec change shows up here directly. */
 class SpecExamplesTest {
 
     private val noon = NowClock(hour = 14, minute = 37, second = 0)
@@ -19,14 +19,14 @@ class SpecExamplesTest {
     }
 
     @Test
-    fun `arange counts down`() {
-        val steps = run("(arange(20, 0, 5))")
+    fun `range counts down`() {
+        val steps = run("(range(20, 0, 5))")
         assertEquals(listOf(20L, 15L, 10L, 5L).map { it * 60 }, steps.map { it.durationSeconds })
     }
 
     @Test
-    fun `nested repeat of arange`() {
-        val steps = run("(3, repeat(3, arange(10,0,5)))")
+    fun `nested repeat of range`() {
+        val steps = run("(3, repeat(3, range(10,0,5)))")
         assertEquals(listOf(3, 10, 5, 10, 5, 10, 5).map { it * 60L }, steps.map { it.durationSeconds })
     }
 

@@ -52,8 +52,32 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun migrate2To3KeepsSchedulesAndAddsLibraryAndRuns() {
+        helper.createDatabase(TEST_DB, 2).apply {
+            execSQL(
+                "INSERT INTO schedules (id, label, hour, minute, oneOffEpochDay, repeatDays, endEpochDay, remainingCount, " +
+                    "afterFire, enabled, target, createdAtMillis, createdBy, snoozedUntilMillis, snoozesUsed, nextFireAtMillis, " +
+                    "ring_soundUri, ring_vibrate, ring_rampSeconds, ring_snoozeMinutes, ring_maxSnoozes) VALUES " +
+                    "('s1', 'Wake', 7, 0, NULL, 31, NULL, NULL, 'DISABLE', 1, 'RING', 0, 'user', NULL, 0, NULL, NULL, 1, 0, 10, NULL)",
+            )
+            close()
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 3, true, *RelayDatabase.MIGRATIONS).apply {
+            query("SELECT label FROM schedules WHERE id = 's1'").use {
+                assertTrue(it.moveToFirst())
+                assertEquals("Wake", it.getString(0))
+            }
+            query("SELECT COUNT(*) FROM runs").use {
+                assertTrue(it.moveToFirst())
+                assertEquals(0, it.getInt(0))
+            }
+            close()
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test"
-        const val LATEST_VERSION = 2
+        const val LATEST_VERSION = 3
     }
 }

@@ -20,6 +20,9 @@ import com.relay.app.R
 import com.relay.app.ui.alarms.AlarmEditScreen
 import com.relay.app.ui.alarms.AlarmsScreen
 import com.relay.app.ui.panes.PlaceholderPane
+import com.relay.app.ui.timers.RelayEditScreen
+import com.relay.app.ui.timers.TimerEditScreen
+import com.relay.app.ui.timers.TimersScreen
 import com.relay.app.ui.settings.SettingsScreen
 
 @Composable
@@ -34,7 +37,8 @@ fun RelayApp() {
                 Pane.entries.forEach { pane ->
                     NavigationBarItem(
                         selected = current?.hierarchy?.any { it.route == pane.route } == true ||
-                            (pane == Pane.ALARMS && current?.route?.startsWith("$ALARM_EDIT/") == true),
+                            (pane == Pane.ALARMS && current?.route?.startsWith("$ALARM_EDIT/") == true) ||
+                            (pane == Pane.TIMERS && (current?.route?.startsWith("$TIMER_EDIT/") == true || current?.route?.startsWith("$RELAY_EDIT/") == true)),
                         onClick = {
                             navController.navigate(pane.route) {
                                 popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -61,7 +65,18 @@ fun RelayApp() {
                 val id = entry.arguments?.getString("id")?.takeIf { it != NEW }
                 AlarmEditScreen(scheduleId = id, onDone = { navController.popBackStack() })
             }
-            composable(Pane.TIMERS.route) { PlaceholderPane(Pane.TIMERS, R.string.placeholder_timers) }
+            composable(Pane.TIMERS.route) {
+                TimersScreen(
+                    onOpenTimer = { id -> navController.navigate("$TIMER_EDIT/${id ?: NEW}") },
+                    onOpenRelay = { id -> navController.navigate("$RELAY_EDIT/${id ?: NEW}") },
+                )
+            }
+            composable("$TIMER_EDIT/{id}") { entry ->
+                TimerEditScreen(entry.arguments?.getString("id")?.takeIf { it != NEW }, onDone = { navController.popBackStack() })
+            }
+            composable("$RELAY_EDIT/{id}") { entry ->
+                RelayEditScreen(entry.arguments?.getString("id")?.takeIf { it != NEW }, onDone = { navController.popBackStack() })
+            }
             composable(Pane.STOPWATCH.route) { PlaceholderPane(Pane.STOPWATCH, R.string.placeholder_stopwatch) }
             composable(Pane.CLOCK.route) { PlaceholderPane(Pane.CLOCK, R.string.placeholder_clock) }
             composable(Pane.SETTINGS.route) { SettingsScreen() }
@@ -70,4 +85,6 @@ fun RelayApp() {
 }
 
 private const val ALARM_EDIT = "alarm"
+private const val TIMER_EDIT = "timer"
+private const val RELAY_EDIT = "relay"
 private const val NEW = "new"

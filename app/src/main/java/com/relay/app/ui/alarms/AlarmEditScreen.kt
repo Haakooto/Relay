@@ -53,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
 import com.relay.app.data.schedule.AfterFire
 import com.relay.app.data.schedule.ExceptionKind
+import com.relay.app.ui.common.NumberOptionChips
 import com.relay.app.ui.common.OptionChips
 import com.relay.app.ui.common.SoundPickerRow
 import com.relay.app.util.RelativeText
@@ -207,17 +208,26 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
             onSelect = { v -> viewModel.update { it.copy(rampSeconds = v) } },
         )
         OptionChips(
-            title = stringResource(R.string.alarm_snooze_length),
-            options = SNOOZE_OPTIONS, selected = state.snoozeMinutes,
-            label = { stringResource(R.string.minutes_short, it) },
-            onSelect = { v -> viewModel.update { it.copy(snoozeMinutes = v) } },
-        )
-        OptionChips(
             title = stringResource(R.string.alarm_max_snoozes),
             options = MAX_SNOOZE_OPTIONS, selected = state.maxSnoozes,
-            label = { it?.toString() ?: stringResource(R.string.option_unlimited) },
+            label = {
+                when (it) {
+                    null -> stringResource(R.string.option_unlimited)
+                    0 -> stringResource(R.string.option_none)
+                    else -> it.toString()
+                }
+            },
             onSelect = { v -> viewModel.update { it.copy(maxSnoozes = v) } },
         )
+        // No snoozes allowed: the length is irrelevant, so don't ask for it.
+        if (state.maxSnoozes != 0) {
+            NumberOptionChips(
+                title = stringResource(R.string.alarm_snooze_length),
+                presets = SNOOZE_PRESETS, value = state.snoozeMinutes, range = SNOOZE_RANGE,
+                label = { stringResource(R.string.minutes_short, it) },
+                onChange = { v -> viewModel.update { it.copy(snoozeMinutes = v) } },
+            )
+        }
 
         HorizontalDivider()
         Text(stringResource(R.string.exceptions_title), style = MaterialTheme.typography.titleLarge)
@@ -257,5 +267,7 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
 }
 
 private val RAMP_OPTIONS = listOf(0, 15, 30, 60)
-private val SNOOZE_OPTIONS = listOf(5, 10, 15, 20, 30)
-private val MAX_SNOOZE_OPTIONS = listOf<Int?>(null, 1, 3, 5)
+val SNOOZE_PRESETS = listOf(5, 10, 15, 20, 30)
+val SNOOZE_RANGE = 1..240
+/** 0 = no snoozing at all ("None"), null = unlimited. */
+private val MAX_SNOOZE_OPTIONS = listOf<Int?>(0, 1, 3, 5, null)

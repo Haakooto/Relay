@@ -419,7 +419,8 @@
       </ul>
       <h3>Timer</h3>
       <ul class="plain">
-        <li>Fields: optional label, duration, sound (tune, vibration).</li>
+        <li>Fields: optional label, duration (one duration in the relay language: <code>25m</code>, <code>1h30m</code>, <code>90</code>), sound (tune, vibration).</li>
+        <li><strong>Saved labels are script names:</strong> letters, digits and <code>_</code>, starting with a letter, not a keyword, and unique across timers and relays. Renaming a saved block updates every relay that uses it. Unsaved labels are free text.</li>
         <li>The config screen has <strong>Start</strong> (an unsaved run, keeping its label) and <strong>Save</strong> (to the library, requires a unique label). Saving doesn't start it. Start it from the library card.</li>
         <li><strong>Editing works on a draft:</strong> the editor opens a copy, and the definition only changes on Save. Anything started in the meantime (by hand or by a schedule) uses the saved version.</li>
         <li><strong>Parallel runs:</strong> starting "Test" while "Test" is running spawns an independent second run, labelled "Test · 2".</li>
@@ -693,7 +694,9 @@
       <h3>Scheduling</h3>
       <ul class="plain">
         <li><code>setAlarmClock()</code> for Ring schedules. It's the most Doze-proof option and shows the system "next alarm" indicator.</li>
-        <li>Exact alarms for every run's next step end and for non-Ring schedules. UI countdowns are computed from the persisted end timestamp.</li>
+        <li><code>setAlarmClock()</code> for every run's next step end too. It's the only API Doze never defers or rate-limits: with plain exact alarms, a relay of 1-minute steps with the screen off would drift by many minutes. The cost is the status-bar alarm icon while a timer runs. UI and notification countdowns are computed from the persisted end timestamp.</li>
+        <li>A seamless boundary advances from the step's scheduled end, not from when the alarm arrived, so a late alarm doesn't stretch the relay.</li>
+        <li>Ring timeout: an unanswered alarm counts as dismissed. A run that times out only goes quiet; it keeps waiting on the Timers pane and in its notification.</li>
         <li>Reschedule everything (schedules, active runs, widget ticks) on boot, on time change, on time-zone change and on app update.</li>
       </ul>
       <h3>Permissions</h3>

@@ -18,11 +18,14 @@ class RelayApplication : Application() {
         super.onCreate()
         container = AppContainer(this)
         container.firingNotifications.createChannels()
+        container.runNotifications.createChannel()
         // Safety net: a force-stop clears every pending alarm without any broadcast, so re-arm
         // (and catch up on misses) whenever the process starts.
         appScope.launch {
             runCatching { container.schedules.rescheduleAll() }
                 .onFailure { Log.e("RelayApplication", "rescheduleAll failed", it) }
+            runCatching { container.runs.rearmAll() }
+                .onFailure { Log.e("RelayApplication", "rearmAll failed", it) }
         }
     }
 }

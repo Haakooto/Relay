@@ -32,7 +32,7 @@ private fun BroadcastReceiver.launchAsync(tag: String, block: suspend () -> Unit
 class FireReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val scheduleId = intent.data?.lastPathSegment ?: return
-        val service = RingService.actionIntent(context, RingService.ACTION_FIRE, scheduleId)
+        val service = RingService.fireIntent(context, scheduleId)
             .putExtra(RingService.EXTRA_TRIGGER_AT, intent.getLongExtra(EXTRA_TRIGGER_AT, System.currentTimeMillis()))
             .putExtra(RingService.EXTRA_IS_SNOOZE, intent.getBooleanExtra(EXTRA_IS_SNOOZE, false))
         try {
@@ -93,7 +93,10 @@ class RescheduleReceiver : BroadcastReceiver() {
             Intent.ACTION_MY_PACKAGE_REPLACED,
             -> {
                 val container = context.appContainer
-                launchAsync("RescheduleReceiver") { container.schedules.rescheduleAll() }
+                launchAsync("RescheduleReceiver") {
+                    container.schedules.rescheduleAll()
+                    container.runs.rearmAll()
+                }
             }
         }
     }
