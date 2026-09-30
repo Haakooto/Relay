@@ -1,82 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <!-- Contrary to what I assumed earlier: setAlarmClock() is NOT exempt from this — it still
-         needs to be declared and granted, same as the plain exact-alarm APIs. Auto-granted on
-         API 31-32; needs a user grant via Settings on 33+ (MainActivity prompts for it). -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <!-- Some OEM battery managers kill background alarm delivery regardless of setAlarmClock()'s
-         Doze exemption — this is the one AOSP-level lever to ask for an exemption. -->
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Permissions are added by the build step that needs them (firing module: step 2). -->
 
     <application
+        android:name=".RelayApplication"
         android:allowBackup="false"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
-        android:theme="@style/Theme.Clockr"
+        android:localeConfig="@xml/locales_config"
+        android:theme="@style/Theme.Relay"
         android:supportsRtl="true">
 
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Clockr">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <receiver
-            android:name=".alarm.AlarmReceiver"
-            android:exported="false" />
-
-        <receiver
-            android:name=".alarm.BootRescheduleReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
-        <activity
-            android:name=".widget.ClockConfigActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Clockr">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
-        <receiver
-            android:name=".widget.ClockrWidgetReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/clockr_widget_info" />
-        </receiver>
-
-        <receiver
-            android:name=".widget.WidgetTickReceiver"
-            android:exported="false" />
-
-        <service
-            android:name=".run.TimerRunService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Runs a user-started timer or relay with a live countdown" />
-        </service>
-
     </application>
-
 </manifest>

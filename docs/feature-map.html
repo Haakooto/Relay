@@ -121,165 +121,158 @@
   <header class="top">
     <div class="wordmark"><span class="dot"></span>RELAY</div>
     <h1>What's actually built, versus what's just planned.</h1>
-    <p>A status snapshot across every pane, taken after the first real device test pass — not a roadmap, a ledger. Full design detail lives in the <a href="https://claude.ai/code/artifact/6b692873-9cb2-4383-b9d6-6f587a16f69d">Relay Spec</a>.</p>
+    <p>v1.0 clean restart. A ledger, not a roadmap, grouped by the build order in the <a href="spec.html">Relay spec</a> (§16). The v0.5 ledger is in git history.</p>
     <div class="meta">
-      <span>2026-09-15, rev 13</span>
-      <span>56 tracked items</span>
+      <span>2026-09-30, rev 1 (v1.0)</span>
+      <span>45 tracked items</span>
       <span>chainlang: 30/30 tests passing</span>
     </div>
 
     <div class="stats">
-      <div class="stat approved"><div class="n">32</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">17</div><div class="l">WIP</div></div>
-      <div class="stat lacking"><div class="n">1</div><div class="l">Lacking</div></div>
-      <div class="stat"><div class="n">3</div><div class="l">Planned</div></div>
-      <div class="stat"><div class="n">2</div><div class="l">Deferred</div></div>
+      <div class="stat approved"><div class="n">0</div><div class="l">Approved</div></div>
+      <div class="stat wip"><div class="n">8</div><div class="l">WIP</div></div>
+      <div class="stat lacking"><div class="n">0</div><div class="l">Lacking</div></div>
+      <div class="stat"><div class="n">33</div><div class="l">Planned</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Deferred</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
     </div>
     <div class="legend">
-      <span class="chip approved">✓ Approved</span> — built, tested, confirmed working
-      <span class="chip wip">◐ WIP</span> — built, not yet verified (or partly built)
-      <span class="chip lacking">✕ Lacking</span> — known gap, no fix yet
-      <span class="chip planned">Planned</span> — designed, no code
-      <span class="chip deferred">Deferred</span> — your call to push out
+      <span class="chip approved">✓ Approved</span> built, tested, confirmed working on the device
+      <span class="chip wip">◐ WIP</span> built, not yet verified (or partly built)
+      <span class="chip lacking">✕ Lacking</span> known gap, no fix yet
+      <span class="chip planned">Planned</span> designed, no code
+      <span class="chip deferred">Deferred</span> pushed out past 1.0
     </div>
   </header>
 
   <main>
     <section>
-      <h2>Alarms</h2>
-      <p class="sub">Confirmed working end-to-end on a real device this round — create/edit, fire, dismiss/snooze, and the underlying permission/scheduling code all check out.</p>
+      <h2>Foundation</h2>
+      <p class="sub">Build step 1. Compiles, chainlang tests pass; nothing run on a device yet.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Create / edit (time, label, repeat days)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device</td></tr>
-          <tr><td class="feature">One-off: delete vs. mark done</td><td><span class="chip approved">✓ Approved</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Repeating: delete after (count / date)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Snooze + max-snooze count</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Falls back to dismiss once exhausted</td></tr>
-          <tr><td class="feature">Sound picker</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Real RingtoneManager picker</td></tr>
-          <tr><td class="feature">Delete alarm</td><td><span class="chip approved">✓ Approved</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Fire → notification → dismiss/snooze</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device</td></tr>
-          <tr><td class="feature">Reschedule after reboot</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Boot receiver reschedules every enabled alarm, per-alarm error isolation</td></tr>
-          <tr><td class="feature">Continuous ring until dismissed</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">Alarm sound is a one-shot notification-channel sound, not a looping siren — a competing notification (e.g. an incoming text) firing its own sound stops the alarm's from continuing. Known, deliberately low priority.</td></tr>
-          <tr><td class="feature"><strong>Scheduled triggers</strong> — target a Timer/Relay instead of firing itself</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Spec §4.2. Confirmed working on-device. An alarm can target a persistent Timer/Relay (config screen: "Fires" → Alarm / Timer or Relay) — firing starts it via the run engine instead of showing the dismiss/snooze notification, reusing its existing Stop/Restart/+1min prompt rather than building a second one. The plain-alarm path is untouched code, not just untouched behavior. Stopwatch as a target is still unbuilt (spec itself leaves its "seed row" mechanism unresolved).</td></tr>
-          <tr><td class="feature"><strong>Schedule exceptions</strong> — skip or retime specific dates</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Built this session: an alarm's config screen has a new "Exceptions" section — add a one-off or ranged date exception that either skips the alarm entirely or fires it at a different time that day, with a quick multi-select to apply the same exception to other alarms at once (e.g. the whole vacation week). New <code>alarm_exceptions</code> table (Room migration 3→4), enforced in <code>AlarmScheduler.nextTriggerMillis</code> so an alarm with no exceptions behaves byte-identically to before. Needs first on-device pass — never run.</td></tr>
-          <tr><td class="feature">Heads-up notification before firing (disable next occurrence)</td><td><span class="chip planned">Planned</span></td><td class="note">Idea, not designed: a notification a configurable lead time before a repeating alarm fires (stock-app default is 2h), with a one-tap "disable" that creates a one-off skip exception for just that occurrence — ties directly into schedule exceptions above. Would need its own AlarmManager scheduling (a second per-alarm trigger ahead of the main one), a Settings row for lead time, and a per-alarm on/off toggle. Deferred by request — roadmapped, not built.</td></tr>
-          <tr><td class="feature">Full-screen wake-the-phone alarm UI</td><td><span class="chip planned">Planned</span></td><td class="note">Idea, not designed: replace/supplement the current plain heads-up notification with a full-screen takeover like stock alarm apps (wakes the screen, shows over the lock screen, big dismiss/snooze). Researched: <code>NotificationHelper.showAlarmFiring</code> already sets <code>PRIORITY_HIGH</code>/<code>CATEGORY_ALARM</code> on an <code>IMPORTANCE_HIGH</code> channel but never calls <code>setFullScreenIntent(...)</code>; there's no dedicated alarm-firing Activity anywhere in the app (only <code>MainActivity</code>) and no <code>USE_FULL_SCREEN_INTENT</code> manifest permission. Would need a new lock-screen-capable Activity, that permission, and an API 34+ <code>canUseFullScreenIntent()</code> gate with graceful fallback. Deferred by request — roadmapped, not built.</td></tr>
+          <tr><td class="feature">Five-pane bottom navigation</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Alarms, Timers, Stopwatch, Clock, Settings. Four panes are placeholders until their build step. Needs a device check that switching panes, and changing language, keep the selected pane</td></tr>
+          <tr><td class="feature">Theme tokens: system / light / dark / AMOLED</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Spec §15 palette. The first frame waits for settings, so a dark-theme user never sees a light flash</td></tr>
+          <tr><td class="feature">i18n: English + Norwegian</td><td><span class="chip wip">◐ WIP</span></td><td class="note">All strings in <code>strings.xml</code> with an <code>nb</code> translation</td></tr>
+          <tr><td class="feature">Per-app language</td><td><span class="chip wip">◐ WIP</span></td><td class="note">System <code>LocaleManager</code> API, so it also shows in system settings. Needs a device check</td></tr>
+          <tr><td class="feature">Settings: 24 h, first day of week, haptics, version</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Stored in DataStore (<code>relay_settings</code>). Version comes from git</td></tr>
+          <tr><td class="feature">Room + migration test harness</td><td><span class="chip wip">◐ WIP</span></td><td class="note"><code>relay.db</code> at schema v1, exported to <code>app/schemas/</code>. <code>MigrationTest</code> compiles but needs a device or emulator to run</td></tr>
+          <tr><td class="feature">chainlang carried over</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Moved to <code>com.relay.chainlang</code>, 30/30 tests passing. The v1.0 language changes (ref arithmetic, fractional range, step labels) come in step 4</td></tr>
+          <tr><td class="feature">Separate install from v0.5</td><td><span class="chip wip">◐ WIP</span></td><td class="note"><code>applicationId com.relay.app</code>, so v0.5 keeps working alongside until you uninstall it</td></tr>
         </tbody>
       </table></div>
     </section>
 
     <section>
-      <h2>Timers &amp; Relays</h2>
-      <p class="sub">A device test surfaced two run-engine bugs — the alert sound firing immediately on start instead of at completion, and a crash on start — both root-caused, fixed, and confirmed on a fresh on-device pass.</p>
+      <h2>Alarms + firing module</h2>
+      <p class="sub">Build step 2. Spec §04, §13.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Create / edit Timer</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Saving a <em>new</em> one now actually starts it (spec §6.2) — editing an existing one just saves</td></tr>
-          <tr><td class="feature">Create / edit Relay</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Same auto-start-on-create rule as Timer</td></tr>
-          <tr><td class="feature">Label validity + uniqueness</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed twice over — label only required once Persistent is on; typing a label now auto-flips Persistent on; uniqueness only counts other <em>persistent</em> rows (a non-persistent row used to permanently squat on its label forever)</td></tr>
-          <tr><td class="feature">Delete Timer/Relay</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was <span class="chip lacking" style="vertical-align:middle;">✕</span> — just added</td></tr>
-          <tr><td class="feature">Sound picker</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was a bare text field — just added</td></tr>
-          <tr><td class="feature">Relay live preview (resolved steps)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">—</td></tr>
-          <tr><td class="feature">Newline as separator + syntax-help dialog</td><td><span class="chip wip">◐ WIP</span></td><td class="note">chainlang side has 30 passing tests; UI use unconfirmed</td></tr>
-          <tr><td class="feature">Deleting a block still referenced elsewhere</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fixed — confirms first, naming which relays reference it</td></tr>
-          <tr><td class="feature"><strong>Run engine</strong> — start, live countdown, relay-step advance, completion prompt</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Fixes: sound firing on start (split notification channel), a relay crashing on start (relay resolution was hitting Room's blocking DAO from the main thread; now forced onto <code>Dispatchers.IO</code>), and the in-app countdown card frozen at the step's full duration (now ticks from a real end-timestamp).</td></tr>
-          <tr><td class="feature">Start button + in-app active-run card</td><td><span class="chip wip">◐ WIP</span></td><td class="note">▶ on each library card; a card at the top of Timers mirrors the notification's controls</td></tr>
-          <tr><td class="feature">Per-relay seamless transition sound</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Open design tension (filed, not acted on): the point was independent soundscapes, but a per-<em>Relay</em> setting means varying the cue within one relay's own steps requires splitting it into several small relays just to attach different tones — the real fix is <strong>Per-step transition/sound override</strong> (below, spec §6.3, still Planned), which would let one relay vary its own boundary sound per step instead.</td></tr>
-          <tr><td class="feature">Library organization — headers, drag-to-reorder</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Headers reorder via up/down buttons (by design, not drag); blocks freely drag under any header.</td></tr>
-          <tr><td class="feature">Per-step transition/sound override</td><td><span class="chip planned">Planned</span></td><td class="note">Spec'd (§6.3), no code. Would also resolve the per-relay-beep tension noted above — bump priority if that keeps being a real annoyance in practice.</td></tr>
-          <tr><td class="feature">Auto-close parens, auto-indent, autocomplete</td><td><span class="chip deferred">Deferred</span></td><td class="note">Your call — "nice to have"</td></tr>
+          <tr><td class="feature">Plain alarm: create / edit / delete / toggle</td><td><span class="chip planned">Planned</span></td><td class="note">Time picker first, list sorted by next fire time</td></tr>
+          <tr><td class="feature">One-off (delete or disable after firing) and repeating (weekdays, end date / count)</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Schedule exceptions: skip or retime dates, apply to several alarms</td><td><span class="chip planned">Planned</span></td><td class="note">v0.5 scheduler math is a salvage candidate</td></tr>
+          <tr><td class="feature">Full-screen ringing over the lock screen</td><td><span class="chip planned">Planned</span></td><td class="note"><code>USE_FULL_SCREEN_INTENT</code> with a heads-up fallback</td></tr>
+          <tr><td class="feature">Continuous looping audio, volume ramp, vibration</td><td><span class="chip planned">Planned</span></td><td class="note">Own playback with <code>USAGE_ALARM</code>, not a channel sound</td></tr>
+          <tr><td class="feature">Snooze with per-alarm length and max count</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Upcoming-alarm notification with Dismiss now</td><td><span class="chip planned">Planned</span></td><td class="note">Adds a one-off skip exception</td></tr>
+          <tr><td class="feature">Late-fire notice</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Reschedule on boot, time change, time-zone change, update</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Several things ringing at once, stacked</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Timers</h2>
+      <p class="sub">Build step 3. Spec §05.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Persisted run engine, driven by exact alarms</td><td><span class="chip planned">Planned</span></td><td class="note">Survives a process kill and a reboot</td></tr>
+          <tr><td class="feature">Timer: Start (unsaved, with label) / Save (library)</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Parallel runs of one definition</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Quick-start chips (4, configurable)</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Run controls and Stop / Restart / +1 min at completion</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Library with headers and drag-to-reorder</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Draft editing (definition changes only on Save)</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Relays</h2>
+      <p class="sub">Build step 4. Spec §05, §06.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Relay definitions, transition mode, seamless tone</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Ref arithmetic <code>(Test2 - 2)</code>, fractional <code>range</code>, step labels</td><td><span class="chip planned">Planned</span></td><td class="note">chainlang changes, <code>arange</code> dropped</td></tr>
+          <tr><td class="feature">Plan check across references (size and depth)</td><td><span class="chip planned">Planned</span></td><td class="note">Closes the v0.5 gap</td></tr>
+          <tr><td class="feature">Per-step sound / transition override</td><td><span class="chip planned">Planned</span></td><td class="note">UI provisional until tried on a prototype</td></tr>
+          <tr><td class="feature">Editor: auto-close, auto-indent, autocomplete, live preview, syntax help</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>Scheduled targets</h2>
+      <p class="sub">Build step 5. Spec §04.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Alarm fires a Timer / Relay (library or inline)</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Alarm starts a Stopwatch</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Save an inline target to the library</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
         </tbody>
       </table></div>
     </section>
 
     <section>
       <h2>Stopwatch</h2>
+      <p class="sub">Build step 6. Spec §07.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Multiple concurrent, pause/resume/lap/restart-to-t₀</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
-          <tr><td class="feature">Rename</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working</td></tr>
-          <tr><td class="feature">Lap delta + cumulative display</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Was briefly downgraded — the first lap's delta included the stopwatch's starting offset (t0) instead of measuring from it, e.g. starting at 1m and lapping at +5s showed 1:05 instead of 0:05. Fixed and retested.</td></tr>
-          <tr><td class="feature">Editing recorded lap/total times</td><td><span class="chip declined">✕ Declined</span></td><td class="note">Agreed: undermines the point of a stopwatch as a factual record</td></tr>
+          <tr><td class="feature">Multiple, name, t₀, lap / pause / restart / delete</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Persisted in Room</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Lap notes</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Ongoing notification with Lap / Pause</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Editing recorded lap times</td><td><span class="chip declined">✕ Declined</span></td><td class="note">A stopwatch is a factual record</td></tr>
         </tbody>
       </table></div>
     </section>
 
     <section>
-      <h2>Clock</h2>
+      <h2>Clock + widgets</h2>
+      <p class="sub">Build step 7. Spec §08, §09.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Live ticking digital face</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed working on-device. Was hardcoded to 24h regardless of Settings; now reads the setting.</td></tr>
-          <tr><td class="feature"><strong>Multiple independent clocks (in-app)</strong></td><td><span class="chip wip">◐ WIP</span></td><td class="note">Built this session: the Clock pane is now a small library (spec §02's "full customization preview" idea) — add/edit/delete/reorder several named clocks, each with its own style. New <code>clock_configs</code> table (Room migration 4→5), one row per in-app clock or per placed widget instance. First run after this update auto-seeds one default clock so existing behavior doesn't regress into an empty list. Needs first on-device pass — never run.</td></tr>
-          <tr><td class="feature">Visual customization (color/font/analogue)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Spec §07's axes, built this session. Digital gets a font choice (Default/Serif/Monospace); analogue gets four face variants (Minimal/Sleek/Classic/Techy) drawn via Compose <code>Canvas</code>, sharing hand-angle/variant-proportion logic with the widget's renderer so both surfaces agree on what each variant looks like. Color picks from the existing brand palette rather than a free picker. Background always follows the app theme in-app (no separate setting) — that axis is widget-only. Needs on-device visual check — never run.</td></tr>
-          <tr><td class="feature">World clock / multiple timezones</td><td><span class="chip deferred">Deferred</span></td><td class="note">Your call. Schema now has a reserved, unused <code>timezoneId</code> column on each clock config so this won't need another migration when it lands — no picker UI yet.</td></tr>
+          <tr><td class="feature">Large main clock + locations list</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Home clock while travelling</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">ClockStyle: digital and analogue options, colors</td><td><span class="chip planned">Planned</span></td><td class="note">One renderer shared by app and widgets</td></tr>
+          <tr><td class="feature">Per-instance widgets with style and location</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">World-clock list and next-alarm widgets</td><td><span class="chip deferred">Deferred</span></td><td class="note">After 1.0</td></tr>
         </tbody>
       </table></div>
     </section>
 
     <section>
-      <h2>Widgets</h2>
+      <h2>After 1.0</h2>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Digital home-screen widget (Glance)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device after the tick-chain and reboot-resume fixes</td></tr>
-          <tr><td class="feature"><strong>Per-instance widget configuration</strong></td><td><span class="chip wip">◐ WIP</span></td><td class="note">First widget-configure Activity in this app. New `ClockConfigActivity` (registered via <code>android:configure</code> + <code>APPWIDGET_CONFIGURE</code>) lets each placed widget pick its own style, independent of every other widget and of any in-app clock — one <code>clock_configs</code> row per <code>appWidgetId</code>. Removing a widget cleans up its row (<code>onDeleted</code>). Needs on-device test: placing a new widget, long-press → "Widget settings" on an existing one, and confirming independent styling across several simultaneous widgets — none of this is exercisable outside a real device/launcher.</td></tr>
-          <tr><td class="feature">Customization axes (color, font, background, shape)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Spec §07's axes, built this session, shared with the in-app editor (one field-editing composable for both surfaces). Background: follow theme / transparent / solid-from-palette. Shape: sharp/rounded/pill corner radius (Glance's <code>cornerRadius</code> modifier). Border: faked via a nested-Box padding trick since Glance/RemoteViews has no native border — color always matches the accent color, not separately pickable.</td></tr>
-          <tr><td class="feature"><strong>Analogue widget face</strong></td><td><span class="chip wip">◐ WIP</span></td><td class="note">Glance can't render Compose <code>Canvas</code> or rotate elements, so this pre-renders a small bitmap via plain <code>android.graphics.Canvas</code> once per minute tick — riding the existing tick-alarm cadence (<code>WidgetTickScheduler</code>) rather than adding any new timer, so it stays cheap. Same four face variants as the in-app analogue face. Needs on-device confirmation the bitmap actually updates each minute without lag, and that a render failure (if any) doesn't break the reschedule chain.</td></tr>
-        </tbody>
-      </table></div>
-    </section>
-
-    <section>
-      <h2>Settings</h2>
-      <div class="tablewrap"><table>
-        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
-        <tbody>
-          <tr><td class="feature">Theme (light/dark/AMOLED)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">"Themes work well"</td></tr>
-          <tr><td class="feature">24h clock format</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
-          <tr><td class="feature">First day of week</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
-          <tr><td class="feature">Language (dropdown, locale only)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Was buggy (flicker/dropped letters) — root-caused and fixed this session</td></tr>
-          <tr><td class="feature">Full i18n — translated UI strings</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device switching to Norsk renders correctly. Every hardcoded UI string moved to <code>strings.xml</code> — screens, notifications/channels, and ViewModel-surfaced error messages — with a full English+Norwegian (nb) translation, verified with no <code>MissingTranslation</code> lint errors. Known scope boundary: chainlang's own exception messages (duration/relay-syntax parse errors) stay English — that module has no Android dependency by design, so localizing them needs chainlang to expose error codes for the app to map, not a quick fix.</td></tr>
-          <tr><td class="feature">Default snooze minutes</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
-          <tr><td class="feature">Haptics</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
-          <tr><td class="feature">Max execution plan size</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Wired into the run engine's safety limit</td></tr>
-          <tr><td class="feature">Reset all data</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Cancels alarms + stops any run, then clears all Room tables, correct order. Confirmation dialog, doesn't touch Settings itself.</td></tr>
-        </tbody>
-      </table></div>
-    </section>
-
-    <section>
-      <h2>Engine &amp; data layer</h2>
-      <p class="sub">Not user-facing, but worth tracking on its own — this is the one area with real automated verification.</p>
-      <div class="tablewrap"><table>
-        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
-        <tbody>
-          <tr><td class="feature">chainlang — parser, evaluator, safety limits, cycle checker</td><td><span class="chip approved">✓ Approved</span></td><td class="note">30/30 automated tests passing, standalone JVM module</td></tr>
-          <tr><td class="feature">Room persistence (Alarm/TimerDef/ChainDef/SoundProfile)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Standard singleton DB, exercised via the UI; no direct DB-level test but nothing to suggest a gap</td></tr>
-          <tr><td class="feature">Settings DataStore</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Reads/writes are straightforward and correct</td></tr>
-        </tbody>
-      </table></div>
-    </section>
-
-    <section>
-      <h2>Cross-cutting</h2>
-      <div class="tablewrap"><table>
-        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
-        <tbody>
-          <tr><td class="feature">Notification permission flow</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Requested correctly at startup</td></tr>
-          <tr><td class="feature">Exact-alarm permission</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Was missing entirely, now requested with a rationale screen; confirmed alarms fire on-device</td></tr>
-          <tr><td class="feature">Crash → graceful error handling</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed this exact round: the permission error surfaced as a clear message, not a crash</td></tr>
-          <tr><td class="feature">Bottom-nav pane switching</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Root-caused and fixed this session: switching Language triggers an implicit Activity recreate (no <code>configChanges</code> declared), and <code>MainActivity</code>'s <code>LaunchedEffect(openClock)</code> re-read the retained launch <code>Intent</code>'s <code>EXTRA_OPEN_CLOCK</code> extra on every recreate, force-navigating to Clock whenever the app had ever been opened from the widget — a general defect (any recreate: rotation, theme, locale). Now consumed once via <code>rememberSaveable</code>. Needs on-device retest: open a non-Clock pane, change Language, confirm it stays put.</td></tr>
-          <tr><td class="feature">App version display</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device</td></tr>
+          <tr><td class="feature">Bedtime</td><td><span class="chip deferred">Deferred</span></td><td class="note">Feasibility spike first</td></tr>
+          <tr><td class="feature">Automation: standard clock intents, batch import, AppFunctions</td><td><span class="chip deferred">Deferred</span></td><td class="note">Spec §12</td></tr>
         </tbody>
       </table></div>
     </section>
 
   </main>
 
-  <footer class="doc"><div class="shell">Relay — feature map · a living ledger, not a roadmap; update it as things move</div></footer>
+  <footer class="doc"><div class="shell">Relay · feature map · a living ledger, not a roadmap; update it as things move</div></footer>
 </div>
 </body>
 </html>

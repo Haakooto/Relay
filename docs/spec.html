@@ -799,7 +799,7 @@
       <span class="eyebrow">16 · Order of work</span>
       <h2>Build order</h2>
       <ol class="plain">
-        <li><strong>Foundation:</strong> project skeleton, theme tokens, navigation, i18n setup, Room with a migration test harness, <code>chainlang</code> carried over with its tests. <strong>Fresh start, with no import from v0.5:</strong> use a new database file name, so installing over v0.5 never opens its version-5 schema. The old file is deleted on first launch.</li>
+        <li><strong>Foundation:</strong> project skeleton, theme tokens, navigation, i18n setup, Room with a migration test harness, <code>chainlang</code> carried over with its tests. <strong>Fresh start, with no import from v0.5:</strong> the new <code>applicationId</code> is <code>com.relay.app</code>, so v1.0 installs <em>alongside</em> the old v0.5 build and never touches its data. The old app keeps firing its alarms until you uninstall it by hand, once v1.0 alarms are proven on the device.</li>
         <li><strong>Firing module + Ring schedules:</strong> plain alarms end to end, including full-screen, looping audio, snooze, exceptions, upcoming notification and boot rescheduling. Test on the device before moving on.</li>
         <li><strong>Run engine + Timers:</strong> persisted runs, parallel runs, quick-start, library with headers.</li>
         <li><strong>Relays:</strong> ref arithmetic in <code>chainlang</code>, the script editor with autocomplete, transitions.</li>

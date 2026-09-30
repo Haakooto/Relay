@@ -28,15 +28,21 @@ fun gitVersionName(): String {
 }
 
 android {
-    namespace = "com.clockr.app"
+    namespace = "com.relay.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.clockr.app"
+        applicationId = "com.relay.app"
         minSdk = 33
         targetSdk = 35
         versionCode = 1
         versionName = gitVersionName()
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Room's exported schemas feed MigrationTestHelper in androidTest.
+    sourceSets {
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
 
     buildTypes {
@@ -57,6 +63,12 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+ksp {
+    // Every schema version is exported and committed, so each migration can be tested against
+    // the real previous schema (spec §02: real migrations from day one).
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -80,10 +92,12 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-    implementation(libs.androidx.glance.appwidget)
-    implementation(libs.androidx.glance.material3)
-
     implementation(libs.androidx.datastore.preferences)
 
     debugImplementation(libs.androidx.ui.tooling)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }

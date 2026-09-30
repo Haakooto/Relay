@@ -5,9 +5,20 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v1.0.0-alpha.1 (2026-09-30)
+
+Untested pre-release: the start of the v1.0 rebuild. Not tried on a device yet.
+
+- Relay is rebuilt from scratch and installs as a new app next to the old one, which keeps
+  working (and keeps ringing its alarms) until you uninstall it. Nothing is carried over.
+- The five panes are in place. Settings works (theme including AMOLED, 24-hour clock, first day
+  of week, language, haptics). Alarms, Timers, Stopwatch and Clock are placeholders for now.
+- Language can be switched between English and Norwegian, and the choice also shows in the
+  phone's own app-language settings.
+
 ## v0.5 — 2026-09-15
 
-- Renamed the app from Clockr to Relay: new launcher icon (adaptive, a two-clock-face mark), new
+- Renamed the app to Relay: new launcher icon (adaptive, a two-clock-face mark), new
   app name, and every on-screen mention of "Chain" (the Timer/Chain block kind) now reads "Relay"
   — "Timer or Relay", "New relay", "Writing a relay", and so on. This is a user-facing rename
   only: the database, the `chainlang` module, and internal Kotlin class names are unchanged, so

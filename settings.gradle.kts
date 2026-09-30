@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Clockr"
+rootProject.name = "Relay"
 include(":app")
 include(":chainlang")

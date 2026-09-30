@@ -1,55 +1,61 @@
 # Relay
 
-Personal Android app: alarms, relayable timers, stopwatch, clock, home-screen widget. Built
-because the stock alarm/timer app is ugly and can't chain timers together.
+Personal Android app that rivals and replaces the stock Android Clock: alarms, timers that
+relay (chain), stopwatch, world clock, home-screen widgets. Built because the stock app can't
+chain timers, can't schedule anything but a ringing alarm, and can't run one timer twice at once.
 
-> **Naming note (v0.5):** the app was renamed Clockr → Relay, user-facing only. In-app strings say
-> "Relay"; the code, database, and the standalone `chainlang/` module still say "Chain"/"chain"
-> throughout (`ChainDefEntity`, `ChainDefDao`, `BlockKind.CHAIN`, the `chain_defs` table,
-> `ClockrDatabase`, `ClockrTheme`, `applicationId "com.clockr.app"`, etc.) — these are the same
-> thing as what the UI calls a "Relay." Deliberately not renamed internally: no user-visible
-> benefit, and renaming the DB table or the `chainlang` module's own package/AST types would be a
-> much larger, riskier change for zero functional gain. When working in this codebase, "chain" and
-> "relay" refer to the same concept.
+## Status: v1.0 clean restart
+
+The v0.5 codebase lives on `main` (last commit before the restart) and in git history. v1.0 is
+being rebuilt from scratch on the `restart` branch, following the build order in the spec (§16).
+Only `chainlang/` was carried over as-is.
 
 ## Docs
 
-- [`docs/spec.html`](docs/spec.html) — design spec (stack, data model, timer/chain DSL). Living
-  document, not always in sync with what's actually built.
-- [`docs/feature-map.html`](docs/feature-map.html) — the source of truth for what's actually
-  built vs. planned. **Update this whenever you fix, add, or retest a feature** — one row per
-  feature, status chip (Approved/WIP/Lacking/Planned/Deferred/Declined) + a one-line note. Keep
-  the header stats counts in sync with the actual row counts.
-- [`CHANGELOG.md`](CHANGELOG.md) — conceptual, human-readable notes per tagged release. Update
-  only when tagging a release, not per-commit; write what changed for the user, not how.
+- [`docs/spec.html`](docs/spec.html): the v1.0 design baseline (core model, panes, relay
+  language, firing module, data model, build order). Update it when a design decision changes.
+- [`docs/feature-map.html`](docs/feature-map.html): source of truth for what's actually built.
+  **Update it whenever you build, fix or retest a feature**: one row per feature, a status chip
+  (Approved/WIP/Lacking/Planned/Deferred/Declined) and a one-line note. Keep the header counts in
+  sync with the rows.
+- [`CHANGELOG.md`](CHANGELOG.md): human-readable notes per tagged release. Update only when
+  tagging, and write what changed for the user, not how.
 
 ## Stack
 
-- Kotlin + Jetpack Compose (Material 3), Room (persistence), DataStore (settings), Glance
-  (home-screen widget), AlarmManager (exact alarms).
-- `app/` — the Android app. `chainlang/` — standalone Kotlin/JVM parser+evaluator for the
-  timer-relay DSL (module/package name kept as "chainlang" internally, see the naming note
-  above), no Android dependency (`./gradlew :chainlang:test`, currently 30/30 passing).
-- `minSdk = 33` deliberately — single code path, no legacy branches.
+- Kotlin + Jetpack Compose (Material 3), Room, DataStore, Glance (widgets, from build step 7),
+  AlarmManager exact alarms.
+- Package and `applicationId`: `com.relay.app`. It installs alongside the old v0.5 app
+  (`applicationId` of the old build differs), so v1.0 never touches v0.5 data.
+- `app/`: the Android app. `chainlang/`: standalone Kotlin/JVM parser and evaluator for the relay
+  language (`com.relay.chainlang`), no Android dependency. `./gradlew :chainlang:test`
+  (currently 30/30 passing). The module keeps the "chain" name internally; in the app, new code
+  says "relay" (`RelayDef`, not `ChainDef`).
+- `minSdk = 33` deliberately: single code path, no legacy branches.
+- Per-app language uses the system `LocaleManager` API (`ui/settings/AppLanguage.kt`), not
+  DataStore. Strings in English and Norwegian (`values-nb`) from the first screen.
 
 ## Versioning
 
-- Releases are manual git tags, `vX.Y` (annotated: `git tag -a vX.Y -m "..."`). No auto-bumping.
-- The app's `versionName` (shown in Settings) is computed at build time from git, not hardcoded:
-  the exact tag when `HEAD` is on one, else `<nearest-tag>+<short-hash>` for anything in between.
-  See `gitVersionName()` in `app/build.gradle.kts`.
-- Tag a release → add a `CHANGELOG.md` entry for it in the same commit/session.
+- Releases are manual annotated git tags in three parts, `vX.Y.Z`. No auto-bumping.
+- Work that is built but not yet tested on the device is tagged as a pre-release:
+  `vX.Y.Z-alpha.N` (for example `v1.0.0-alpha.1` for build step 1). The plain `vX.Y.Z` tag is only
+  for a release that has passed the user's device test.
+- `versionName` is computed from git at build time (`gitVersionName()` in `app/build.gradle.kts`):
+  the exact tag on a tagged commit, else `<nearest-tag>+<short-hash>`.
+- Tag a release, then add a `CHANGELOG.md` entry for it in the same session.
 
 ## Working conventions
 
 - Only commit when explicitly asked. Never amend, never force-push.
-- No device or emulator is available in this environment — verify changes with
-  `./gradlew :app:compileDebugKotlin` (and `:chainlang:test` for DSL changes), but real
-  correctness comes from the user's own device testing pass. Say so explicitly rather than
-  claiming a UI/gesture/hardware-dependent feature works.
-- Be extra cautious touching `alarm/AlarmReceiver`, `alarm/NotificationHelper`, or
-  `alarm/AlarmScheduler` — alarm firing reliability is the one thing this app cannot regress on,
-  and bugs there are invisible until a real alarm fails to go off. Prefer additive, narrowly-scoped
-  changes over refactors there when it can't be tested on-device in the same session.
-- Room schema changes need a real `Migration`, not `fallbackToDestructiveMigration()` — the user's
-  device carries real data across sessions.
+- No device or emulator in this environment. Verify with `./gradlew :app:compileDebugKotlin`
+  (plus `:chainlang:test` for language changes, `:app:compileDebugAndroidTestKotlin` for
+  instrumented tests). Real correctness comes from the user's own device testing, so say so
+  explicitly rather than claiming a UI, gesture or hardware-dependent feature works.
+- Alarm firing reliability is the one thing this app cannot regress on. Everything that rings
+  goes through one firing module (spec §13). Be extra careful there, and prefer narrow, additive
+  changes when it can't be tested on-device in the same session.
+- Room: schemas are exported to `app/schemas/` and committed. Every version bump needs a real
+  `Migration` in `RelayDatabase.MIGRATIONS` and a test in `MigrationTest`. Never
+  `fallbackToDestructiveMigration()`: the user's device carries real data.
+- Add Android permissions and settings keys in the build step that first needs them, not ahead.
