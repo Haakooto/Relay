@@ -111,7 +111,7 @@
   }
   .cover-note strong{ color:var(--ink); }
 
-  /* tick divider — small clock-bezel motif between major sections */
+  /* tick divider: small clock-bezel motif between major sections */
   .ticks{
     display:flex; gap:5px; align-items:flex-end; height:14px; margin:3.2rem 0 1.6rem; opacity:.7;
   }
@@ -162,7 +162,7 @@
   tbody tr:last-child td{ border-bottom:none; }
   td code{ background:var(--surface-2); padding:.1em .4em; border-radius:4px; font-size:.85em; }
 
-  /* code / grammar panel — instrument-panel treatment, same dark tone in both themes */
+  /* code / grammar panel: instrument-panel treatment, same dark tone in both themes */
   .panel{
     background:var(--code-bg); color:var(--code-ink); border-radius:8px; padding:1.1rem 1.3rem;
     font-family:'IBM Plex Mono',monospace; font-size:.85rem; line-height:1.7; overflow-x:auto; box-shadow:var(--shadow);
@@ -205,6 +205,15 @@
   .swatch .chip{ width:64px; height:44px; border-radius:6px; border:1px solid var(--line); }
 
   footer.doc{ border-top:1px solid var(--line); padding:2rem 0 3rem; color:var(--ink-soft); font-size:.85rem; font-family:'IBM Plex Mono',monospace; }
+  .tag{ display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:.66rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; padding:.15rem .5rem; border-radius:999px; border:1px solid var(--line); color:var(--ink-soft); vertical-align:middle; margin-left:.4rem; }
+  .tag.new{ color:var(--accent); border-color:color-mix(in srgb, var(--accent) 50%, var(--line)); }
+  .tag.keep{ color:var(--teal); border-color:color-mix(in srgb, var(--teal) 50%, var(--line)); }
+  .tag.changed{ color:var(--danger); border-color:color-mix(in srgb, var(--danger) 50%, var(--line)); }
+  .tag.later{ border-style:dashed; }
+  .flow{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; margin:1rem 0; }
+  .flow .arrow{ font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); }
+  ol.plain, ul.plain{ max-width:70ch; padding-left:1.2rem; }
+  ol.plain li, ul.plain li{ margin-bottom:.35rem; }
 </style>
 </head>
 <body>
@@ -213,407 +222,567 @@
   <div class="cover-top">
     <div class="wordmark"><span class="dot"></span>RELAY</div>
     <div class="meta-row">
-      <span>v0.5 — scheduling &amp; modularity</span>
-      <span>2026-09-08</span>
+      <span>v1.0 · clean restart</span>
+      <span>2026-09-30</span>
       <span>Android · Kotlin · Compose</span>
     </div>
   </div>
-  <h1>A clock app worth keeping.</h1>
-  <p class="tagline">Full technical specification for a custom Android alarms / timers / stopwatch app — built because the stock one is ugly and the timer can't relay.</p>
-  <div class="cover-note">Rev 5: design-only pass, nothing built yet — an alarm generalizes to a <strong>scheduled trigger</strong> with a target (anonymous / Timer-or-Relay / Stopwatch), relays get an optional per-step transition override, and the completion UI (Stop/Restart/+1min vs. Dismiss/Snooze) is meant to be one shared, pluggable module. Flags real rework needed in already-built code — see §04.2 and §11.</div>
+  <h1>One clock app, and timers that relay.</h1>
+  <p class="tagline">Relay rivals and replaces the stock Android Clock. Where the stock app is good, copy it closely. Where it is limited (timers can't chain, only alarms can be scheduled, a timer can't run twice at once), fix it.</p>
+  <div class="cover-note"><strong>Rev 7, a clean restart.</strong> Consolidates the v0.5 spec, what the v0.5 device test pass taught us, the re-brief from 2026-09-30 and the first read-through (labels on unsaved timers, lap notes, the automation API, and answers to the rev 6 open questions). It replaces every earlier revision and the old feature map as the design baseline. The earlier docs are still in git history. Section tags show what is <span class="tag keep">keep</span> (proven in v0.5, carry over), <span class="tag changed">changed</span>, <span class="tag new">new</span> or <span class="tag later">later</span>.</div>
 </div>
 
 <div class="shell layout">
   <nav class="toc">
     <span class="toc-label">Contents</span>
     <ol>
+      <li><a href="#goals">Goals &amp; principles</a></li>
       <li><a href="#stack">Stack &amp; platform</a></li>
-      <li><a href="#structure">App structure</a></li>
-      <li><a href="#data">Data model</a></li>
+      <li><a href="#model">Core model</a></li>
       <li><a href="#alarms">Alarms</a></li>
-      <li><a href="#stopwatches">Stopwatches</a></li>
       <li><a href="#timers">Timers &amp; relays</a></li>
+      <li><a href="#lang">Relay language</a></li>
+      <li><a href="#stopwatch">Stopwatch</a></li>
+      <li><a href="#clock">Clock</a></li>
       <li><a href="#widgets">Widgets</a></li>
+      <li><a href="#bedtime">Bedtime</a></li>
       <li><a href="#settings">Settings</a></li>
-      <li><a href="#reliability">Permissions &amp; reliability</a></li>
+      <li><a href="#automation">Automation &amp; assistants</a></li>
+      <li><a href="#reliability">Firing &amp; reliability</a></li>
+      <li><a href="#data">Data model</a></li>
       <li><a href="#design">Visual direction</a></li>
-      <li><a href="#next">Open items &amp; next steps</a></li>
+      <li><a href="#plan">Build order</a></li>
+      <li><a href="#open">Open questions</a></li>
     </ol>
   </nav>
 
   <main>
 
-    <section id="stack">
-      <span class="eyebrow">01 — Foundation</span>
-      <h2>Stack &amp; platform</h2>
-      <p class="lede">Native, Android-only. No cross-platform framework — widgets, exact alarms, and foreground services all need native APIs, so Flutter/RN would just add a translation layer for no benefit.</p>
-      <div class="tablewrap">
-        <table>
-          <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
-          <tbody>
-            <tr><td>Language</td><td><code>Kotlin</code></td><td>Standard for modern Android</td></tr>
-            <tr><td>UI</td><td><code>Jetpack Compose</code></td><td>Declarative UI, shares theming logic with widgets</td></tr>
-            <tr><td>Widgets</td><td><code>Glance</code></td><td>Compose-based widget toolkit — same design tokens as the app</td></tr>
-            <tr><td>Persistence</td><td><code>Room</code></td><td>Local SQLite ORM; fully local, no sync layer needed</td></tr>
-            <tr><td>Alarms</td><td><code>AlarmManager</code> (exact)</td><td>Only reliable way to fire at a precise wall-clock time</td></tr>
-            <tr><td>Timers/relays</td><td>Foreground <code>Service</code> + <code>WorkManager</code> fallback</td><td>Survives Doze; shows a live notification with controls</td></tr>
-            <tr><td>Alarm sound picker</td><td><code>RingtoneManager</code> (<code>TYPE_ALARM</code>)</td><td>Reuses the system alarm-sound picker UI for free</td></tr>
-            <tr><td>Min SDK</td><td>33 (Android 13)</td><td>Single notification-permission code path; no legacy branches needed on your hardware</td></tr>
-            <tr><td>Target SDK</td><td>Latest stable (36)</td><td>Current Play requirements</td></tr>
-            <tr><td>Sync</td><td>None</td><td>Fully local by decision — no account, no backend</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <section id="goals">
+      <span class="eyebrow">01 · Why</span>
+      <h2>Goals &amp; principles</h2>
+      <p class="lede">A one-app replacement for the stock Clock: Alarms, Timers, Stopwatch, Clock, Settings, and if feasible Bedtime, so nobody needs the stock app alongside it.</p>
+      <h3>What to fix compared to the stock app</h3>
+      <ul class="plain">
+        <li>Timers can't chain. Relay has <strong>relays</strong>: scripted sequences of timers and other relays.</li>
+        <li>Only alarms can be scheduled. Relay can schedule a <strong>timer, a relay or a stopwatch</strong> as well as a plain alarm.</li>
+        <li>A saved timer can only run once at a time. In Relay, one definition can spawn <strong>any number of parallel runs</strong>.</li>
+        <li>Clock and widget styling is limited. Relay offers deep, per-instance style configuration.</li>
+        <li>Creating many similar alarms is tedious. A future <strong>automation API</strong> lets an on-phone assistant create them in bulk (§12).</li>
+      </ul>
+      <h3>Principles</h3>
+      <ul class="plain">
+        <li><strong>An alarm must never fail to fire.</strong> Reliability beats features. Everything that rings goes through one hardened firing path (§13).</li>
+        <li><strong>Separate definitions from runs.</strong> A definition is what you saved. A run is a live instance of it. One definition can have many runs.</li>
+        <li><strong>One scheduling primitive.</strong> An alarm is a schedule whose target rings. Timers, relays and stopwatches are other targets on the same machinery.</li>
+        <li><strong>Close copy where the stock app is good</strong> (alarm ringing screen, quick timers, world clock list). Don't reinvent what already works.</li>
+        <li>Fully local, no account, no sync. <code>minSdk 33</code>, single code path.</li>
+        <li>Room schema is versioned with real migrations from day one.</li>
+      </ul>
+      <h3>Non-goals</h3>
+      <ul class="plain">
+        <li>Sync or backup to a server.</li>
+        <li>Lock-screen widgets (Android removed third-party keyguard widgets).</li>
+        <li>Editing recorded stopwatch laps (a stopwatch is a factual record).</li>
+      </ul>
     </section>
 
-    <div class="shell" style="padding:0;"><div class="ticks">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div></div>
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
-    <section id="structure">
-      <span class="eyebrow">02 — Navigation</span>
-      <h2>App structure</h2>
-      <p class="lede">Five top-level panes in a bottom navigation bar. The stock app's mental model, not its execution.</p>
-      <div class="grid cols-3">
-        <div class="card"><h4>Alarms</h4><ul>
-          <li><span class="fname">List, sorted by next fire time</span></li>
-          <li><span class="fname">One-off and repeating, mixed</span></li>
-          <li><span class="fname">Swipe or toggle per alarm</span></li>
+    <section id="stack">
+      <span class="eyebrow">02 · Foundation</span>
+      <h2>Stack &amp; platform</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Language / UI</td><td>Kotlin, Jetpack Compose (Material 3)</td><td>Standard modern Android <span class="tag keep">keep</span></td></tr>
+          <tr><td>Widgets</td><td>Glance, with bitmap-rendered analogue faces</td><td>Glance can't draw a Canvas or rotate views, so the analogue face is drawn to a bitmap on each minute tick <span class="tag keep">keep</span></td></tr>
+          <tr><td>Persistence</td><td>Room (entities) + DataStore (settings)</td><td>Local only <span class="tag keep">keep</span></td></tr>
+          <tr><td>Scheduling</td><td><code>AlarmManager.setAlarmClock()</code> for anything that rings, exact alarms for run step ends</td><td>The only APIs that survive Doze reliably <span class="tag changed">changed</span></td></tr>
+          <tr><td>Runs</td><td>State persisted in Room, step ends driven by exact alarms, foreground service only for the live notification and in-app UI</td><td>v0.5 used a coroutine <code>delay()</code> with in-memory state, so a process kill lost the run <span class="tag changed">changed</span></td></tr>
+          <tr><td>Ringing audio</td><td>Our own foreground playback (<code>MediaPlayer</code>, <code>USAGE_ALARM</code>, looping), not a notification-channel sound</td><td>v0.5 finding: a channel sound is one-shot, and any other notification cut it off <span class="tag changed">changed</span></td></tr>
+          <tr><td>Relay language</td><td><code>chainlang</code>, a standalone JVM module</td><td>Parser, evaluator, safety limits and cycle checker are tested (30/30) <span class="tag keep">keep</span>. Extended in §06</td></tr>
+          <tr><td>SDK</td><td>min 33, target latest stable</td><td>Single notification-permission code path</td></tr>
+          <tr><td>i18n</td><td>English + Norwegian (nb) from the first screen</td><td>Retrofitting strings was expensive in v0.5 <span class="tag keep">keep</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+    <section id="model">
+      <span class="eyebrow">03 · The idea</span>
+      <h2>Core model</h2>
+      <p class="lede">A timer counts down. An alarm is a countdown scheduled to end at a wall-clock time. Generalizing: anything startable can be scheduled, and anything scheduled can ring.</p>
+      <div class="flow">
+        <span class="pill work"><span class="lab">Schedule</span>time + repeat + exceptions</span>
+        <span class="arrow">→</span>
+        <span class="pill ref"><span class="lab">Target</span>Ring · Timer · Relay · Stopwatch</span>
+        <span class="arrow">→</span>
+        <span class="pill break"><span class="lab">Run</span>live instance</span>
+        <span class="arrow">→</span>
+        <span class="pill"><span class="lab">Firing</span>shared ring UI</span>
+      </div>
+      <div class="grid cols-2">
+        <div class="card"><h4>Definition</h4><ul>
+          <li><span class="fname">Timer or Relay, explicitly saved to the library</span></li>
+          <li><span class="fname">Its label is unique and is the name relays reference</span></li>
+          <li><span class="fname">Idle when not running; start any time</span></li>
+          <li><span class="fname">Referenceable by name from any relay</span></li>
         </ul></div>
-        <div class="card"><h4>Timers</h4><ul>
-          <li><span class="fname">Active runs front and center</span></li>
-          <li><span class="fname">Library of saved Timer / Relay blocks below</span></li>
-          <li><span class="fname">Quick-build + advanced editor</span></li>
+        <div class="card"><h4>Run</h4><ul>
+          <li><span class="fname">A live countdown, spawned from a definition or unsaved</span></li>
+          <li><span class="fname">Optional free-text label, shown on the ringing screen</span></li>
+          <li><span class="fname">Many runs of one definition can run in parallel</span></li>
+          <li><span class="fname">Own state, controls and notification</span></li>
+          <li><span class="fname">Persisted, so it survives a process kill and a reboot</span></li>
         </ul></div>
         <div class="card"><h4>Stopwatch</h4><ul>
-          <li><span class="fname">List of concurrent running watches</span></li>
-          <li><span class="fname">Add with optional name + t₀</span></li>
+          <li><span class="fname">Counts up, with laps</span></li>
+          <li><span class="fname">Stays in the list until deleted, named or not</span></li>
         </ul></div>
-        <div class="card"><h4>Clock</h4><ul>
-          <li><span class="fname">Live face with seconds, full customization preview</span></li>
-          <li><span class="fname">Default tap target for every home-screen widget</span></li>
-        </ul></div>
-        <div class="card"><h4>Settings</h4><ul>
-          <li><span class="fname">Theme, clock format, defaults</span></li>
-          <li><span class="fname">Widget presets management</span></li>
+        <div class="card"><h4>Schedule (UI: "Alarm")</h4><ul>
+          <li><span class="fname">When: time, date or repeat days, end rule, exceptions</span></li>
+          <li><span class="fname">What: one target (below)</span></li>
         </ul></div>
       </div>
-      <p style="margin-top:1rem"><span class="mono" style="color:var(--ink-soft)">Change from v0.1 —</span> the clock face is promoted from "hidden behind the widget tap" to its own pane, so it's reachable from the nav bar too, not just by tapping a widget.</p>
+      <h3>Lifecycle rules</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Object</th><th>Saved (library)</th><th>Unsaved (anonymous)</th></tr></thead>
+        <tbody>
+          <tr><td>Timer</td><td>When a run ends, the definition goes back to idle, ready to start again</td><td>Exists only as its run, optionally with a label. Gone when stopped</td></tr>
+          <tr><td>Relay</td><td>Same as a saved timer</td><td>Same as an unsaved timer</td></tr>
+          <tr><td>Stopwatch</td><td colspan="2">Stays until explicitly deleted, whether named or not</td></tr>
+          <tr><td>Schedule target</td><td>Points at a library definition</td><td>Inline, created and owned by the schedule, optionally labelled. Each fire spawns a fresh run. <strong>Save to library</strong> promotes it to a definition</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout"><strong>Label vs. saved:</strong> any timer, relay or run can carry a free-text label ("Pasta", "Take pills"), which is shown when it rings. Saving to the library is a separate, explicit action (the <strong>Save</strong> button, not a checkbox). A saved block's label must be unique, because relays reference it by that label. Unsaved labels don't need to be unique.</div>
     </section>
 
-    <div class="shell" style="padding:0;"><div class="ticks">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div></div>
-
-    <section id="data">
-      <span class="eyebrow">03 — Persistence</span>
-      <h2>Data model</h2>
-      <p class="lede">Room entities. Everything local, nothing synced. <code>TimerDef</code> and <code>ChainDef</code> both implement a common <strong>RunnableBlock</strong> shape — id, label, persistent flag, own sound profile, computed total duration — which is what lets either one be started standalone <em>or</em> referenced from inside another relay.</p>
-      <div class="grid cols-3">
-        <div class="card"><h4>Alarm</h4><ul>
-          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
-          <li><span class="fname">time</span><span class="ftype">LocalTime</span></li>
-          <li><span class="fname">label</span><span class="ftype">String?</span></li>
-          <li><span class="fname">repeatDays</span><span class="ftype">Set&lt;DayOfWeek&gt;</span></li>
-          <li><span class="fname">oneOffAfterFire</span><span class="ftype">DELETE / MARK_DONE</span></li>
-          <li><span class="fname">done</span><span class="ftype">Boolean</span></li>
-          <li><span class="fname">deleteAfter</span><span class="ftype">enum / date / count</span></li>
-          <li><span class="fname">soundProfileId</span><span class="ftype">FK</span></li>
-          <li><span class="fname">snoozeMinutes</span><span class="ftype">Int</span></li>
-          <li><span class="fname">maxSnoozes</span><span class="ftype">Int?</span></li>
-          <li><span class="fname">enabled</span><span class="ftype">Boolean</span></li>
-          <li><span class="fname">target</span><span class="ftype">sealed — planned, see §4.2</span></li>
-        </ul><p class="note">Today's fields (<code>oneOffAfterFire</code>, <code>done</code>) only make sense for an <code>Anonymous</code> target — adopting §4.2 splits this into generic scheduling fields + a <code>target: Anonymous | TimerOrChain(blockId) | Stopwatch(name?, t0)</code>.</p></div>
-        <div class="card"><h4>TimerDef <span style="opacity:.6;font-weight:400;">— leaf</span></h4><ul>
-          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
-          <li><span class="fname">label</span><span class="ftype">String</span></li>
-          <li><span class="fname">duration</span><span class="ftype">DurationExpr</span></li>
-          <li><span class="fname">soundProfileId</span><span class="ftype">FK</span></li>
-          <li><span class="fname">persistent</span><span class="ftype">Boolean</span></li>
-        </ul><p class="note">Referenceable by label from any Relay once persistent.</p></div>
-        <div class="card"><h4>ChainDef <span style="opacity:.6;font-weight:400;">— composite</span></h4><ul>
-          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
-          <li><span class="fname">label</span><span class="ftype">String</span></li>
-          <li><span class="fname">persistent</span><span class="ftype">Boolean</span></li>
-          <li><span class="fname">defaultSoundProfileId</span><span class="ftype">FK</span></li>
-          <li><span class="fname">soundOverrides</span><span class="ftype">Map&lt;blockId,FK&gt; — →StepOverride, §6.3</span></li>
-          <li><span class="fname">transitionMode</span><span class="ftype">REQUIRE_INTERACTION / SEAMLESS (default)</span></li>
-          <li><span class="fname">content</span><span class="ftype">List&lt;ChainElement&gt;</span></li>
-          <li><span class="fname">totalDuration</span><span class="ftype">computed, cached</span></li>
-        </ul></div>
-        <div class="card"><h4>ChainElement <span style="opacity:.6;font-weight:400;">— sealed</span></h4><ul>
-          <li><span class="fname">Anonymous(duration, note?)</span><span class="ftype">inherits relay default sound</span></li>
-          <li><span class="fname">FunctionGroup(fn, of)</span><span class="ftype">repeat / range / arange</span></li>
-          <li><span class="fname">Reference(blockId)</span><span class="ftype">→ TimerDef or ChainDef</span></li>
-        </ul><p class="note"><code>note</code> is a display-only tag on an Anonymous element (e.g. "lunch") — not a reusable label, doesn't create a block.</p></div>
-        <div class="card"><h4>Stopwatch <span style="opacity:.6;font-weight:400;">— in-memory only</span></h4><ul>
-          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
-          <li><span class="fname">name</span><span class="ftype">String?</span></li>
-          <li><span class="fname">t0</span><span class="ftype">Duration</span></li>
-          <li><span class="fname">accumulatedElapsed</span><span class="ftype">Duration</span></li>
-          <li><span class="fname">startedAt</span><span class="ftype">Instant?</span></li>
-          <li><span class="fname">laps</span><span class="ftype">List&lt;Duration&gt;</span></li>
-        </ul></div>
-        <div class="card"><h4>SoundProfile</h4><ul>
-          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
-          <li><span class="fname">ringtoneUri</span><span class="ftype">Uri</span></li>
-          <li><span class="fname">vibrationPattern</span><span class="ftype">enum</span></li>
-          <li><span class="fname">volume</span><span class="ftype">Float</span></li>
-        </ul></div>
-        <div class="card"><h4>WidgetConfig</h4><ul>
-          <li><span class="fname">id</span><span class="ftype">UUID (per instance)</span></li>
-          <li><span class="fname">style</span><span class="ftype">digital / analogue</span></li>
-          <li><span class="fname">showDate</span><span class="ftype">Boolean</span></li>
-          <li><span class="fname">palette</span><span class="ftype">colors, face, hands</span></li>
-          <li><span class="fname">background</span><span class="ftype">transparent/solid/gradient/image</span></li>
-          <li><span class="fname">shape</span><span class="ftype">enum + corner radius</span></li>
-        </ul></div>
-      </div>
-    </section>
-
-    <div class="shell" style="padding:0;"><div class="ticks">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div></div>
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
     <section id="alarms">
-      <span class="eyebrow">04 — Alarms</span>
-      <h2>Alarms</h2>
-
-      <h3>4.1 — Today's model</h3>
-      <div class="grid cols-2">
-        <div class="card"><h4>One-off</h4><ul>
-          <li><span class="fname">Fires once at a date + time</span></li>
-          <li><span class="fname">After firing: <em>Delete</em> or <em>Mark as done</em> — per-alarm toggle</span></li>
-          <li><span class="fname">Delete → removed immediately, no trace</span></li>
-          <li><span class="fname">Mark as done → stays in the list, greyed out with a "done" chip, until you toggle it back to active or delete it manually</span></li>
-        </ul></div>
-        <div class="card"><h4>Repeating</h4><ul>
-          <li><span class="fname">Day-of-week set (Mon–Sun)</span></li>
-          <li><span class="fname">"Delete after" — end date, or occurrence count</span></li>
-          <li><span class="fname">Email-rule style: "repeat until…" / "repeat N times"</span></li>
-        </ul></div>
-      </div>
-      <h3>Behavior</h3>
-      <ul>
-        <li>Snooze length and max-snooze count are <strong>per-alarm</strong>, not global.</li>
-        <li>Sound, vibration, and volume are per-alarm via the system alarm-sound picker.</li>
-        <li>If the alarm can't fire on time (device off, Doze denial, etc.) it fires late with a clear "this alarm was delayed" notice rather than silently skipping.</li>
+      <span class="eyebrow">04 · Pane 1</span>
+      <h2>Alarms <span class="tag changed">changed</span></h2>
+      <p class="lede">A plain alarm is still two taps away. What an alarm <em>does</em> when it fires is a choice.</p>
+      <h3>List</h3>
+      <ul class="plain">
+        <li>Sorted by next fire time (v0.5 sorted by hour and minute). Each row shows time, repeat summary, label, a target icon (bell / timer / relay / stopwatch) and an on/off toggle.</li>
+        <li>Tap a row to edit it. Create with +: the time picker comes first, as in the stock app.</li>
       </ul>
-
-      <h3>4.2 — Generalizing: scheduled triggers <span style="opacity:.6;font-weight:400;">(design-only, not built)</span></h3>
-      <p class="lede">An alarm is a special case of a more general primitive: <strong>a scheduled trigger</strong> — a time, a repeat pattern, and a target that fires. A zero-duration Timer <em>is</em> today's alarm; the same time+repeat machinery can just as well start a Timer, a Relay, or a Stopwatch. Dropping the Alarms pane in favor of "just schedule a zero-second timer" would be a worse product for purely human reasons — people think in alarms — so the pane stays, but what it can point at grows.</p>
-      <ul>
-        <li>The Alarms pane gets <strong>three sub-panes</strong>: <strong>Anonymous</strong> (today's alarm, unchanged), <strong>Timer/Relay</strong> (fires by starting a persistent Timer or Relay block), <strong>Stopwatch</strong> (fires by starting a stopwatch, optionally with a name and t₀).</li>
-        <li>The scheduling config — time, repeat days, delete-after, snooze — is <strong>shared</strong> across all three; only the target and what "firing" means differs.</li>
-        <li>A repeating <strong>Timer/Relay</strong> trigger is the natural way to get "run my Workday relay every weekday at 8am" — the payoff for building this at all.</li>
-        <li>Snooze generalizes cleanly to "delay the trigger" regardless of target — no new concept needed.</li>
-        <li><strong>Stopwatch</strong> triggers are the one wrinkle: stopwatches are deliberately in-memory-only (spec §05), but "start at T" only needs one small persisted seed (start timestamp + name + t₀) that the Stopwatch pane reads back on next open to reconstruct "this has been running since T" — it doesn't mean abandoning the in-memory design for manually-started stopwatches.</li>
-        <li>Scheduling a <em>lap</em> on an already-running stopwatch at a future time (also raised alongside this) is a separate, smaller feature — a per-stopwatch mini-scheduler, not a target type under Alarms. Tracked, not designed yet.</li>
+      <h3>Targets ("Fires")</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Target</th><th>On fire</th><th>Config</th></tr></thead>
+        <tbody>
+          <tr><td>Ring <em>(default)</em></td><td>Full-screen ringing: Dismiss / Snooze</td><td>Sound, vibration, volume ramp, snooze length, max snoozes</td></tr>
+          <tr><td>Timer</td><td>Starts a run. Example: a countdown starting exactly at 17:00</td><td>A named library timer, or an inline anonymous duration</td></tr>
+          <tr><td>Relay</td><td>Starts a run. Example: a snooze-less wake-up of five timers with escalating sounds</td><td>A named library relay, or an inline anonymous script (same editor as §05)</td></tr>
+          <tr><td>Stopwatch</td><td>Creates and starts a stopwatch at that moment. Example: counting from 16:00, lap whenever</td><td>Optional name, optional t₀</td></tr>
+        </tbody>
+      </table></div>
+      <p>Anonymous targets don't exist beforehand: the schedule creates them. A label is optional and is shown when it rings. <strong>Save to library</strong> turns an inline target into a normal library definition, which the schedule then references.</p>
+      <h3>Shared scheduling fields <span class="tag keep">keep</span></h3>
+      <ul class="plain">
+        <li>Time. Either one-off (the next occurrence, or a picked date) or repeating on a set of weekdays.</li>
+        <li>One-off after firing: delete, or keep and disable.</li>
+        <li>Repeat end: never, an end date, or after N occurrences.</li>
+        <li><strong>Exceptions</strong>: skip, or retime, a single date or a date range. You can apply one exception to several alarms at once (for example a vacation week).</li>
       </ul>
-      <p class="callout danger">This is not backward-compatible with the <code>Alarm</code> entity as built (§03): <code>oneOffAfterFire</code> and <code>done</code> only make sense for the Anonymous target. Adopting this means splitting <code>Alarm</code> into generic scheduling fields (time, repeat, delete-after, snooze) plus a <code>target</code> sealed type, and — bigger — reworking <code>AlarmReceiver</code>/<code>NotificationHelper</code>, which are currently hard-wired to alarm dismiss/snooze semantics rather than a pluggable per-target action set. See §11.</p>
+      <h3>Ringing behaviour (copy the stock app)</h3>
+      <ul class="plain">
+        <li><strong>Full-screen</strong> over the lock screen and wakes the screen, with big Dismiss / Snooze controls. <span class="tag new">new</span></li>
+        <li><strong>Rings continuously</strong> until you act on it or a ring timeout passes, and other notifications can't cut it off. <span class="tag new">new</span></li>
+        <li>Gradually increasing volume (configurable ramp) and vibration. <span class="tag new">new</span></li>
+        <li>Snooze length and max-snooze count are per alarm. When snoozes run out, Snooze is hidden. <span class="tag keep">keep</span></li>
+        <li><strong>Upcoming-alarm notification</strong> a configurable lead time before firing (stock default: 2 h), with "Dismiss now". On a repeating alarm, that adds a one-off skip exception. <span class="tag new">new</span></li>
+        <li>If it fires late (device off, clock change), it rings with a clear "delayed from 07:00" notice instead of silently skipping.</li>
+      </ul>
+      <div class="callout">Snooze only applies to the Ring target. For Timer, Relay and Stopwatch targets, the run's own controls take over when it fires. Their "snooze" is simply the relay itself (see the wake-up example in §06).</div>
     </section>
 
-    <div class="shell" style="padding:0;"><div class="ticks">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div></div>
-
-    <section id="stopwatches">
-      <span class="eyebrow">05 — Stopwatches</span>
-      <h2>Stopwatches</h2>
-      <ul>
-        <li>Any number of stopwatches exist <strong>concurrently</strong>, each an independent card in a list — existence isn't tied to running. A stopwatch stays in the list, running or paused, until you explicitly delete it.</li>
-        <li>Per card: <strong>lap</strong> (while running), <strong>pause/resume</strong>, <strong>restart</strong> (reset to t₀), <strong>delete</strong>.</li>
-        <li>Optional name per stopwatch.</li>
-        <li>Optional <strong>t₀</strong> — a starting offset (e.g. <code>10:00</code>) instead of always counting from zero. Restart resets to t₀, not to zero.</li>
-        <li>State model: <code>accumulatedElapsed: Duration</code> plus <code>startedAt: Instant?</code> — elapsed is <code>accumulated</code> when paused, or <code>accumulated + (now − startedAt)</code> while running. Pausing folds the running segment into <code>accumulated</code> and clears <code>startedAt</code>.</li>
-        <li>Kept alive only for as long as the app process is — not backed by Room, doesn't survive an app kill/reboot. Matches how you actually use a stopwatch; if that ever needs to change, it's a one-line switch to a persisted entity, not a redesign.</li>
-      </ul>
-    </section>
-
-    <div class="shell" style="padding:0;"><div class="ticks">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div></div>
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
     <section id="timers">
-      <span class="eyebrow">06 — The hard part · reworked in v0.2</span>
+      <span class="eyebrow">05 · Pane 2</span>
       <h2>Timers &amp; relays</h2>
-      <p class="lede">The core shift: a Timer or a Relay is no longer a one-shot expression that gets flattened and forgotten. Either one can be a <strong>named, persistent block</strong> that other relays reference by label — define "Work" once, reuse it everywhere, and editing it later ripples everywhere it's used. This already matches the "atom" framing from the modularity discussion: a Timer is the atom (labeled, startable, relayable), a Relay is atoms plus ordering plus per-transition metadata, and neither cares who's driving it — a person tapping Start, or (once §4.2 lands) a scheduled trigger.</p>
-
-      <h3>6.1 — Library &amp; config screen</h3>
-      <p>The Timers pane is a library list: each card shows only <strong>label, kind (Timer/Relay), and total duration</strong> — no content or sound details cluttering the list. Tapping a card pushes a full-screen <strong>config screen</strong> onto the nav stack (not a modal or bottom sheet), the same screen shape for both Timer and Relay. A Timer's config is short (label, duration, sound, persistent) and a Relay's is long (adds transition mode, default sound, overrides, content) — deliberately one pattern for both rather than two, even though it's more screen than a bare Timer strictly needs.</p>
-
-      <h3>6.2 — Timer (leaf block)</h3>
-      <p>Configuring a Timer means setting: a <strong>duration</strong>, a <strong>label</strong>, a <strong>sound profile</strong> (tune + vibration), and whether it's <strong>persistent</strong> (off by default).</p>
-      <ul>
-        <li>Creating a Timer always starts it immediately — persistent only decides whether the definition is <em>kept</em> afterward.</li>
-        <li><strong>Not persistent:</strong> starts immediately; if you choose "stop" when it ends, it's completely gone, no trace.</li>
-        <li><strong>Persistent:</strong> saved to the library <em>and</em> started immediately; "stop" just ends that run — the definition stays, ready to start again or be referenced by a relay.</li>
+      <h3>Layout <span class="tag keep">keep</span></h3>
+      <ul class="plain">
+        <li><strong>Active runs</strong> at the top: one card per run, each with its own countdown and controls.</li>
+        <li><strong>Library</strong> below: named timers and relays. Each card shows the label, the kind and the total duration, plus a ▶ start button.</li>
+        <li>The library can be sorted by the user, with named headers: headers move up and down, and blocks drag freely under any header.</li>
       </ul>
-
-      <h3>6.3 — Relay (composite block)</h3>
-      <p>Configuring a Relay means setting: a <strong>label</strong>, <strong>persistent</strong>, a <strong>default sound profile</strong> (for anonymous content), optional <strong>sound-profile overrides</strong> (per referenced block, scoped to this relay only), a <strong>transition mode</strong>, and the <strong>content</strong> itself.</p>
-      <p>Content is an ordered list where each element is one of:</p>
-      <ul>
-        <li><strong>Anonymous</strong> — a bare duration (<code>3</code>, <code>30m</code>) with no identity of its own. Inherits the relay's default sound profile. May carry a display-only note ("lunch") that's just a label in the UI, not a reusable block.</li>
-        <li><strong>A function of anonymous timers</strong> — <code>range</code> / <code>arange</code> / <code>repeat</code>, exactly as before, expanding to more Anonymous elements (or to a repeated group of any element, including references).</li>
-        <li><strong>A reference</strong> — the label of an existing persistent Timer or Relay. Its duration and sound profile are looked up <em>live</em> from the source block, not copied in — so re-tuning "Work" updates every relay that references it, automatically. A reference keeps the source's own sound profile unless this relay explicitly overrides it.</li>
+      <h3>The + menu <span class="tag changed">changed</span></h3>
+      <ul class="plain">
+        <li>The existing three: <strong>New timer</strong>, <strong>New relay</strong>, <strong>New header</strong>.</li>
+        <li>Plus a <strong>quick-start row</strong> of four chips, default <code>1m</code> <code>5m</code> <code>10m</code> <code>15m</code> (configurable in Settings). One tap starts an anonymous timer run.</li>
       </ul>
-      <p>Every Relay also declares its <strong>transition mode</strong>: require an interaction to advance between steps, or sound the alert and continue immediately (seamless). This is the relay's own default — it governs advancing between its steps regardless of what those steps are.</p>
-      <p class="callout">Per-step override, not per-step-by-default: rather than every step pair carrying its own transition config (real flexibility — "seamless into Break, but confirm before Work starts back up" — at the cost of configuring N−1 transitions instead of one), the recommended mechanism reuses the <code>soundOverrides</code> pattern that already exists for exactly this shape of problem. Extend it from <code>Map&lt;blockId, soundProfileId&gt;</code> to <code>Map&lt;blockId, StepOverride&gt;</code> where <code>StepOverride</code> carries an optional sound profile <em>and</em> an optional transition-mode override for the transition immediately following that step. Unlisted steps keep the relay's default. Not built — this is the resolution to the "does every level need its own transition metadata" question raised alongside §4.2.</p>
-
-      <h3>6.4 — Expression grammar</h3>
-      <div class="panel"><pre style="margin:0;white-space:pre-wrap;">chain_content  = "(" element ("," element)* ")"
-element        = duration | ref | call | chain_content
-<span class="c2">ref</span>            = IDENT                               <span class="c3">// label of an existing persistent block, resolved live</span>
-call           = repeat_call | range_call | arange_call
-<span class="c1">repeat_call</span>    = "repeat" "(" int_expr "," element ")"
-<span class="c1">range_call</span>     = "range"  "(" int_expr "," int_expr ["," int_expr] ")"
-<span class="c1">arange_call</span>    = "arange" "(" int_expr "," int_expr ["," int_expr] ")"
-
-duration       = literal_duration | int_expr         <span class="c3">// bare number ⇒ minutes</span>
-literal_duration = (NUMBER "h")? (NUMBER "m")? (NUMBER "s")?
-
-int_expr       = int_term (("+" | "-") int_term)*
-int_term       = NUMBER | time_func | <span class="c2">"RANDOM"</span> "(" int_expr "," int_expr ")" | "(" int_expr ")"
-time_func      = ("MINUTE" | "HOUR" | "SECOND") "(" time_expr ")"
-time_expr      = "NOW" (("+" | "-") literal_duration)?</pre></div>
-      <p class="callout">Evaluation is still <strong>eager for durations</strong> (<code>NOW</code> resolves once, at start time) but <strong>lazy for references</strong>: a reference's duration and sound are read from the live source block each time it matters (display, start, total-duration calc) — that's what makes "editing Work updates every relay" true.</p>
-
-      <h3>6.5 — Worked example</h3>
-      <div class="tablewrap">
-        <table>
-          <thead><tr><th>Block</th><th>Definition</th><th>Total</th></tr></thead>
-          <tbody>
-            <tr><td><code>Work</code></td><td>TimerDef · 25m · persistent · sound: <em>sadsong</em></td><td>25m</td></tr>
-            <tr><td><code>Break</code></td><td>TimerDef · 5m · persistent · sound: <em>happysong</em></td><td>5m</td></tr>
-            <tr><td><code>Session</code></td><td>ChainDef · <code>repeat(4, (Work, Break))</code> · persistent</td><td>2h</td></tr>
-            <tr><td><code>Workday</code></td><td>ChainDef · <code>(Session, 30, Session, 60, Work)</code> · persistent · default sound: <em>joysong</em></td><td>5h 55m</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>All four are independently startable from the library. Visualized:</p>
-      <div class="group">
-        <span class="group-badge">Session — ×4 <span class="block-total">= 2h00m</span></span>
-        <div class="pill ref work">Work<span class="lab">25m</span></div>
-        <div class="pill ref break">Break<span class="lab">5m</span></div>
-      </div>
-      <div class="chain" style="margin-top:1.1rem;">
-        <div class="pill ref">Session<span class="lab">2h00m</span></div>
-        <div class="pill anon">30m</div>
-        <div class="pill ref">Session<span class="lab">2h00m</span></div>
-        <div class="pill anon">60m</div>
-        <div class="pill ref work">Work<span class="lab">25m</span></div>
-      </div>
-      <p class="mono" style="color:var(--ink-soft);font-size:.85rem;">Workday total: 5h 55m — recomputed live; retuning Work's 25m changes this number without touching Workday's own definition.</p>
-
-      <h3>6.6 — Safety limits</h3>
-      <p class="lede">A flat "100 links" cap stops making sense once relays legitimately run for hours across dozens of referenced steps. It's replaced by graph-shape limits instead of a raw count:</p>
-      <div class="tablewrap">
-        <table>
-          <thead><tr><th>Limit</th><th>Default</th><th>Configurable</th></tr></thead>
-          <tbody>
-            <tr><td>Reference graph must be a DAG</td><td>enforced, always</td><td>No</td></tr>
-            <tr><td>Max reference depth</td><td>20</td><td>No</td></tr>
-            <tr><td>Max resolved execution-plan size</td><td>300 steps</td><td>Yes, hard ceiling 1000</td></tr>
-            <tr><td>Max multiplier per <code>repeat</code>/<code>range</code>/<code>arange</code></td><td>200</td><td>No — use case above this isn't supported</td></tr>
-            <tr><td>Total duration</td><td>soft warning above 24h</td><td>Yes, threshold</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="callout danger"><strong>Cycle detection</strong> is mandatory, not optional: saving a reference that would make a block contain itself — directly (Work → Work) or indirectly (Workday → Session → Workday) — is rejected at save time, with the cycle path shown in the error. Without this, total-duration can't even be computed. Plan size is still checked symbolically before expansion, the same nesting-bomb hedge as before, just against the new, bigger cap.</p>
-
-      <h3>6.7 — On completion</h3>
-      <p>Whenever a run reaches a terminal point — a standalone Timer finishes, or the last step of a Relay finishes, with nothing to auto-advance to — three options appear: <strong>Stop</strong>, <strong>Restart</strong>, <strong>+1 minute</strong>, applied to whichever timer just hit zero.</p>
-      <ul>
-        <li>Mid-relay, between two steps, this prompt does <em>not</em> appear — the relay's transition mode (interaction-required / seamless) governs advancing instead.</li>
-        <li><strong>Stop</strong> on a non-persistent run discards it entirely. <strong>Stop</strong> on a persistent run just ends the active session; the definition stays in the library.</li>
-        <li><strong>Restart</strong> re-runs the whole thing from the top when the terminal step was the end of a relay — back to the relay's first step, not just its last leaf. For a standalone Timer (no relay involved) it just restarts that timer.</li>
-        <li><strong>+1 minute</strong> extends only the terminal step in place, whether standalone or the last leaf of a relay. Neither option changes the saved definition.</li>
+      <h3>Timer</h3>
+      <ul class="plain">
+        <li>Fields: optional label, duration, sound (tune, vibration).</li>
+        <li>The config screen has <strong>Start</strong> (an unsaved run, keeping its label) and <strong>Save</strong> (to the library, requires a unique label). Saving doesn't start it. Start it from the library card.</li>
+        <li><strong>Editing works on a draft:</strong> the editor opens a copy, and the definition only changes on Save. Anything started in the meantime (by hand or by a schedule) uses the saved version.</li>
+        <li><strong>Parallel runs:</strong> starting "Test" while "Test" is running spawns an independent second run, labelled "Test · 2".</li>
+        <li>Run controls: pause/resume, reset, +1 min, stop.</li>
+        <li>At zero, it rings through the firing module (§13), showing its label, with <strong>Stop / Restart / +1 min</strong>. Stop on an unsaved run discards it. On a saved run, Stop just ends that run.</li>
+      </ul>
+      <h3>Relay</h3>
+      <ul class="plain">
+        <li>Fields: optional label, script (§06), default sound (for anonymous steps), transition mode, seamless-transition tone. <span class="tag keep">keep</span></li>
+        <li>Steps can be anonymous durations, named timers, or other named relays.</li>
+        <li><strong>Transition mode</strong>, per relay: <em>seamless</em> plays a short cue (beep, double beep, chime, pip, or silent) and continues. <em>Interaction required</em> rings the ending step's sound until you tap <strong>Continue</strong> (or <strong>Stop relay</strong>). <span class="tag keep">keep</span></li>
+        <li>Terminal completion: <strong>Stop / Restart / +1 min</strong>. Restart goes back to the relay's first step. +1 min extends only the last step.</li>
+        <li><strong>Per-step override</strong> of sound and transition mode for the boundary after a given step, so one relay can vary its own cues ("seamless into Break, but confirm before Work"). Unlisted steps keep the relay defaults. To set one, tap a step in the relay's live preview, then choose its sound and outgoing transition (provisional: confirm in the prototype). <span class="tag new">new</span></li>
+      </ul>
+      <h3>Script editor <span class="tag keep">keep</span></h3>
+      <ul class="plain">
+        <li>Auto-closes <code>(</code>. <span class="tag new">new</span></li>
+        <li>Enter after <code>(</code> or a separator auto-indents. <span class="tag new">new</span></li>
+        <li>Commas and newlines are both valid separators.</li>
+        <li><span class="tag new">new</span> <strong>Autocomplete:</strong> while you type a name, a drop-down lists named timers and relays that match. It leaves out the relay being edited and anything that would create a cycle.</li>
+        <li>Live preview: resolved steps and total duration, recomputed as you type. Errors appear inline, with position.</li>
+        <li>A syntax help sheet, since the language is powerful but unfamiliar to most people. That's accepted.</li>
+        <li><strong>A relay can never contain itself</strong>, directly or indirectly. Saving is rejected, and the cycle path is shown (Workday → Session → Workday).</li>
       </ul>
     </section>
 
-    <div class="shell" style="padding:0;"><div class="ticks">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div></div>
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+    <section id="lang">
+      <span class="eyebrow">06 · The hard part</span>
+      <h2>Relay language</h2>
+      <p class="lede">Carried over from <code>chainlang</code>, with one extension: a named block can be used as a number in duration arithmetic.</p>
+      <div class="panel"><pre style="margin:0"><span class="c1">relay</span>      = "(" element (<span class="c2">sep</span> element)* ")"
+<span class="c1">sep</span>        = "," | NEWLINE
+<span class="c1">element</span>    = ref | dur_expr [STRING] | call | relay   <span class="c3">// STRING: optional label, e.g. 5m "stretch"</span>
+<span class="c1">ref</span>        = IDENT                      <span class="c3">// bare name: a reference step, keeps its identity and sound</span>
+<span class="c1">call</span>       = "repeat" "(" int_expr "," element ")"
+           | "range" "(" num_expr "," num_expr ["," num_expr] ")"  <span class="c3">// fractional allowed</span>
+<span class="c1">dur_expr</span>   = dur_term (("+" | "-") dur_term)*
+<span class="c1">dur_term</span>   = literal | int_expr | ref_value
+<span class="c1">ref_value</span>  = IDENT                      <span class="c3">// inside arithmetic: that block's total duration</span>  <span class="c1">NEW</span>
+<span class="c1">literal</span>    = (NUMBER "h")? (NUMBER "m")? (NUMBER "s")?
+<span class="c1">int_expr</span>   = int_term (("+" | "-") int_term)*    <span class="c3">// bare number = minutes</span>
+<span class="c1">int_term</span>   = NUMBER | "RANDOM" "(" int_expr "," int_expr ")"
+           | ("MINUTE" | "HOUR" | "SECOND") "(" "NOW" (("+"|"-") literal)? ")"
+           | "(" int_expr ")"
+<span class="c1">num_expr</span>   = int_expr with decimal NUMBERs allowed  <span class="c3">// minutes, rounded to whole seconds</span></pre></div>
+      <h3>Rules</h3>
+      <ul class="plain">
+        <li><strong>A bare name is a reference</strong>: <code>(Test2)</code> runs Test2 as a step, with its own sound. References are resolved when a run starts, so retuning Test2 updates every relay that uses it. Once started, a run is a frozen snapshot.</li>
+        <li><strong>A name inside arithmetic is a value</strong> <span class="tag new">new</span>: with Test2 = 10m, <code>(Test2 - 2)</code> is a relay of <em>one anonymous 8m step</em>. <code>Test2 + 30s</code> also works. A relay name used this way contributes its total duration. A result ≤ 0 is an error. <strong>Sound:</strong> with exactly one name in the expression, the step inherits that block's sound. Otherwise it uses the relay default.</li>
+        <li><code>range(a, b, step)</code> expands to anonymous steps of a, a+step, … minutes, half-open, direction-aware (numpy semantics). Fractional values are allowed: <code>range(1, 3, 0.5)</code> gives 1m, 1m30s, 2m, 2m30s. <code>arange</code> is dropped <span class="tag changed">changed</span>. <code>repeat(n, element)</code> repeats any element, references included.</li>
+        <li>An anonymous step can carry a display-only label, written <code>5m "stretch"</code>, which is shown at ring time. <span class="tag new">new</span></li>
+        <li><code>NOW</code> is evaluated once, when the run starts.</li>
+      </ul>
+      <h3>Worked examples</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Block</th><th>Definition</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr><td>Work</td><td>Timer · 25m · sound: sadsong</td><td>25m</td></tr>
+          <tr><td>Break</td><td>Timer · 5m · sound: happysong</td><td>5m</td></tr>
+          <tr><td>Session</td><td>Relay · <code>repeat(4, (Work, Break))</code> · seamless</td><td>2h</td></tr>
+          <tr><td>Workday</td><td>Relay · <code>(Session, 30, Session, 60, Work)</code></td><td>5h 55m</td></tr>
+          <tr><td>Wake</td><td>Relay · <code>(Nudge, Nudge, Louder, Loud, Siren)</code>, five 5m timers with escalating sounds · <em>interaction required</em> · scheduled Mon–Fri 06:30</td><td>25m</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>Wake</strong> is the snooze-less wake-up call. Each boundary rings with the ending step's sound until you tap Continue, which starts the next five minutes. It's snooze with character, and <strong>Stop relay</strong> ends it when you're actually up.</p>
+      <h3>Safety limits <span class="tag keep">keep</span></h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Limit</th><th>Default</th><th>Configurable</th></tr></thead>
+        <tbody>
+          <tr><td>Reference graph is a DAG (no self-containment)</td><td>always</td><td>No</td></tr>
+          <tr><td>Max reference depth</td><td>20</td><td>No</td></tr>
+          <tr><td>Max resolved plan size, counted across all references</td><td>300 steps</td><td>Yes, hard ceiling 1000</td></tr>
+          <tr><td>Max repeat/range multiplier</td><td>200</td><td>No</td></tr>
+          <tr><td>Max expression length</td><td>2000 chars</td><td>No</td></tr>
+          <tr><td>Long-relay warning</td><td>above 24 h</td><td>Yes</td></tr>
+        </tbody>
+      </table></div>
+      <h3>What each check guards against</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Check</th><th>When</th><th>Catches</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Cycle check</strong> over the whole reference graph</td><td>Every save and rename of a relay or timer</td><td>Self-containment, direct (<code>R1 → R1</code>) or indirect (<code>R1 → R2 → R1</code>), with the path in the error</td></tr>
+          <tr><td><strong>Shape check</strong> on one script's AST</td><td>Every keystroke and save, before expansion</td><td>Nesting bombs inside one script (<code>repeat(200, repeat(200, …))</code>). It treats each reference as one opaque step, so on its own it does <em>not</em> catch cycles or big referenced blocks</td></tr>
+          <tr><td><strong>Plan check</strong> on the fully expanded plan</td><td>Run start, and in the editor preview</td><td>Totals across references (<code>repeat(200, BigRelay)</code>) and max depth. It also stops expanding if the depth limit is hit, so a cycle that slips past save (a bad import, say) fails safely instead of overflowing the stack <span class="tag new">new</span></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout danger"><strong>v0.5 gap:</strong> only the first two existed. The run engine expanded referenced relays recursively without re-checking the combined size or depth, so a relay made of big referenced relays could exceed the plan cap.</div>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+    <section id="stopwatch">
+      <span class="eyebrow">07 · Pane 3</span>
+      <h2>Stopwatch <span class="tag keep">keep</span></h2>
+      <ul class="plain">
+        <li>Any number of stopwatches at once, each a card in a list, running or paused, until deleted.</li>
+        <li>Per card: lap (while running), pause/resume, restart (to t₀), rename, delete.</li>
+        <li>Optional name, optional t₀ start offset.</li>
+        <li>Laps show both the delta and the cumulative time. The first lap's delta is measured from t₀.</li>
+        <li><strong>Each lap can take a free-text note</strong>, added or edited at any time. Lap times themselves stay read-only. <span class="tag new">new</span></li>
+        <li>State: <code>accumulated</code> + <code>startedAt?</code>. The elapsed time is computed, never ticked.</li>
+        <li><strong>Persisted in Room</strong> <span class="tag changed">changed</span>. This is needed for scheduled starts, and it removes v0.5's unresolved "seed row" workaround. The cost is small.</li>
+        <li>An ongoing notification with Lap / Pause while one is running. <span class="tag new">new</span></li>
+      </ul>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+    <section id="clock">
+      <span class="eyebrow">08 · Pane 4</span>
+      <h2>Clock <span class="tag changed">changed</span></h2>
+      <p class="lede">Laid out like the stock app: one large styled clock on top, a list of locations below. This replaces v0.5's "library of clocks".</p>
+      <ul class="plain">
+        <li><strong>Main clock:</strong> local time, large, with seconds, in the user's chosen style. It's the tap target for every widget.</li>
+        <li><strong>Locations list:</strong> city name, time, day and offset relative to local ("Tomorrow, +9 h"). Add a location through city search. Swipe to delete, drag to reorder.</li>
+        <li>Optional stock-style <em>home clock</em>: when you're travelling outside your home time zone (set in Settings), the home time is shown automatically. <span class="tag new">new</span></li>
+      </ul>
+      <h3>ClockStyle (shared with widgets)</h3>
+      <div class="grid cols-2">
+        <div class="card"><h4>Digital</h4><ul>
+          <li><span class="fname">Font</span><span class="ftype">system · serif · mono · 7-segment · display face</span></li>
+          <li><span class="fname">Format</span><span class="ftype">follow setting / 12 h / 24 h</span></li>
+          <li><span class="fname">Seconds</span><span class="ftype">on / off</span></li>
+          <li><span class="fname">Date</span><span class="ftype">off / pattern</span></li>
+          <li><span class="fname">Colors</span><span class="ftype">digits, secondary, background</span></li>
+        </ul></div>
+        <div class="card"><h4>Analogue</h4><ul>
+          <li><span class="fname">Hand style</span><span class="ftype">thick · thin · dot</span></li>
+          <li><span class="fname">Ticks</span><span class="ftype">none · minute · quarter · hour · 3 h</span></li>
+          <li><span class="fname">Face</span><span class="ftype">none · ring · filled · numerals</span></li>
+          <li><span class="fname">Second hand</span><span class="ftype">on / off</span></li>
+          <li><span class="fname">Colors</span><span class="ftype">each hand, ticks, face, background</span></li>
+        </ul></div>
+      </div>
+      <p>Colors come from the theme palette, plus a custom picker for any element.</p>
+      <p>One renderer is shared: Compose Canvas in the app and a bitmap in widgets, drawn by the same geometry code, so both surfaces agree.</p>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
     <section id="widgets">
-      <span class="eyebrow">07 — Home screen</span>
+      <span class="eyebrow">09 · Home screen</span>
       <h2>Widgets</h2>
-      <p class="lede">Built with Glance so they share the app's Compose theming directly. Multiple independent instances, each configured separately — nice-to-have, not a hard requirement.</p>
-      <div class="tablewrap">
-        <table>
-          <thead><tr><th>Axis</th><th>Options</th></tr></thead>
-          <tbody>
-            <tr><td>Style</td><td>Digital or analogue, per instance</td></tr>
-            <tr><td>Date</td><td>On/off, format</td></tr>
-            <tr><td>Granularity</td><td>Minute (Android throttles widget updates; live seconds live in-app instead)</td></tr>
-            <tr><td>Colors</td><td>Face, hands/digits, text — independent</td></tr>
-            <tr><td>Font / digit style</td><td>System font, 7-segment, or custom face</td></tr>
-            <tr><td>Background</td><td>Transparent, solid, gradient, image</td></tr>
-            <tr><td>Shape / border</td><td>Corner radius, border weight &amp; color</td></tr>
-            <tr><td>Tap target</td><td>Opens the <strong>Clock</strong> pane (§02) directly</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="callout">No lock-screen version — Android removed third-party keyguard widgets in 5.0 and no OEM exposes an equivalent hook. Dropped per your call; effort goes into the home-screen widget instead.</p>
-    </section>
-
-    <div class="shell" style="padding:0;"><div class="ticks">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div></div>
-
-    <section id="settings">
-      <span class="eyebrow">08 — Preferences</span>
-      <h2>Settings</h2>
-      <div class="grid cols-2">
-        <div class="card"><h4>Display</h4><ul>
-          <li><span class="fname">Theme</span><span class="ftype">light / dark / AMOLED</span></li>
-          <li><span class="fname">Clock format</span><span class="ftype">12h / 24h</span></li>
-          <li><span class="fname">First day of week</span><span class="ftype">any DayOfWeek</span></li>
-          <li><span class="fname">Language</span><span class="ftype">Locale, overrides system</span></li>
-        </ul></div>
-        <div class="card"><h4>Defaults</h4><ul>
-          <li><span class="fname">Default snooze length</span><span class="ftype">Int (min)</span></li>
-          <li><span class="fname">Default alarm/timer sound</span><span class="ftype">Uri</span></li>
-          <li><span class="fname">Haptics</span><span class="ftype">on / off</span></li>
-          <li><span class="fname">Max execution-plan size</span><span class="ftype">Int, ≤1000</span></li>
-          <li><span class="fname">Long-relay warning threshold</span><span class="ftype">Duration</span></li>
-        </ul></div>
-      </div>
-    </section>
-
-    <div class="shell" style="padding:0;"><div class="ticks">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div></div>
-
-    <section id="reliability">
-      <span class="eyebrow">09 — Making it actually fire</span>
-      <h2>Permissions &amp; reliability</h2>
-      <ul>
-        <li><code>SCHEDULE_EXACT_ALARM</code> — required at 33+ for alarms to fire on time; requested with a plain-language rationale screen, not buried.</li>
-        <li><code>POST_NOTIFICATIONS</code> — requested once at first alarm/timer creation.</li>
-        <li>Foreground service + battery-optimization exemption prompt — needed once, so a seamless timer relay survives Doze and isn't killed mid-relay.</li>
-        <li>Dedicated notification channels per surface (alarms, timers, relay-transitions) so the user can tune importance/sound independently in system settings.</li>
+      <ul class="plain">
+        <li>Each placed widget is its own instance with its own <strong>ClockStyle</strong> (digital or analogue) and <strong>location</strong> (local by default, or any time zone, with an optional city label).</li>
+        <li>A configure screen appears on placement, and you can reconfigure through the long-press "Widget settings". Removing a widget deletes its config.</li>
+        <li>Extra widget-only axes: background (transparent / follow theme / solid / gradient), corner shape, border.</li>
+        <li>Minute granularity: Android throttles widget updates, and seconds live in the app. Tapping the widget opens the Clock pane.</li>
+        <li>A world-clock list widget and a "next alarm" widget. <span class="tag later">later</span></li>
       </ul>
     </section>
 
-    <div class="shell" style="padding:0;"><div class="ticks">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div></div>
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+    <section id="bedtime">
+      <span class="eyebrow">10 · Pane 6?</span>
+      <h2>Bedtime <span class="tag later">later</span></h2>
+      <p class="lede"><strong>Not in 1.0.</strong> The goal is replacing the stock app entirely. Feasibility varies per piece. What the stock app does through private Google integrations isn't open to us.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Stock feature</th><th>Feasible?</th><th>How</th></tr></thead>
+        <tbody>
+          <tr><td>Bedtime schedule + reminder notification</td><td>Yes</td><td>Just a schedule with a notification target</td></tr>
+          <tr><td>Linked wake-up alarm</td><td>Yes</td><td>A schedule, which can target a relay (for example Wake)</td></tr>
+          <tr><td>Do Not Disturb during bedtime</td><td>Yes</td><td><code>AutomaticZenRule</code> / notification policy access. The user grants it once</td></tr>
+          <tr><td>Sunrise alarm (screen brightens before the alarm)</td><td>Probably</td><td>A full-screen activity started N minutes early, ramping brightness. Needs device testing</td></tr>
+          <tr><td>Sleep sounds</td><td>Yes, but big scope</td><td>Media playback with a sleep timer</td></tr>
+          <tr><td>Grayscale / wind-down (Digital Wellbeing bedtime mode)</td><td>Likely no</td><td>No public API known. Verify</td></tr>
+          <tr><td>Sleep tracking</td><td>Maybe</td><td>Google Play services Sleep API. Verify, low priority</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+    <section id="settings">
+      <span class="eyebrow">11 · Pane 5</span>
+      <h2>Settings</h2>
+      <div class="grid cols-2">
+        <div class="card"><h4>Display <span class="tag keep">keep</span></h4><ul>
+          <li><span class="fname">Theme</span><span class="ftype">system / light / dark / AMOLED</span></li>
+          <li><span class="fname">Clock format</span><span class="ftype">12 h / 24 h</span></li>
+          <li><span class="fname">First day of week</span><span class="ftype">DayOfWeek</span></li>
+          <li><span class="fname">Home time zone</span><span class="ftype">ZoneId <span class="tag new">new</span></span></li>
+          <li><span class="fname">Language</span><span class="ftype">system / en / nb</span></li>
+        </ul></div>
+        <div class="card"><h4>Alarms</h4><ul>
+          <li><span class="fname">Default snooze length</span><span class="ftype">min <span class="tag keep">keep</span></span></li>
+          <li><span class="fname">Default alarm sound</span><span class="ftype">Uri <span class="tag new">new</span></span></li>
+          <li><span class="fname">Volume ramp</span><span class="ftype">off / seconds <span class="tag new">new</span></span></li>
+          <li><span class="fname">Ring timeout</span><span class="ftype">default 10 min <span class="tag new">new</span></span></li>
+          <li><span class="fname">Upcoming-alarm lead time</span><span class="ftype">off / duration <span class="tag new">new</span></span></li>
+        </ul></div>
+        <div class="card"><h4>Timers</h4><ul>
+          <li><span class="fname">Quick-start durations (4)</span><span class="ftype">1m 5m 10m 15m <span class="tag new">new</span></span></li>
+          <li><span class="fname">Default timer sound</span><span class="ftype">Uri <span class="tag new">new</span></span></li>
+          <li><span class="fname">Max plan size</span><span class="ftype">≤ 1000 <span class="tag keep">keep</span></span></li>
+          <li><span class="fname">Long-relay warning</span><span class="ftype">duration <span class="tag new">new</span></span></li>
+        </ul></div>
+        <div class="card"><h4>General <span class="tag keep">keep</span></h4><ul>
+          <li><span class="fname">Haptics</span><span class="ftype">on / off</span></li>
+          <li><span class="fname">Assistant / app control</span><span class="ftype">on / off <span class="tag later">later</span></span></li>
+          <li><span class="fname">Reset all data</span><span class="ftype">with confirmation</span></li>
+          <li><span class="fname">App version</span><span class="ftype">from git tag</span></li>
+        </ul></div>
+      </div>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+    <section id="automation">
+      <span class="eyebrow">12 · Hands-free</span>
+      <h2>Automation &amp; assistants <span class="tag later">later</span></h2>
+      <div class="callout"><strong>Future feature, not in 1.0.</strong> The design is kept here so the command layer can be shaped for it from the start. Only the command layer itself (one internal API that the UI also uses) is built in 1.0.</div>
+      <p class="lede">"Five wake-up alarms, five minutes apart" shouldn't need a loop in the relay language, which would be hard to build and hard to use. An assistant can do the looping instead. Relay just needs a clean API for it.</p>
+      <p>All three entry points call one internal <strong>command layer</strong>, the same one the UI uses. So validation is identical: scripts are parsed, cycle-checked and size-checked no matter who submits them.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Entry point</th><th>What it covers</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Standard Android clock intents</strong>: <code>ACTION_SET_ALARM</code>, <code>ACTION_SET_TIMER</code>, <code>ACTION_SHOW_ALARMS</code>, <code>ACTION_SHOW_TIMERS</code>, <code>ACTION_DISMISS_ALARM</code>, <code>ACTION_SNOOZE_ALARM</code></td><td>What Gemini and other assistants already send to "the clock app" for "set an alarm for 7". One plain alarm or timer per intent, but an assistant can send several. A label passes through as the run label</td><td>Future. Well-established API, the first to build</td></tr>
+          <tr><td><strong>Batch import</strong>: a JSON document, received by share-to-Relay (text or <code>.json</code>) or a <code>VIEW</code> intent</td><td>Any number of schedules, timers and relays, including scheduled relay targets. Works with any AI app that can produce text</td><td>Future</td></tr>
+          <tr><td><strong>AppFunctions</strong> (<code>androidx.appfunctions</code>, Android 16+)</td><td>Typed functions (<code>createSchedules</code>, <code>startTimer</code>, <code>listAlarms</code>, …) that on-device agents discover and call directly, with no text round-trip</td><td>Future, after a spike. Newest and least certain. First verify that Gemini actually calls third-party AppFunctions on your device</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Batch format (sketch)</h3>
+      <div class="panel"><pre style="margin:0">{
+  <span class="c2">"relay"</span>: 1,
+  <span class="c2">"schedules"</span>: [
+    { <span class="c2">"time"</span>: <span class="c1">"06:30"</span>, <span class="c2">"repeat"</span>: [<span class="c1">"MO"</span>,<span class="c1">"TU"</span>,<span class="c1">"WE"</span>,<span class="c1">"TH"</span>,<span class="c1">"FR"</span>], <span class="c2">"label"</span>: <span class="c1">"wake_1"</span>, <span class="c2">"target"</span>: { <span class="c2">"ring"</span>: {} } },
+    { <span class="c2">"time"</span>: <span class="c1">"06:35"</span>, <span class="c2">"repeat"</span>: [<span class="c1">"MO"</span>,<span class="c1">"TU"</span>,<span class="c1">"WE"</span>,<span class="c1">"TH"</span>,<span class="c1">"FR"</span>], <span class="c2">"label"</span>: <span class="c1">"wake_2"</span>, <span class="c2">"target"</span>: { <span class="c2">"ring"</span>: {} } },
+    { <span class="c2">"time"</span>: <span class="c1">"17:00"</span>, <span class="c2">"target"</span>: { <span class="c2">"relay"</span>: { <span class="c2">"ref"</span>: <span class="c1">"Workday"</span> } } }
+  ],
+  <span class="c2">"library"</span>: [
+    { <span class="c2">"kind"</span>: <span class="c1">"timer"</span>, <span class="c2">"label"</span>: <span class="c1">"Tea"</span>, <span class="c2">"duration"</span>: <span class="c1">"4m"</span> },
+    { <span class="c2">"kind"</span>: <span class="c1">"relay"</span>, <span class="c2">"label"</span>: <span class="c1">"Wake"</span>, <span class="c2">"script"</span>: <span class="c1">"(Nudge, Nudge, Loud)"</span>, <span class="c2">"transition"</span>: <span class="c1">"interaction"</span> }
+  ]
+}</pre></div>
+      <h3>Rules</h3>
+      <ul class="plain">
+        <li><strong>JSON, formatted for people too:</strong> short keys, times and durations as plain strings (<code>"06:30"</code>, <code>"4m"</code>), and relay content written in the relay language. You can hand-edit it as easily as an assistant can generate it.</li>
+        <li><strong>Becoming the handler:</strong> assistants send standard intents to whichever app handles them. A one-time onboarding hint explains how to make Relay that app. Verify how Gemini picks the handler when this is built.</li>
+        <li><strong>A human confirms every batch:</strong> the preview shows each item, and you can untick items. Nothing is written until you tap Create.</li>
+        <li>Deleting or bulk-disabling through any entry point always asks for confirmation in the app. Standard intents that only create or show things need no extra step, matching stock behaviour.</li>
+        <li>Everything created externally gets a small "added by &lt;app&gt;" marker, so it's easy to find and undo.</li>
+        <li>One Settings switch turns all external control off.</li>
+        <li>The JSON schema is published in the app's help and in the repo, so any assistant can be pointed at it.</li>
+      </ul>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+    <section id="reliability">
+      <span class="eyebrow">13 · Making it actually fire</span>
+      <h2>Firing &amp; reliability</h2>
+      <p class="lede">Built first and tested hardest. Everything that makes noise goes through one module.</p>
+      <h3>The firing module</h3>
+      <p>One controller, parameterized by context. It owns the looping audio, the vibration, the full-screen activity and the notification:</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Context</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td>Ring schedule fires</td><td>Dismiss · Snooze (hidden once max snoozes is reached)</td></tr>
+          <tr><td>Relay boundary, interaction required</td><td>Continue · Stop relay</td></tr>
+          <tr><td>Timer / relay reaches its end</td><td>Stop · Restart · +1 min</td></tr>
+        </tbody>
+      </table></div>
+      <ul class="plain">
+        <li>If several things ring at once (two timers, or an alarm during a run), they stack on one ringing screen and each is dismissed on its own.</li>
+        <li>Audio: <code>USAGE_ALARM</code>, looping, with audio focus. It plays at alarm volume even when media is muted.</li>
+      </ul>
+      <h3>Scheduling</h3>
+      <ul class="plain">
+        <li><code>setAlarmClock()</code> for Ring schedules. It's the most Doze-proof option and shows the system "next alarm" indicator.</li>
+        <li>Exact alarms for every run's next step end and for non-Ring schedules. UI countdowns are computed from the persisted end timestamp.</li>
+        <li>Reschedule everything (schedules, active runs, widget ticks) on boot, on time change, on time-zone change and on app update.</li>
+      </ul>
+      <h3>Permissions</h3>
+      <ul class="plain">
+        <li><code>USE_EXACT_ALARM</code>. Google Play auto-grants it to apps whose core function is an alarm clock or timer, so no permission screen is needed and the user can't revoke it by accident. v0.5 used <code>SCHEDULE_EXACT_ALARM</code>, which the user must grant in system settings and can revoke.</li>
+        <li><code>USE_FULL_SCREEN_INTENT</code>, gated by <code>canUseFullScreenIntent()</code> on API 34+, with a heads-up fallback.</li>
+        <li><code>POST_NOTIFICATIONS</code>, requested at first alarm or timer creation. Battery-optimization exemption, prompted once.</li>
+        <li>Notification channels: ringing alarm, ringing timer, run progress (low), upcoming alarm, stopwatch, errors.</li>
+      </ul>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+    <section id="data">
+      <span class="eyebrow">14 · Persistence</span>
+      <h2>Data model</h2>
+      <div class="grid cols-3">
+        <div class="card"><h4>TimerDef</h4><ul>
+          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
+          <li><span class="fname">label</span><span class="ftype">String, unique</span></li>
+          <li><span class="fname">durationExpr</span><span class="ftype">String</span></li>
+          <li><span class="fname">sound</span><span class="ftype">SoundSpec</span></li>
+          <li><span class="fname">headerId, sortOrder</span><span class="ftype">library</span></li>
+        </ul></div>
+        <div class="card"><h4>RelayDef</h4><ul>
+          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
+          <li><span class="fname">label</span><span class="ftype">String, unique</span></li>
+          <li><span class="fname">script</span><span class="ftype">String</span></li>
+          <li><span class="fname">stepOverrides</span><span class="ftype">Map&lt;stepKey, StepOverride&gt;</span></li>
+          <li><span class="fname">defaultSound</span><span class="ftype">SoundSpec</span></li>
+          <li><span class="fname">transitionMode</span><span class="ftype">SEAMLESS / INTERACTION</span></li>
+          <li><span class="fname">transitionTone</span><span class="ftype">enum</span></li>
+          <li><span class="fname">headerId, sortOrder</span><span class="ftype">library</span></li>
+        </ul></div>
+        <div class="card"><h4>Run</h4><ul>
+          <li><span class="fname">id</span><span class="ftype">UUID</span></li>
+          <li><span class="fname">sourceDefId?</span><span class="ftype">null = anonymous</span></li>
+          <li><span class="fname">label?</span><span class="ftype">String</span></li>
+          <li><span class="fname">plan</span><span class="ftype">List&lt;Step&gt; snapshot</span></li>
+          <li><span class="fname">stepIndex, phase</span><span class="ftype">Int, enum</span></li>
+          <li><span class="fname">stepEndsAt / remaining</span><span class="ftype">Instant / Duration</span></li>
+          <li><span class="fname">startedBy</span><span class="ftype">user / scheduleId / external</span></li>
+        </ul></div>
+        <div class="card"><h4>Schedule</h4><ul>
+          <li><span class="fname">id, label?, enabled</span><span class="ftype"></span></li>
+          <li><span class="fname">time, date?</span><span class="ftype">LocalTime, LocalDate</span></li>
+          <li><span class="fname">repeatDays</span><span class="ftype">Set&lt;DayOfWeek&gt;</span></li>
+          <li><span class="fname">endRule</span><span class="ftype">never / date / count</span></li>
+          <li><span class="fname">afterFire</span><span class="ftype">DELETE / DISABLE</span></li>
+          <li><span class="fname">target</span><span class="ftype">sealed, below</span></li>
+        </ul>
+        <p class="note">target = Ring(sound, ramp, snooze, maxSnoozes) | Timer(defId or inline expr, label?) | Relay(defId or inline script, label?) | Stopwatch(name?, t₀). Every row also stores createdBy (user / external app).</p></div>
+        <div class="card"><h4>ScheduleException</h4><ul>
+          <li><span class="fname">scheduleId</span><span class="ftype">FK</span></li>
+          <li><span class="fname">startDay, endDay</span><span class="ftype">LocalDate</span></li>
+          <li><span class="fname">kind</span><span class="ftype">SKIP / RETIME(time)</span></li>
+        </ul></div>
+        <div class="card"><h4>Stopwatch</h4><ul>
+          <li><span class="fname">id, name?</span><span class="ftype"></span></li>
+          <li><span class="fname">t0, accumulated</span><span class="ftype">Duration</span></li>
+          <li><span class="fname">startedAt?</span><span class="ftype">Instant</span></li>
+          <li><span class="fname">laps</span><span class="ftype">List&lt;Lap(at, note?)&gt;</span></li>
+          <li><span class="fname">sortOrder</span><span class="ftype">Long</span></li>
+        </ul></div>
+        <div class="card"><h4>ClockStyle</h4><ul>
+          <li><span class="fname">kind</span><span class="ftype">DIGITAL / ANALOGUE</span></li>
+          <li><span class="fname">digital fields</span><span class="ftype">font, format, seconds, date</span></li>
+          <li><span class="fname">analogue fields</span><span class="ftype">hands, ticks, face, secondHand</span></li>
+          <li><span class="fname">colors</span><span class="ftype">per element</span></li>
+        </ul>
+        <p class="note">Embedded (JSON) in the main-clock setting and in each WidgetInstance.</p></div>
+        <div class="card"><h4>Location / WidgetInstance</h4><ul>
+          <li><span class="fname">Location: zoneId, city, sortOrder</span><span class="ftype"></span></li>
+          <li><span class="fname">Widget: appWidgetId, style, zoneId?, city?</span><span class="ftype"></span></li>
+          <li><span class="fname">widget background, shape, border</span><span class="ftype"></span></li>
+        </ul></div>
+        <div class="card"><h4>Library + sound</h4><ul>
+          <li><span class="fname">LibraryHeader: title, sortOrder</span><span class="ftype"></span></li>
+          <li><span class="fname">SoundSpec: ringtoneUri, vibration</span><span class="ftype">embedded</span></li>
+        </ul>
+        <p class="note">v0.5's SoundProfile table stored vibration and volume that nothing ever read. It's now an embedded value, with every field used.</p></div>
+      </div>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
     <section id="design">
-      <span class="eyebrow">10 — Starting point, not final</span>
-      <h2>Visual direction</h2>
-      <p class="lede">A seed token system for the <em>app itself</em> (distinct from this document's own palette) — Material 3 Expressive as a base, pushed further so it doesn't read as stock. Lock these tokens before building many screens; individual screen layouts stay easy to reskin since Compose separates logic from presentation.</p>
+      <span class="eyebrow">15 · Look</span>
+      <h2>Visual direction <span class="tag keep">keep</span></h2>
+      <p>Material 3 as the base, pushed so it doesn't read as stock. Seed tokens:</p>
       <div class="swatches">
         <div class="swatch"><div class="chip" style="background:#151513"></div>ink 151513</div>
         <div class="swatch"><div class="chip" style="background:#F4F2EA"></div>paper F4F2EA</div>
@@ -621,30 +790,49 @@ time_expr      = "NOW" (("+" | "-") literal_duration)?</pre></div>
         <div class="swatch"><div class="chip" style="background:#2E6F66"></div>teal 2E6F66</div>
         <div class="swatch"><div class="chip" style="background:#7A6A4F"></div>brass 7A6A4F</div>
       </div>
-      <p>Suggested pairing: a display face with real character for large clock digits (not the system default), a plain workhorse for lists and settings, tabular numerals everywhere digits line up. Treat this as a proposal to react to — the mockups are where it actually gets pressure-tested.</p>
+      <p>A bundled display face with character for the large clock digits, a plain workhorse face for lists, and tabular numerals wherever digits line up. v0.5 only used system serif and mono.</p>
     </section>
 
-    <div class="shell" style="padding:0;"><div class="ticks">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div></div>
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
-    <section id="next">
-      <span class="eyebrow">11 — Where to go from here</span>
-      <h2>Open items &amp; next steps</h2>
-      <ul>
-        <li><strong>Name:</strong> Relay (renamed from Clockr, v0.5) — settled.</li>
-        <li><strong>Done:</strong> Room + chainlang data layer, Timers/Alarms/Stopwatch/Clock/Settings wired to real state, a first Glance clock widget. See the repo for what's actually built vs. this document's design-ahead sections.</li>
-        <li><strong>Next, and the biggest remaining gap:</strong> the Timer/Relay <em>run</em> engine doesn't exist yet — creating and editing definitions works, but there's no foreground service, live countdown, relay-step advancement, or the §6.7 completion prompt. Nothing in §4.2's scheduled-triggers idea is buildable until this exists, since there's nothing yet to schedule <em>into</em>.</li>
-        <li><strong>Build the completion/firing UI as one shared, pluggable module from the start</strong> — not an alarm-only screen generalized later. One controller, parameterized by which actions are valid for the context: Alarm firing gets Dismiss/Snooze; a Timer/Relay run finishing gets Stop/Restart/+1min (spec §6.7). Getting this right now avoids reconciling two divergent implementations afterward.</li>
-        <li><strong>Known refactor debt once §4.2 is adopted:</strong> <code>AlarmEntity</code>, <code>AlarmReceiver</code>, and <code>NotificationHelper</code> as built are alarm-specific (hard-wired dismiss/snooze, <code>oneOffAfterFire</code>/<code>done</code> baked into the entity) rather than shaped around a generic scheduled-trigger + pluggable target. <code>AlarmScheduler</code>'s actual time/repeat math, by contrast, is already target-agnostic and should carry over largely as-is.</li>
-        <li>Still open: exact wording/flow for the sound/transition-override UI on a Relay (picking which step to override, per relay); final default for the execution-plan-size cap; the Stopwatch-target "seed row" mechanism (§4.2).</li>
+    <section id="plan">
+      <span class="eyebrow">16 · Order of work</span>
+      <h2>Build order</h2>
+      <ol class="plain">
+        <li><strong>Foundation:</strong> project skeleton, theme tokens, navigation, i18n setup, Room with a migration test harness, <code>chainlang</code> carried over with its tests. <strong>Fresh start, with no import from v0.5:</strong> use a new database file name, so installing over v0.5 never opens its version-5 schema. The old file is deleted on first launch.</li>
+        <li><strong>Firing module + Ring schedules:</strong> plain alarms end to end, including full-screen, looping audio, snooze, exceptions, upcoming notification and boot rescheduling. Test on the device before moving on.</li>
+        <li><strong>Run engine + Timers:</strong> persisted runs, parallel runs, quick-start, library with headers.</li>
+        <li><strong>Relays:</strong> ref arithmetic in <code>chainlang</code>, the script editor with autocomplete, transitions.</li>
+        <li><strong>Scheduled targets:</strong> Timer, Relay and Stopwatch on the Alarms pane.</li>
+        <li><strong>Stopwatch</strong> (persisted).</li>
+        <li><strong>Clock pane + ClockStyle renderer + widgets.</strong></li>
+        <li><strong>After 1.0:</strong> automation (standard clock intents, then batch import, then AppFunctions after a spike), Bedtime (after a feasibility spike), extra widgets.</li>
+      </ol>
+      <h3>Worth salvaging from v0.5</h3>
+      <ul class="plain">
+        <li><code>chainlang/</code> in full, including its tests.</li>
+        <li>The <code>AlarmScheduler</code> next-trigger math, including exceptions. It's target-agnostic already.</li>
+        <li>Library header and drag-reorder logic. The analogue hand-angle geometry. The <code>strings.xml</code> translations (en + nb). <code>gitVersionName()</code>.</li>
+      </ul>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+    <section id="open">
+      <span class="eyebrow">17 · Undecided</span>
+      <h2>Open questions</h2>
+      <p>None right now. One decision is provisional until it's tried on a working prototype:</p>
+      <ul class="plain">
+        <li><strong>Per-step override UI</strong> (§05): tap a step in the live preview to override it.</li>
       </ul>
     </section>
 
   </main>
 </div>
 
-<footer class="doc"><div class="shell">Relay — technical spec v0.5 · living document, expect revisions as screens get built</div></footer>
+<div class="shell">
+  <footer class="doc">Relay · spec v1.0 · clean-restart baseline, update as screens get built</footer>
+</div>
+
 </body>
 </html>
