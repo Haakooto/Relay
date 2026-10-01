@@ -5,6 +5,20 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v1.0-alpha.4 (2026-10-01)
+
+Untested pre-release: languages, editors and a new light theme. Not tried on a device yet.
+
+- Norwegian is now Nynorsk throughout, also on phones set to bokmål. A relay is "eit relé".
+- English is British English, and dates and times are written the British way (1 Oct 2026),
+  even on a phone set to US English.
+- Alarm, timer and relay editors take over the screen: the bottom bar is hidden, and leaving
+  with unsaved changes asks whether to discard them.
+- The alarm editor's Save button sits next to the time, so there's no scrolling to save. Timer
+  and relay editors have Start and Save at the top.
+- A cleaner light theme: near-white instead of cream, grey instead of lavender for selected
+  options, and a deeper orange that's easier to read. Dark and AMOLED lose their purple tint too.
+
 ## v1.0-alpha.3 (2026-09-30)
 
 Untested pre-release: timers and relays. Not tried on a device yet.

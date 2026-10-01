@@ -10,18 +10,18 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 
 ## Every build: quick smoke test (2 min)
 
-- [ ] App opens, and all five panes open from the bottom bar.
-- [ ] Set an alarm 2 minutes out, lock the phone: it wakes the screen and rings until you act.
+- [x] App opens, and all five panes open from the bottom bar.
+- [x] Set an alarm 2 minutes out, lock the phone: it wakes the screen and rings until you act.
 
 ## v1.0-alpha.1: foundation
 
 - [x] Switching between the five panes lands on the pane you tapped. (The old app got stuck on Clock.)
-- [ ] Settings → Language → Norsk: the UI switches to Norwegian **and you stay on Settings**.
-- [ ] Language → System: back to the phone's language.
-- [ ] Each theme (System, Light, Dark, AMOLED) applies at once. AMOLED is pure black.
-- [ ] Close and reopen the app in Dark: no white flash on launch.
-- [ ] Settings shows a version like `v1.0-alpha.2+abc1234`.
-- [ ] The phone's own Settings → Apps → Relay → Language also lists English and Norsk.
+- [x] Settings → Language → Norsk: the UI switches to Norwegian **and you stay on Settings**.
+- [x] Language → System: back to the phone's language.
+- [x] Each theme (System, Light, Dark, AMOLED) applies at once. AMOLED is pure black.
+- [x] Close and reopen the app in Dark: no white flash on launch.
+- [x] Settings shows a version like `v1.0-alpha.2+abc1234`.
+- [x] The phone's own Settings → Apps → Relay → Language also lists English and Norsk.
 
 ## v1.0-alpha.2: alarms
 
@@ -44,9 +44,9 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] While snoozed, the "Snoozed until" notification's Dismiss cancels the snooze.
 
 ### Creating and editing
-- [ ] New alarm opens straight into the time picker.
+- [x] New alarm opens straight into the time picker.
 - [ ] After Save, a toast says how long until it rings.
-- [ ] The list is sorted by next ring time and shows "Rings in …".
+- [x] The list is sorted by next ring time and shows "Rings in …".
 - [ ] One-off with "Delete" after ringing: gone from the list after you dismiss it.
 - [ ] One-off with "Keep, switched off": stays, toggled off.
 - [ ] Repeating on chosen days: the list shows the days in your first-day-of-week order.
@@ -120,3 +120,20 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 ### Restarts
 - [ ] Start a 5-minute timer, swipe the app away from recents: it still rings on time.
 - [ ] Start a 10-minute timer, restart the phone, unlock: the timer is still there and rings on time.
+
+## Uncommitted: languages and editors
+
+- [ ] Settings → Language → Norsk: everything is Nynorsk ("Innstillingar", "Tidtakarar", "Nytt relé").
+- [ ] Phone set to bokmål, app language System: the app shows Nynorsk too.
+- [ ] Phone set to US English, app language System: dates read like "1 Oct 2026", and 12-hour times say "pm".
+- [ ] Open an alarm, timer or relay editor: the bottom bar is gone.
+- [ ] Alarm editor: Save sits next to the big time; no scrolling needed to save.
+- [ ] Timer and relay editors: Start and Save are in the top bar.
+- [ ] Change something, then press back (or ✕): asks "Discard changes?". Keep editing stays; Discard leaves.
+- [ ] Open an editor and back out without changing anything: leaves straight away, no question.
+
+## Uncommitted: light theme
+
+- [ ] Light theme: background is near-white, not cream; selected chips and the bottom-bar highlight are grey, not lavender.
+- [ ] Orange headings and links read clearly (darker orange than before).
+- [ ] Dark and AMOLED: selected chips are grey too, with no purple anywhere.

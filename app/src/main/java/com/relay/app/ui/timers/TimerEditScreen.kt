@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
 import com.relay.app.ui.common.SoundPickerRow
+import com.relay.app.ui.common.rememberDiscardGuard
 import com.relay.app.util.DurationText
 
 @Composable
@@ -46,6 +47,7 @@ fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
     if (!state.loaded) return
+    val close = rememberDiscardGuard(viewModel::isDirty, onDone)
 
     state.deleteReferences?.let { refs ->
         DeleteDialog(state.label, refs, onDismiss = viewModel::cancelDelete) { viewModel.delete(onDone) }
@@ -55,9 +57,14 @@ fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onDone) { Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.action_cancel)) }
-            Text(stringResource(if (state.isNew) R.string.timer_new else R.string.timer_edit), style = MaterialTheme.typography.titleLarge)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            IconButton(onClick = close) { Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.action_cancel)) }
+            Text(
+                stringResource(if (state.isNew) R.string.timer_new else R.string.timer_edit),
+                style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f),
+            )
+            OutlinedButton(onClick = { viewModel.start(onDone) }, enabled = state.seconds != null) { Text(stringResource(R.string.action_start)) }
+            Button(onClick = { viewModel.save(onDone) }) { Text(stringResource(R.string.action_save)) }
         }
         OutlinedTextField(
             value = state.label,
@@ -91,12 +98,7 @@ fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
             Switch(checked = state.sound.vibrate, onCheckedChange = { viewModel.setSound(state.sound.copy(vibrate = it)) })
         }
         state.saveError?.let { Text(saveErrorText(it), color = MaterialTheme.colorScheme.error) }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            if (!state.isNew) TextButton(onClick = viewModel::askDelete) { Text(stringResource(R.string.action_delete)) }
-            Spacer(Modifier.weight(1f))
-            OutlinedButton(onClick = { viewModel.save(onDone) }) { Text(stringResource(R.string.action_save)) }
-            Button(onClick = { viewModel.start(onDone) }, enabled = state.seconds != null) { Text(stringResource(R.string.action_start)) }
-        }
+        if (!state.isNew) TextButton(onClick = viewModel::askDelete) { Text(stringResource(R.string.action_delete)) }
     }
 }
 

@@ -7,7 +7,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
-import java.util.Locale
 
 object RelativeText {
     /** "8 h 12 min" style, for "rings in ...". Rounds up so it never says 0 min too early. */
@@ -29,7 +28,7 @@ object RelativeText {
         days == setOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY) ->
             context.getString(R.string.repeat_weekdays)
         days == setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) -> context.getString(R.string.repeat_weekends)
-        else -> weekOrder(firstDay).filter { it in days }.joinToString(", ") { it.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }
+        else -> weekOrder(firstDay).filter { it in days }.joinToString(", ") { it.getDisplayName(TextStyle.SHORT, AppLocale.formatting) }
     }
 
     fun weekOrder(firstDay: DayOfWeek): List<DayOfWeek> = (0L until 7L).map { firstDay.plus(it) }
@@ -38,6 +37,6 @@ object RelativeText {
     fun date(context: Context, date: LocalDate, today: LocalDate = LocalDate.now()): String = when (date) {
         today -> context.getString(R.string.date_today)
         today.plusDays(1) -> context.getString(R.string.date_tomorrow)
-        else -> date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault()))
+        else -> date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(AppLocale.formatting))
     }
 }

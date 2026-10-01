@@ -97,11 +97,21 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
                 createdAtMillis = existing.createdAtMillis,
                 createdBy = existing.createdBy,
             )
+            baseline = _state.value.editable()
             refreshExceptions()
         }
     }
 
     fun update(transform: (AlarmEditState) -> AlarmEditState) = _state.update(transform)
+
+    private var baseline: List<Any?>? = null
+    private fun AlarmEditState.editable() = listOf(
+        hour, minute, label, repeatDays, oneOffDate, afterFire, endRule, endDate, endCount,
+        soundUri, vibrate, rampSeconds, snoozeMinutes, maxSnoozes,
+    )
+
+    /** Unsaved edits? Exceptions don't count: they're saved the moment they're added. */
+    fun isDirty(): Boolean = baseline != null && baseline != _state.value.editable()
 
     /** Saves and arms. [onSaved] gets the next fire time (null = won't ring). */
     fun save(onSaved: (Long?) -> Unit) = viewModelScope.launch {

@@ -54,6 +54,7 @@ import com.relay.app.R
 import com.relay.app.data.schedule.AfterFire
 import com.relay.app.data.schedule.ExceptionKind
 import com.relay.app.ui.common.NumberOptionChips
+import com.relay.app.ui.common.rememberDiscardGuard
 import com.relay.app.ui.common.OptionChips
 import com.relay.app.ui.common.SoundPickerRow
 import com.relay.app.util.RelativeText
@@ -61,7 +62,7 @@ import com.relay.app.util.TimeText
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.TextStyle
-import java.util.Locale
+import com.relay.app.util.AppLocale
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -73,6 +74,7 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
     if (!state.loaded) return
+    val close = rememberDiscardGuard(viewModel::isDirty, onDone)
 
     // Stock behaviour: a new alarm opens straight into the time picker.
     var pickingTime by rememberSaveable { mutableStateOf(state.isNew) }
@@ -123,17 +125,21 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onDone) { Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.action_cancel)) }
+            IconButton(onClick = close) { Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.action_cancel)) }
             Text(
                 stringResource(if (state.isNew) R.string.alarm_new else R.string.alarm_edit),
                 style = MaterialTheme.typography.titleLarge,
             )
         }
-        Text(
-            TimeText.of(LocalTime.of(state.hour, state.minute), state.is24h),
-            fontSize = 64.sp, fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.clickable { pickingTime = true },
-        )
+        // Save sits next to the time, so it's reachable without scrolling the long option list.
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                TimeText.of(LocalTime.of(state.hour, state.minute), state.is24h),
+                fontSize = 64.sp, fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f).clickable { pickingTime = true },
+            )
+            Button(onClick = onSave) { Text(stringResource(R.string.action_save)) }
+        }
         OutlinedTextField(
             value = state.label,
             onValueChange = { v -> viewModel.update { it.copy(label = v) } },
@@ -149,7 +155,7 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
                 FilterChip(
                     selected = on,
                     onClick = { viewModel.update { it.copy(repeatDays = if (on) it.repeatDays - day else it.repeatDays + day) } },
-                    label = { Text(day.getDisplayName(TextStyle.SHORT, Locale.getDefault())) },
+                    label = { Text(day.getDisplayName(TextStyle.SHORT, AppLocale.formatting)) },
                 )
             }
         }
@@ -255,13 +261,9 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
             OutlinedButton(onClick = { addingException = true }) { Text(stringResource(R.string.exception_add)) }
         }
 
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            if (!state.isNew) {
-                TextButton(onClick = { viewModel.delete(onDone) }) { Text(stringResource(R.string.action_delete)) }
-            }
-            Spacer(Modifier.weight(1f))
-            Button(onClick = onSave) { Text(stringResource(R.string.action_save)) }
+        if (!state.isNew) {
+            Spacer(Modifier.height(8.dp))
+            TextButton(onClick = { viewModel.delete(onDone) }) { Text(stringResource(R.string.action_delete)) }
         }
     }
 }

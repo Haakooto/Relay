@@ -55,9 +55,14 @@ class TimerEditViewModel(application: Application, private val timerId: String?)
                 loaded = true, isNew = false, id = existing.id, label = existing.label, durationExpr = existing.durationExpr,
                 sound = existing.sound, headerId = existing.headerId, sortOrder = existing.sortOrder,
             )
+            baseline = _state.value.editable()
             reevaluate()
         }
     }
+
+    private var baseline: List<Any?>? = null
+    private fun TimerEditState.editable() = listOf(label, durationExpr, sound)
+    fun isDirty(): Boolean = baseline != null && baseline != _state.value.editable()
 
     fun setLabel(v: String) { _state.update { it.copy(label = v, saveError = null) } }
     fun setDuration(v: String) { _state.update { it.copy(durationExpr = v) }; reevaluate() }

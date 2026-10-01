@@ -40,7 +40,7 @@ import com.relay.app.ui.common.OptionChips
 import com.relay.app.ui.common.SoundPickerRow
 import java.time.DayOfWeek
 import java.time.format.TextStyle
-import java.util.Locale
+import com.relay.app.util.AppLocale
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -76,7 +76,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 FilterChip(
                     selected = current.firstDayOfWeek == day,
                     onClick = { viewModel.setFirstDayOfWeek(day) },
-                    label = { Text(day.getDisplayName(TextStyle.SHORT, Locale.getDefault())) },
+                    label = { Text(day.getDisplayName(TextStyle.SHORT, AppLocale.formatting)) },
                 )
             }
         }

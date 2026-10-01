@@ -61,6 +61,12 @@ android {
         jvmTarget = "17"
     }
 
+    lint {
+        // values-nb deliberately mirrors values-nn (Nynorsk) for bokmål phones, without listing
+        // bokmål as a choice in the system language picker. See NorwegianStringsTest.
+        disable += "UnusedTranslation"
+    }
+
     buildFeatures {
         compose = true
     }

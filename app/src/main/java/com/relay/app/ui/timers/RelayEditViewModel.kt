@@ -83,11 +83,16 @@ class RelayEditViewModel(application: Application, private val relayId: String?)
                 defaultSound = existing.defaultSound, mode = existing.transitionMode, tone = existing.transitionTone,
                 overrides = StepOverrides.decode(existing.stepOverrides), headerId = existing.headerId, sortOrder = existing.sortOrder,
             )).copy(longWarningHours = settings.longRelayWarningHours)
+            baseline = _state.value.editable()
             snapshot = library.snapshot()
             _state.update { it.copy(candidates = library.referenceCandidates(existing?.label.orEmpty())) }
             schedulePreview(immediately = true)
         }
     }
+
+    private var baseline: List<Any?>? = null
+    private fun RelayEditState.editable() = listOf(label, script, defaultSound, mode, tone, overrides)
+    fun isDirty(): Boolean = baseline != null && baseline != _state.value.editable()
 
     fun setLabel(v: String) { _state.update { it.copy(label = v, saveError = null) }; schedulePreview() }
     fun setScript(v: String) {

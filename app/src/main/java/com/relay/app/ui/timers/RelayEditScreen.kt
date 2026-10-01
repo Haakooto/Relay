@@ -47,6 +47,7 @@ import com.relay.app.run.OwnStep
 import com.relay.app.run.OwnStepKind
 import com.relay.app.ui.common.OptionChips
 import com.relay.app.ui.common.SoundPickerRow
+import com.relay.app.ui.common.rememberDiscardGuard
 import com.relay.app.util.DurationText
 
 @Composable
@@ -58,6 +59,7 @@ fun RelayEditScreen(relayId: String?, onDone: () -> Unit) {
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
     if (!state.loaded) return
+    val close = rememberDiscardGuard(viewModel::isDirty, onDone)
     var showHelp by remember { mutableStateOf(false) }
     var editingStep by remember { mutableStateOf<OwnStep?>(null) }
 
@@ -73,8 +75,8 @@ fun RelayEditScreen(relayId: String?, onDone: () -> Unit) {
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onDone) { Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.action_cancel)) }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            IconButton(onClick = close) { Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.action_cancel)) }
             Text(
                 stringResource(if (state.isNew) R.string.relay_new else R.string.relay_edit),
                 style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f),
@@ -82,6 +84,10 @@ fun RelayEditScreen(relayId: String?, onDone: () -> Unit) {
             IconButton(onClick = { showHelp = true }) {
                 Icon(Icons.AutoMirrored.Outlined.HelpOutline, contentDescription = stringResource(R.string.relay_syntax_help))
             }
+            OutlinedButton(onClick = { viewModel.start(onDone) }, enabled = state.preview.error == null && state.preview.steps.isNotEmpty()) {
+                Text(stringResource(R.string.action_start))
+            }
+            Button(onClick = { viewModel.save(onDone) }) { Text(stringResource(R.string.action_save)) }
         }
         OutlinedTextField(
             value = state.label,
@@ -122,14 +128,7 @@ fun RelayEditScreen(relayId: String?, onDone: () -> Unit) {
         }
 
         state.saveError?.let { Text(saveErrorText(it), color = MaterialTheme.colorScheme.error) }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            if (!state.isNew) TextButton(onClick = viewModel::askDelete) { Text(stringResource(R.string.action_delete)) }
-            Spacer(Modifier.weight(1f))
-            OutlinedButton(onClick = { viewModel.save(onDone) }) { Text(stringResource(R.string.action_save)) }
-            Button(onClick = { viewModel.start(onDone) }, enabled = state.preview.error == null && state.preview.steps.isNotEmpty()) {
-                Text(stringResource(R.string.action_start))
-            }
-        }
+        if (!state.isNew) TextButton(onClick = viewModel::askDelete) { Text(stringResource(R.string.action_delete)) }
     }
 }
 

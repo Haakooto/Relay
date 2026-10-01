@@ -36,7 +36,12 @@ Only `chainlang/` was carried over as-is.
   says "relay" (`RelayDef`, not `ChainDef`).
 - `minSdk = 33` deliberately: single code path, no legacy branches.
 - Per-app language uses the system `LocaleManager` API (`ui/settings/AppLanguage.kt`), not
-  DataStore. Strings in English and Norwegian (`values-nb`) from the first screen.
+  DataStore. Strings in English and Norwegian from the first screen.
+- English is **British English** only, not configurable: British spelling in `values/strings.xml`,
+  and any English locale formats dates and times as en-GB (`util/AppLocale.kt`).
+- Norwegian is **Nynorsk** only, never bokmål. Edit `values-nn/strings.xml`, then copy it over
+  `values-nb/strings.xml` (Android doesn't fall back from nb to nn; `NorwegianStringsTest` fails if
+  they differ). A relay is **eit relé** (reléet, relé, relea), never "stafett".
 
 ## Versioning
 

@@ -31,14 +31,15 @@ fun RelayApp() {
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination
 
+    // Editors are modal: no bottom bar, so leaving means saving or discarding.
+    val inEditor = current?.route?.let { route -> EDITOR_ROUTES.any { route.startsWith("$it/") } } == true
+
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            if (!inEditor) NavigationBar {
                 Pane.entries.forEach { pane ->
                     NavigationBarItem(
-                        selected = current?.hierarchy?.any { it.route == pane.route } == true ||
-                            (pane == Pane.ALARMS && current?.route?.startsWith("$ALARM_EDIT/") == true) ||
-                            (pane == Pane.TIMERS && (current?.route?.startsWith("$TIMER_EDIT/") == true || current?.route?.startsWith("$RELAY_EDIT/") == true)),
+                        selected = current?.hierarchy?.any { it.route == pane.route } == true,
                         onClick = {
                             navController.navigate(pane.route) {
                                 popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -88,3 +89,4 @@ private const val ALARM_EDIT = "alarm"
 private const val TIMER_EDIT = "timer"
 private const val RELAY_EDIT = "relay"
 private const val NEW = "new"
+private val EDITOR_ROUTES = listOf(ALARM_EDIT, TIMER_EDIT, RELAY_EDIT)

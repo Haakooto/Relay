@@ -10,15 +10,21 @@ import android.os.LocaleList
  */
 enum class AppLanguage(val tag: String) {
     SYSTEM(""),
-    ENGLISH("en"),
-    NORWEGIAN("nb");
+    /** British English only, by design. */
+    ENGLISH("en-GB"),
+    /** Nynorsk only, by design. */
+    NORWEGIAN("nn");
 
     companion object {
+        /** A bokmål or generic Norwegian choice counts as Norwegian, which Relay shows as Nynorsk. */
+        private val NORWEGIAN_CODES = setOf("nn", "nb", "no")
+
         fun current(context: Context): AppLanguage {
             val locales = context.getSystemService(LocaleManager::class.java).applicationLocales
             if (locales.isEmpty) return SYSTEM
             val language = locales[0].language
-            return entries.firstOrNull { it != SYSTEM && it.tag == language } ?: SYSTEM
+            if (language in NORWEGIAN_CODES) return NORWEGIAN
+            return entries.firstOrNull { it != SYSTEM && java.util.Locale.forLanguageTag(it.tag).language == language } ?: SYSTEM
         }
 
         fun apply(context: Context, language: AppLanguage) {
