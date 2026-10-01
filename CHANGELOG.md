@@ -16,8 +16,9 @@ Untested pre-release: languages, editors and a new light theme. Not tried on a d
   with unsaved changes asks whether to discard them.
 - The alarm editor's Save button sits next to the time, so there's no scrolling to save. Timer
   and relay editors have Start and Save at the top.
-- A cleaner light theme: near-white instead of cream, grey instead of lavender for selected
-  options, and a deeper orange that's easier to read. Dark and AMOLED lose their purple tint too.
+- Themes: selected options are warm grey in light and orange-tinted in dark and AMOLED, instead
+  of lavender. The orange is easier to read in light and more vivid in dark. The cream light
+  background and the warm dark background stay.
 
 ## v1.0-alpha.3 (2026-09-30)
 

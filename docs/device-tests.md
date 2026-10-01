@@ -132,8 +132,10 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Change something, then press back (or ✕): asks "Discard changes?". Keep editing stays; Discard leaves.
 - [ ] Open an editor and back out without changing anything: leaves straight away, no question.
 
-## Uncommitted: light theme
+## Uncommitted: themes (second try)
 
-- [ ] Light theme: background is near-white, not cream; selected chips and the bottom-bar highlight are grey, not lavender.
-- [ ] Orange headings and links read clearly (darker orange than before).
-- [ ] Dark and AMOLED: selected chips are grey too, with no purple anywhere.
+- [ ] Light: the cream background is back; selected chips and the bottom-bar highlight are warm grey with dark text, no lavender.
+- [ ] Light: orange headings read clearly.
+- [ ] Dark: warm dark background, vivid orange; selected chips are a deep orange tint and stand out.
+- [ ] AMOLED: pure black, same vivid orange, selected chips stand out.
+- [ ] The + button is solid orange in all themes.

@@ -9,68 +9,70 @@ val Accent = Color(0xFFC7501E)
 val Teal = Color(0xFF2E6F66)
 val Brass = Color(0xFF7A6A4F)
 
-// Light scheme. A near-white, barely warm background instead of the cream "paper" (which read
-// as sun-bleached across a whole screen), neutral greys for selection, and a deeper orange so
-// orange text clears 5.8:1 contrast. Every role is set: anything left out falls back to
-// Material's default purple, which is where the lavender chips came from.
+// Light scheme: the cream paper look (preferred over a cooler near-white), with two fixes from
+// the first device test: selection is a warm grey with ink text instead of Material's default
+// lavender, and the orange is a shade deeper so text on paper reads at 4.9:1 (was 4.1:1).
+// Every role is set: anything left out falls back to Material's default purple.
 object LightTokens {
-    val primary = Color(0xFFA8401A)
+    val primary = Color(0xFFB4461A)
     val onPrimary = Color(0xFFFFFFFF)
-    val primaryContainer = Color(0xFFFFDBCE)
-    val onPrimaryContainer = Color(0xFF3A0B00)
-    val secondary = Color(0xFF5D5E58)
+    val primaryContainer = Accent
+    val onPrimaryContainer = Color(0xFFFFFFFF)
+    val secondary = Color(0xFF5E5A4E)
     val onSecondary = Color(0xFFFFFFFF)
-    val secondaryContainer = Color(0xFFDEDED8)
-    val onSecondaryContainer = Color(0xFF1B1C18)
+    val secondaryContainer = Color(0xFFD6D2C4)
+    val onSecondaryContainer = Ink
     val tertiary = Teal
     val onTertiary = Color(0xFFFFFFFF)
-    val tertiaryContainer = Color(0xFFB8ECE2)
+    val tertiaryContainer = Color(0xFFB8E3DA)
     val onTertiaryContainer = Color(0xFF00201C)
-    val background = Color(0xFFF8F8F6)
-    val onBackground = Color(0xFF1B1C18)
-    val surface = Color(0xFFF8F8F6)
-    val onSurface = Color(0xFF1B1C18)
-    val surfaceVariant = Color(0xFFE4E3DE)
-    val onSurfaceVariant = Color(0xFF46463F)
-    val outline = Color(0xFF77776F)
-    val outlineVariant = Color(0xFFC8C7C0)
-    val surfaceContainerLowest = Color(0xFFFFFFFF)
-    val surfaceContainerLow = Color(0xFFF2F2EF)
-    val surfaceContainer = Color(0xFFECECE8)
-    val surfaceContainerHigh = Color(0xFFE6E6E2)
-    val surfaceContainerHighest = Color(0xFFE0E0DB)
-    val inverseSurface = Color(0xFF30312C)
-    val inverseOnSurface = Color(0xFFF2F1EB)
-    val inversePrimary = Color(0xFFFFB59A)
+    val background = Paper
+    val onBackground = Ink
+    val surface = Paper
+    val onSurface = Ink
+    val surfaceVariant = Color(0xFFE4E0D2)
+    val onSurfaceVariant = Color(0xFF4A473D)
+    val outline = Color(0xFF7D7869)
+    val outlineVariant = Color(0xFFCCC7B8)
+    val surfaceContainerLowest = Color(0xFFFBFAF5)
+    val surfaceContainerLow = Color(0xFFEFECE2)
+    val surfaceContainer = Color(0xFFE9E6DA)
+    val surfaceContainerHigh = Color(0xFFE3DFD2)
+    val surfaceContainerHighest = Color(0xFFDDD9CB)
+    val inverseSurface = Color(0xFF31302A)
+    val inverseOnSurface = Paper
+    val inversePrimary = Color(0xFFFF8A57)
 }
 
+// Dark scheme: the warm olive-black of v0.5 with a vivid orange (5.2:1 on the background), and
+// an orange-tinted selection so chosen options pop instead of fading into grey.
 object DarkTokens {
-    val primary = Color(0xFFFFB59A)
-    val onPrimary = Color(0xFF5A1B00)
-    val primaryContainer = Color(0xFF7E2C0A)
-    val onPrimaryContainer = Color(0xFFFFDBCE)
-    val secondary = Color(0xFFC6C7BF)
-    val onSecondary = Color(0xFF2F312B)
-    val secondaryContainer = Color(0xFF3F403B)
-    val onSecondaryContainer = Color(0xFFE3E3DB)
-    val tertiary = Color(0xFF8FD3C6)
-    val onTertiary = Color(0xFF003731)
-    val tertiaryContainer = Color(0xFF00504A)
-    val onTertiaryContainer = Color(0xFFB8ECE2)
-    val background = Color(0xFF131411)
-    val onBackground = Color(0xFFE4E3DD)
-    val surface = Color(0xFF131411)
-    val onSurface = Color(0xFFE4E3DD)
-    val surfaceVariant = Color(0xFF46463F)
-    val onSurfaceVariant = Color(0xFFC8C7C0)
-    val outline = Color(0xFF92918A)
-    val outlineVariant = Color(0xFF46463F)
-    val surfaceContainerLowest = Color(0xFF0E0F0C)
-    val surfaceContainerLow = Color(0xFF1B1C19)
-    val surfaceContainer = Color(0xFF1F201D)
-    val surfaceContainerHigh = Color(0xFF2A2A27)
-    val surfaceContainerHighest = Color(0xFF353531)
-    val inverseSurface = Color(0xFFE4E3DD)
-    val inverseOnSurface = Color(0xFF30312C)
-    val inversePrimary = Color(0xFFA8401A)
+    val primary = Color(0xFFE8682F)
+    val onPrimary = Ink
+    val primaryContainer = Accent
+    val onPrimaryContainer = Color(0xFFFFFFFF)
+    val secondary = Color(0xFFFFB08C)
+    val onSecondary = Color(0xFF4A1A05)
+    val secondaryContainer = Color(0xFF5A2A12)
+    val onSecondaryContainer = Color(0xFFFFD9C7)
+    val tertiary = Color(0xFF6CC3B5)
+    val onTertiary = Color(0xFF00332D)
+    val tertiaryContainer = Teal
+    val onTertiaryContainer = Color(0xFFE0FFF8)
+    val background = Color(0xFF1C1E17)
+    val onBackground = Color(0xFFEDEAE0)
+    val surface = Color(0xFF1C1E17)
+    val onSurface = Color(0xFFEDEAE0)
+    val surfaceVariant = Color(0xFF3A3C32)
+    val onSurfaceVariant = Color(0xFFCBC7B8)
+    val outline = Color(0xFF959181)
+    val outlineVariant = Color(0xFF45473C)
+    val surfaceContainerLowest = Color(0xFF15170F)
+    val surfaceContainerLow = Color(0xFF21231B)
+    val surfaceContainer = Color(0xFF262820)
+    val surfaceContainerHigh = Color(0xFF30322A)
+    val surfaceContainerHighest = Color(0xFF3B3D34)
+    val inverseSurface = Color(0xFFEDEAE0)
+    val inverseOnSurface = Color(0xFF31302A)
+    val inversePrimary = Color(0xFFB4461A)
 }

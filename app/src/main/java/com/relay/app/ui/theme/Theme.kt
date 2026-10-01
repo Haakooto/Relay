@@ -34,15 +34,15 @@ private val DarkColors = with(DarkTokens) {
     )
 }
 
-/** Pure black surfaces for OLED screens; containers stay just off black so cards still read. */
+/** Pure black surfaces for OLED screens, same vivid accents; containers just off black, warm. */
 private val AmoledColors = DarkColors.copy(
     background = Color.Black,
     surface = Color.Black,
     surfaceContainerLowest = Color.Black,
-    surfaceContainerLow = Color(0xFF0B0B0A),
-    surfaceContainer = Color(0xFF111110),
-    surfaceContainerHigh = Color(0xFF1A1A18),
-    surfaceContainerHighest = Color(0xFF242422),
+    surfaceContainerLow = Color(0xFF0C0D09),
+    surfaceContainer = Color(0xFF13140F),
+    surfaceContainerHigh = Color(0xFF1C1D17),
+    surfaceContainerHighest = Color(0xFF26281F),
 )
 
 @Composable
