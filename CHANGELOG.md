@@ -5,6 +5,22 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v1.0-alpha.5 (2026-10-01)
+
+Untested pre-release: stopwatches, the clock and home-screen widgets. Not tried on a device yet.
+
+- Stopwatches: as many as you like, each with an optional name and starting time. Lap, pause,
+  resume and restart. Laps show their own time and the running total, and each lap can take a
+  note. Stopwatches keep counting when the app is closed or the phone restarts, and a running one
+  has a notification with Lap and Pause.
+- The Clock pane shows one big clock and a list of cities, with how far ahead or behind each
+  one is. Add cities by searching; swipe to remove, drag to reorder. Set a home time zone in
+  Settings to see the time at home while travelling.
+- Style the clock your way: digital in five fonts (including a 7-segment face) or analogue with
+  a choice of hands, marks and face, and a colour for every part.
+- Home-screen widgets: each one can have its own style, city, background, corners and border.
+  Tap a widget to open the Clock pane.
+
 ## v1.0-alpha.4 (2026-10-01)
 
 Untested pre-release: languages, editors and a new light theme. Not tried on a device yet.

@@ -76,8 +76,30 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun migrate3To4KeepsRunsAndAddsStopwatchesAndClocks() {
+        helper.createDatabase(TEST_DB, 3).apply {
+            execSQL(
+                "INSERT INTO timer_defs (id, label, durationExpr, headerId, sortOrder, sound_uri, sound_vibrate) " +
+                    "VALUES ('t1', 'Tea', '4m', NULL, 1, NULL, 1)",
+            )
+            close()
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 4, true, *RelayDatabase.MIGRATIONS).apply {
+            query("SELECT label FROM timer_defs WHERE id = 't1'").use {
+                assertTrue(it.moveToFirst())
+                assertEquals("Tea", it.getString(0))
+            }
+            query("SELECT COUNT(*) FROM stopwatches").use {
+                assertTrue(it.moveToFirst())
+                assertEquals(0, it.getInt(0))
+            }
+            close()
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test"
-        const val LATEST_VERSION = 3
+        const val LATEST_VERSION = 4
     }
 }

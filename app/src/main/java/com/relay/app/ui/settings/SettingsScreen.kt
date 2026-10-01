@@ -33,6 +33,8 @@ import com.relay.app.ui.common.NumberDialog
 import com.relay.app.ui.common.NumberOptionChips
 import com.relay.app.util.DurationText
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -125,6 +127,28 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             },
             onSelect = viewModel::setUpcomingLeadMinutes,
         )
+
+        HorizontalDivider()
+        SectionTitle(R.string.settings_clock_title)
+        var pickingHome by remember { mutableStateOf(false) }
+        Column(Modifier.fillMaxWidth().clickable { pickingHome = true }.padding(vertical = 8.dp)) {
+            Text(stringResource(R.string.settings_home_zone), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                current.homeZoneId?.let { com.relay.app.clock.Cities.nameOf(it) } ?: stringResource(R.string.settings_home_zone_none),
+                style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary,
+            )
+            Text(stringResource(R.string.settings_home_zone_hint), style = MaterialTheme.typography.labelSmall)
+        }
+        if (pickingHome) {
+            com.relay.app.ui.clock.CityPickerDialog(
+                stringResource(R.string.settings_home_zone), onDismiss = { pickingHome = false },
+                extra = {
+                    TextButton(onClick = { viewModel.setHomeZoneId(null); pickingHome = false }) {
+                        Text(stringResource(R.string.settings_home_zone_none))
+                    }
+                },
+            ) { viewModel.setHomeZoneId(it.zoneId); pickingHome = false }
+        }
 
         HorizontalDivider()
         SectionTitle(R.string.settings_timers_title)

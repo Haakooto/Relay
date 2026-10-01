@@ -19,20 +19,32 @@ import androidx.navigation.compose.rememberNavController
 import com.relay.app.R
 import com.relay.app.ui.alarms.AlarmEditScreen
 import com.relay.app.ui.alarms.AlarmsScreen
-import com.relay.app.ui.panes.PlaceholderPane
+import androidx.compose.runtime.LaunchedEffect
+import com.relay.app.ui.clock.ClockScreen
+import com.relay.app.ui.clock.ClockStyleScreen
+import com.relay.app.ui.stopwatch.StopwatchScreen
 import com.relay.app.ui.timers.RelayEditScreen
 import com.relay.app.ui.timers.TimerEditScreen
 import com.relay.app.ui.timers.TimersScreen
 import com.relay.app.ui.settings.SettingsScreen
 
 @Composable
-fun RelayApp() {
+fun RelayApp(openClock: Boolean = false, onClockOpened: () -> Unit = {}) {
     val navController = rememberNavController()
+    LaunchedEffect(openClock) {
+        if (openClock) {
+            navController.navigate(Pane.CLOCK.route) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+            }
+            onClockOpened()
+        }
+    }
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination
 
     // Editors are modal: no bottom bar, so leaving means saving or discarding.
-    val inEditor = current?.route?.let { route -> EDITOR_ROUTES.any { route.startsWith("$it/") } } == true
+    val inEditor = current?.route?.let { route -> route == CLOCK_STYLE || EDITOR_ROUTES.any { route.startsWith("$it/") } } == true
 
     Scaffold(
         bottomBar = {
@@ -78,8 +90,9 @@ fun RelayApp() {
             composable("$RELAY_EDIT/{id}") { entry ->
                 RelayEditScreen(entry.arguments?.getString("id")?.takeIf { it != NEW }, onDone = { navController.popBackStack() })
             }
-            composable(Pane.STOPWATCH.route) { PlaceholderPane(Pane.STOPWATCH, R.string.placeholder_stopwatch) }
-            composable(Pane.CLOCK.route) { PlaceholderPane(Pane.CLOCK, R.string.placeholder_clock) }
+            composable(Pane.STOPWATCH.route) { StopwatchScreen() }
+            composable(Pane.CLOCK.route) { ClockScreen(onEditStyle = { navController.navigate(CLOCK_STYLE) }) }
+            composable(CLOCK_STYLE) { ClockStyleScreen(onDone = { navController.popBackStack() }) }
             composable(Pane.SETTINGS.route) { SettingsScreen() }
         }
     }
@@ -89,4 +102,5 @@ private const val ALARM_EDIT = "alarm"
 private const val TIMER_EDIT = "timer"
 private const val RELAY_EDIT = "relay"
 private const val NEW = "new"
+private const val CLOCK_STYLE = "clockstyle"
 private val EDITOR_ROUTES = listOf(ALARM_EDIT, TIMER_EDIT, RELAY_EDIT)

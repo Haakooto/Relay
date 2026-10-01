@@ -123,16 +123,16 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>v1.0 clean restart. A ledger, not a roadmap, grouped by the build order in the <a href="spec.html">Relay spec</a> (§16). The v0.5 ledger is in git history.</p>
     <div class="meta">
-      <span>2026-09-30, rev 4 (v1.0)</span>
+      <span>2026-10-01, rev 5 (v1.0)</span>
       <span>49 tracked items</span>
       <span>chainlang: 49/49 tests passing</span>
     </div>
 
     <div class="stats">
       <div class="stat approved"><div class="n">1</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">30</div><div class="l">WIP</div></div>
+      <div class="stat wip"><div class="n">38</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">3</div><div class="l">Lacking</div></div>
-      <div class="stat"><div class="n">11</div><div class="l">Planned</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">3</div><div class="l">Deferred</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
     </div>
@@ -235,14 +235,14 @@
 
     <section>
       <h2>Stopwatch</h2>
-      <p class="sub">Build step 6. Spec §07.</p>
+      <p class="sub">Build step 6. Spec §07. Built, compiles, unit-tested; nothing run on a device yet.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Multiple, name, t₀, lap / pause / restart / delete</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
-          <tr><td class="feature">Persisted in Room</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
-          <tr><td class="feature">Lap notes</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
-          <tr><td class="feature">Ongoing notification with Lap / Pause</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Multiple, name, t₀, lap / pause / restart / delete</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Add with optional name and start offset; starts at once. Restart goes back to t₀, clears laps, keeps running if it was</td></tr>
+          <tr><td class="feature">Persisted in Room</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Wall-clock based, so a running stopwatch keeps counting across a reboot. 7 unit tests</td></tr>
+          <tr><td class="feature">Lap notes</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Tap a lap to add or edit its note; lap times stay read-only. First lap measured from t₀</td></tr>
+          <tr><td class="feature">Ongoing notification with Lap / Pause</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Counting chronometer with Lap and Pause, only while running</td></tr>
           <tr><td class="feature">Editing recorded lap times</td><td><span class="chip declined">✕ Declined</span></td><td class="note">A stopwatch is a factual record</td></tr>
         </tbody>
       </table></div>
@@ -250,14 +250,14 @@
 
     <section>
       <h2>Clock + widgets</h2>
-      <p class="sub">Build step 7. Spec §08, §09.</p>
+      <p class="sub">Build step 7. Spec §08, §09. Built and compiles; nothing run on a device yet.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Large main clock + locations list</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
-          <tr><td class="feature">Home clock while travelling</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
-          <tr><td class="feature">ClockStyle: digital and analogue options, colors</td><td><span class="chip planned">Planned</span></td><td class="note">One renderer shared by app and widgets</td></tr>
-          <tr><td class="feature">Per-instance widgets with style and location</td><td><span class="chip planned">Planned</span></td><td class="note">-</td></tr>
+          <tr><td class="feature">Large main clock + locations list</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Main clock in the chosen style, then cities with day and offset ("Tomorrow, +9 h"). Search the time-zone database; swipe to delete, long-press to drag</td></tr>
+          <tr><td class="feature">Home clock while travelling</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Settings → Home time zone. Shown at the top of the cities when the phone is in a different zone</td></tr>
+          <tr><td class="feature">ClockStyle: digital and analogue options, colors</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Fonts: system, serif, mono, 7-segment (DSEG7) and a display face (Fraunces), both bundled under the SIL OFL. Analogue: hands, marks, face, second hand. A colour per element: Auto, palette, or custom. One renderer for app and widgets</td></tr>
+          <tr><td class="feature">Per-instance widgets with style and location</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Each widget is drawn as a bitmap from its own settings, so fonts, gradients and borders match the app. Configure on placement and from "Widget settings"; tap opens the Clock pane; minute ticks via a non-wakeup alarm</td></tr>
           <tr><td class="feature">World-clock list and next-alarm widgets</td><td><span class="chip deferred">Deferred</span></td><td class="note">After 1.0</td></tr>
         </tbody>
       </table></div>

@@ -551,14 +551,14 @@
         </ul></div>
         <div class="card"><h4>Analogue</h4><ul>
           <li><span class="fname">Hand style</span><span class="ftype">thick · thin · dot</span></li>
-          <li><span class="fname">Ticks</span><span class="ftype">none · minute · quarter · hour · 3 h</span></li>
+          <li><span class="fname">Marks</span><span class="ftype">none · minutes (60, bolder hours) · hours (12) · quarters (12/3/6/9)</span></li>
           <li><span class="fname">Face</span><span class="ftype">none · ring · filled · numerals</span></li>
           <li><span class="fname">Second hand</span><span class="ftype">on / off</span></li>
           <li><span class="fname">Colors</span><span class="ftype">each hand, ticks, face, background</span></li>
         </ul></div>
       </div>
       <p>Colors come from the theme palette, plus a custom picker for any element.</p>
-      <p>One renderer is shared: Compose Canvas in the app and a bitmap in widgets, drawn by the same geometry code, so both surfaces agree.</p>
+      <p>One renderer is shared: it draws on a plain Android canvas, used through Compose in the app and into a bitmap for widgets, so both always agree. The 7-segment face (DSEG7) and the display face (Fraunces) are bundled fonts under the SIL Open Font Licence; the licence texts ship in <code>assets/licenses/</code>.</p>
     </section>
 
     <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
@@ -570,7 +570,8 @@
         <li>Each placed widget is its own instance with its own <strong>ClockStyle</strong> (digital or analogue) and <strong>location</strong> (local by default, or any time zone, with an optional city label).</li>
         <li>A configure screen appears on placement, and you can reconfigure through the long-press "Widget settings". Removing a widget deletes its config.</li>
         <li>Extra widget-only axes: background (transparent / follow theme / solid / gradient), corner shape, border.</li>
-        <li>Minute granularity: Android throttles widget updates, and seconds live in the app. Tapping the widget opens the Clock pane.</li>
+        <li>Each widget is drawn as one bitmap from its own settings: Glance can't use bundled fonts, gradients or a canvas, and a bitmap makes the widget look exactly like the in-app clock.</li>
+        <li>Minute granularity, from a non-wakeup exact alarm at each minute boundary: no battery cost with the screen off, and the pending tick lands as soon as the phone wakes. Tapping the widget opens the Clock pane.</li>
         <li>A world-clock list widget and a "next alarm" widget. <span class="tag later">later</span></li>
       </ul>
     </section>

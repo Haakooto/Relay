@@ -96,6 +96,10 @@ class RescheduleReceiver : BroadcastReceiver() {
                 launchAsync("RescheduleReceiver") {
                     container.schedules.rescheduleAll()
                     container.runs.rearmAll()
+                    container.stopwatches.republishAll()
+                    // A clock or zone change moves every widget's time; a reboot loses the tick.
+                    com.relay.app.widget.ClockWidget.refreshAll(context)
+                    com.relay.app.widget.WidgetTicker.schedule(context)
                 }
             }
         }

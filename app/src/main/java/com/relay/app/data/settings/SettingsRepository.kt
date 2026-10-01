@@ -47,6 +47,12 @@ data class AppSettings(
     val maxPlanSize: Int = 300,
     /** Relays longer than this get a warning in the editor. */
     val longRelayWarningHours: Int = 24,
+
+    // Clock (build step 7).
+    /** ClockStyle JSON for the Clock pane's main clock; null = defaults. */
+    val mainClockStyle: String? = null,
+    /** Null = no home clock. When set and different from the phone's zone, the Clock pane shows it. */
+    val homeZoneId: String? = null,
 )
 
 val DEFAULT_QUICK_TIMERS = listOf(60L, 300L, 600L, 900L)
@@ -70,6 +76,8 @@ class SettingsRepository(context: Context) {
             defaultTimerSoundUri = prefs[DEFAULT_TIMER_SOUND],
             maxPlanSize = (prefs[MAX_PLAN_SIZE] ?: 300).coerceIn(1, MAX_PLAN_CEILING),
             longRelayWarningHours = prefs[LONG_RELAY_HOURS] ?: 24,
+            mainClockStyle = prefs[MAIN_CLOCK_STYLE],
+            homeZoneId = prefs[HOME_ZONE],
         )
     }
 
@@ -96,6 +104,8 @@ class SettingsRepository(context: Context) {
     }
     suspend fun setMaxPlanSize(value: Int) = store.edit { it[MAX_PLAN_SIZE] = value.coerceIn(1, MAX_PLAN_CEILING) }
     suspend fun setLongRelayWarningHours(value: Int) = store.edit { it[LONG_RELAY_HOURS] = value }
+    suspend fun setMainClockStyle(json: String) = store.edit { it[MAIN_CLOCK_STYLE] = json }
+    suspend fun setHomeZoneId(value: String?) = store.edit { if (value == null) it.remove(HOME_ZONE) else it[HOME_ZONE] = value }
 
     private companion object {
         val THEME = stringPreferencesKey("theme")
@@ -111,6 +121,8 @@ class SettingsRepository(context: Context) {
         val DEFAULT_TIMER_SOUND = stringPreferencesKey("default_timer_sound_uri")
         val MAX_PLAN_SIZE = intPreferencesKey("max_plan_size")
         val LONG_RELAY_HOURS = intPreferencesKey("long_relay_warning_hours")
+        val MAIN_CLOCK_STYLE = stringPreferencesKey("main_clock_style")
+        val HOME_ZONE = stringPreferencesKey("home_zone_id")
         const val MAX_PLAN_CEILING = 1000
     }
 }

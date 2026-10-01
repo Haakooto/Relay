@@ -317,13 +317,13 @@ private fun BlockCard(
 }
 
 @Composable
-fun TextDialog(title: String, initial: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+fun TextDialog(title: String, initial: String, onDismiss: () -> Unit, allowBlank: Boolean = false, onConfirm: (String) -> Unit) {
     var text by remember { mutableStateOf(initial) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { OutlinedTextField(value = text, onValueChange = { text = it }, singleLine = true) },
-        confirmButton = { TextButton(enabled = text.isNotBlank(), onClick = { onConfirm(text) }) { Text(stringResource(R.string.action_ok)) } },
+        confirmButton = { TextButton(enabled = allowBlank || text.isNotBlank(), onClick = { onConfirm(text) }) { Text(stringResource(R.string.action_ok)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }

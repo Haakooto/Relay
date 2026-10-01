@@ -7,7 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.relay.app.data.library.LibraryHeaderDao
+import com.relay.app.data.clock.ClockDao
+import com.relay.app.data.clock.LocationEntity
+import com.relay.app.data.clock.WidgetConfigEntity
 import com.relay.app.data.library.LibraryDao
+import com.relay.app.data.stopwatch.LapEntity
+import com.relay.app.data.stopwatch.StopwatchDao
+import com.relay.app.data.stopwatch.StopwatchEntity
 import com.relay.app.data.library.LibraryHeaderEntity
 import com.relay.app.data.library.RelayDefEntity
 import com.relay.app.data.library.TimerDefEntity
@@ -26,8 +32,9 @@ import com.relay.app.data.schedule.ScheduleExceptionEntity
     entities = [
         LibraryHeaderEntity::class, ScheduleEntity::class, ScheduleExceptionEntity::class,
         TimerDefEntity::class, RelayDefEntity::class, RunEntity::class,
+        StopwatchEntity::class, LapEntity::class, LocationEntity::class, WidgetConfigEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class RelayDatabase : RoomDatabase() {
@@ -35,6 +42,8 @@ abstract class RelayDatabase : RoomDatabase() {
     abstract fun scheduleDao(): ScheduleDao
     abstract fun libraryDao(): LibraryDao
     abstract fun runDao(): RunDao
+    abstract fun stopwatchDao(): StopwatchDao
+    abstract fun clockDao(): ClockDao
 
     companion object {
         const val FILE_NAME = "relay.db"
@@ -89,8 +98,30 @@ abstract class RelayDatabase : RoomDatabase() {
             }
         }
 
+        /** v4 (build steps 6-7): stopwatches and laps, clock locations, widget configs. From schemas/4.json. */
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `stopwatches` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, " +
+                        "`t0Millis` INTEGER NOT NULL, `accumulatedMillis` INTEGER NOT NULL, `startedAtMillis` INTEGER, " +
+                        "`sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `laps` (`id` TEXT NOT NULL, `stopwatchId` TEXT NOT NULL, `number` INTEGER NOT NULL, " +
+                        "`elapsedMillis` INTEGER NOT NULL, `note` TEXT NOT NULL, PRIMARY KEY(`id`), " +
+                        "FOREIGN KEY(`stopwatchId`) REFERENCES `stopwatches`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_laps_stopwatchId` ON `laps` (`stopwatchId`)")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `locations` (`id` TEXT NOT NULL, `zoneId` TEXT NOT NULL, `city` TEXT NOT NULL, " +
+                        "`sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE TABLE IF NOT EXISTS `widget_configs` (`appWidgetId` INTEGER NOT NULL, `spec` TEXT NOT NULL, PRIMARY KEY(`appWidgetId`))")
+            }
+        }
+
         /** Append each migration here as the schema grows. */
-        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
 
         fun build(context: Context): RelayDatabase =
             Room.databaseBuilder(context.applicationContext, RelayDatabase::class.java, FILE_NAME)

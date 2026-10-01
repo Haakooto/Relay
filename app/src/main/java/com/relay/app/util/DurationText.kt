@@ -22,4 +22,14 @@ object DurationText {
             if (s > 0 || (h == 0L && m == 0L)) add("${s}s")
         }.joinToString(" ")
     }
+
+    /** Stopwatch style with hundredths: "1:02:03.45", "02:03.45". */
+    fun stopwatch(millis: Long): String {
+        val ms = millis.coerceAtLeast(0)
+        val h = ms / 3_600_000
+        val m = (ms / 60_000) % 60
+        val s = (ms / 1000) % 60
+        val cs = (ms / 10) % 100
+        return if (h > 0) "%d:%02d:%02d.%02d".format(h, m, s, cs) else "%02d:%02d.%02d".format(m, s, cs)
+    }
 }

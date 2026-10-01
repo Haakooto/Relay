@@ -3,7 +3,10 @@ package com.relay.app
 import android.content.Context
 import com.relay.app.data.RelayDatabase
 import com.relay.app.data.settings.SettingsRepository
+import com.relay.app.clock.ClockRepository
 import com.relay.app.firing.FiringNotifications
+import com.relay.app.stopwatch.StopwatchNotifications
+import com.relay.app.stopwatch.StopwatchRepository
 import com.relay.app.library.LibraryRepository
 import com.relay.app.run.RunNotifications
 import com.relay.app.run.RunRepository
@@ -23,6 +26,9 @@ class AppContainer(context: Context) {
     }
     val runNotifications: RunNotifications by lazy { RunNotifications(appContext) }
     val runs: RunRepository by lazy { RunRepository(database.runDao(), RunScheduler(appContext), runNotifications) }
+    val stopwatchNotifications: StopwatchNotifications by lazy { StopwatchNotifications(appContext) }
+    val stopwatches: StopwatchRepository by lazy { StopwatchRepository(database.stopwatchDao(), stopwatchNotifications) }
+    val clocks: ClockRepository by lazy { ClockRepository(database.clockDao(), settings) }
     val library: LibraryRepository by lazy {
         LibraryRepository(database.libraryDao(), database.libraryHeaderDao(), runs, settings::current)
     }

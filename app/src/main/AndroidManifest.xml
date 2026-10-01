@@ -28,7 +28,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -64,6 +65,35 @@
         <receiver
             android:name=".run.RunActionReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name=".stopwatch.StopwatchActionReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".widget.ClockWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/clock_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.WidgetTickReceiver"
+            android:exported="false" />
+
+        <activity
+            android:name=".widget.WidgetConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity="com.relay.app.widgetconfig">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
 
         <receiver
             android:name=".schedule.RescheduleReceiver"

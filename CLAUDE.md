@@ -67,3 +67,5 @@ Only `chainlang/` was carried over as-is.
   `Migration` in `RelayDatabase.MIGRATIONS` and a test in `MigrationTest`. Never
   `fallbackToDestructiveMigration()`: the user's device carries real data.
 - Add Android permissions and settings keys in the build step that first needs them, not ahead.
+- Bundled fonts (`res/font/`: DSEG7, Fraunces) are SIL OFL; keep their licence texts in
+  `assets/licenses/` when adding or updating fonts.

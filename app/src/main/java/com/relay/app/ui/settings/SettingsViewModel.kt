@@ -22,7 +22,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         .getPackageInfo(application.packageName, 0).versionName ?: "?"
 
     fun setTheme(value: ThemeSetting) = viewModelScope.launch { repository.setTheme(value) }
-    fun setClockFormat24h(value: Boolean) = viewModelScope.launch { repository.setClockFormat24h(value) }
+    fun setClockFormat24h(value: Boolean) = viewModelScope.launch {
+        repository.setClockFormat24h(value)
+        com.relay.app.widget.ClockWidget.refreshAll(getApplication())
+    }
+    fun setHomeZoneId(value: String?) = viewModelScope.launch { repository.setHomeZoneId(value) }
     fun setFirstDayOfWeek(value: DayOfWeek) = viewModelScope.launch { repository.setFirstDayOfWeek(value) }
     fun setHaptics(value: Boolean) = viewModelScope.launch { repository.setHaptics(value) }
     fun setDefaultSnoozeMinutes(value: Int) = viewModelScope.launch { repository.setDefaultSnoozeMinutes(value) }

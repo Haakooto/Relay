@@ -2,6 +2,8 @@ package com.relay.app
 
 import android.app.Application
 import android.util.Log
+import com.relay.app.widget.ClockWidget
+import com.relay.app.widget.WidgetTicker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,6 +21,7 @@ class RelayApplication : Application() {
         container = AppContainer(this)
         container.firingNotifications.createChannels()
         container.runNotifications.createChannel()
+        container.stopwatchNotifications.createChannel()
         // Safety net: a force-stop clears every pending alarm without any broadcast, so re-arm
         // (and catch up on misses) whenever the process starts.
         appScope.launch {
@@ -26,6 +29,10 @@ class RelayApplication : Application() {
                 .onFailure { Log.e("RelayApplication", "rescheduleAll failed", it) }
             runCatching { container.runs.rearmAll() }
                 .onFailure { Log.e("RelayApplication", "rearmAll failed", it) }
+            runCatching { container.stopwatches.republishAll() }
+                .onFailure { Log.e("RelayApplication", "stopwatch republish failed", it) }
+            runCatching { ClockWidget.refreshAll(this@RelayApplication); WidgetTicker.schedule(this@RelayApplication) }
+                .onFailure { Log.e("RelayApplication", "widget refresh failed", it) }
         }
     }
 }

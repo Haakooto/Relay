@@ -139,3 +139,37 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Dark: warm dark background, vivid orange; selected chips are a deep orange tint and stand out.
 - [ ] AMOLED: pure black, same vivid orange, selected chips stand out.
 - [ ] The + button is solid orange in all themes.
+
+## Uncommitted: stopwatch (build step 6)
+
+- [ ] Stopwatch → + → no name, no start time → Start: it counts, with hundredths.
+- [ ] + again with name "Run" and start time 1 m: shows 01:00.00 and counts up; "Started from" shows under it.
+- [ ] Lap at about 01:05: the lap shows 00:05 (measured from the start time) and 01:05 total.
+- [ ] Tap a lap: add a note; it shows under the lap. The lap time can't be changed.
+- [ ] Pause and Resume keep the time; Restart goes back to the start time and clears the laps.
+- [ ] While running, the notification counts up; its Lap and Pause work.
+- [ ] Swipe the app away, reopen: the stopwatch kept counting.
+- [ ] Rename and delete work.
+
+## Uncommitted: clock and widgets (build step 7)
+
+### Clock pane
+- [ ] A big clock on top, ticking every second, in the display font.
+- [ ] Tap it (or the palette icon): the style editor opens without the bottom bar, with a live preview.
+- [ ] Try each font, including 7-segment with seconds: the clock always fits the width.
+- [ ] Analogue: thick, thin and dot hands; each mark style; ring, filled and numeral faces; second hand on and off.
+- [ ] Change a colour (palette, then a custom one): the preview follows; Save keeps it.
+- [ ] + → search "tokyo" → pick: Tokyo shows "Tomorrow" or "Today" with "+7 h" or "+8 h", and the time.
+- [ ] Swipe a city away to delete; long-press and drag to reorder.
+- [ ] Settings → Clock → Home time zone → pick a city in another zone: a "Home" row appears at the top of the cities.
+
+### Widgets
+- [ ] Long-press home screen → Widgets → Relay: placing it opens the setup screen first.
+- [ ] Back out of setup: no widget is added.
+- [ ] Save a digital widget: it shows the time; the minute changes on time.
+- [ ] Place a second, analogue widget for another city: both show their own time and style.
+- [ ] Background: transparent, colour, gradient; corners: sharp, rounded, pill; a border: all show on the widget.
+- [ ] Long-press a widget → Widget settings: change it; the widget updates.
+- [ ] Tap a widget: Relay opens on the Clock pane. Then change the language in Settings: it stays on Settings (the old app jumped back to Clock).
+- [ ] Leave the phone locked for 10 minutes, unlock: the widget shows the right time straight away.
+- [ ] Switch 24-hour clock off in Settings: widgets change to 12-hour.
