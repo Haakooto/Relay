@@ -88,7 +88,9 @@ object AnalogueRenderer {
                 typeface = numeralTypeface
             }
             val inset = if (style.ticks == TickStyle.NONE) 0.78f else 0.66f
-            for (n in 1..12) {
+            // With quarter marks, only the quarter numerals: 12, 3, 6 and 9.
+            val numbers = if (style.ticks == TickStyle.QUARTERS) listOf(3, 6, 9, 12) else (1..12).toList()
+            for (n in numbers) {
                 val a = Math.toRadians(n * 30.0)
                 val x = cx + (r * inset * sin(a)).toFloat()
                 val y = cy - (r * inset * cos(a)).toFloat() - (text.ascent() + text.descent()) / 2

@@ -32,9 +32,9 @@ fun ClockStyleEditor(style: ClockStyle, onChange: (ClockStyle) -> Unit) {
             label = { stringResource(if (it == ClockKind.DIGITAL) R.string.clock_digital else R.string.clock_analogue) },
             onSelect = { onChange(style.copy(kind = it)) },
         )
+        // One font for everything the clock writes: digits, numerals and the date.
         OptionChips(
-            stringResource(if (style.kind == ClockKind.DIGITAL) R.string.clock_font else R.string.clock_numeral_font),
-            DigitalFont.entries, style.font,
+            stringResource(R.string.clock_font), DigitalFont.entries, style.font,
             label = { stringResource(fontLabel(it)) }, onSelect = { onChange(style.copy(font = it)) },
         )
         if (style.kind == ClockKind.DIGITAL) {

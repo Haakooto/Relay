@@ -99,6 +99,8 @@ fun ClockFace(
                 }
             }
         }
-        if (date != null) Text(date, style = MaterialTheme.typography.titleLarge, color = Color(resolved.secondary))
+        if (date != null) {
+            Text(date, style = MaterialTheme.typography.titleLarge, fontFamily = ClockFonts.compose(style.font), color = Color(resolved.secondary))
+        }
     }
 }

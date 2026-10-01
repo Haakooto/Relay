@@ -226,7 +226,6 @@
     <string name="clock_digital">Digital</string>
     <string name="clock_analogue">Analog</string>
     <string name="clock_font">Skrift</string>
-    <string name="clock_numeral_font">Skrift for tal</string>
     <string name="font_system">System</string>
     <string name="font_serif">Serif</string>
     <string name="font_mono">Mono</string>

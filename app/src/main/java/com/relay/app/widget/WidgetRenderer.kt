@@ -101,7 +101,7 @@ object WidgetRenderer {
                 canvas.translate((w - side) / 2, pad)
                 AnalogueRenderer.draw(canvas, side, side, t.hour, t.minute, 0f, style.copy(secondHand = false), colors, typeface)
                 canvas.restore()
-                if (caption != null) drawCentred(canvas, caption, w / 2f, h - pad - captionH * 0.2f, captionH * 0.7f, colors.secondary, null, w - 2 * pad)
+                if (caption != null) drawCentred(canvas, caption, w / 2f, h - pad - captionH * 0.2f, captionH * 0.7f, colors.secondary, typeface, w - 2 * pad)
             }
             ClockKind.DIGITAL -> {
                 val time = ClockText.time(t, style, is24hSetting, withSeconds = false)
@@ -113,7 +113,7 @@ object WidgetRenderer {
                 val block = timeSize + if (caption != null) captionSize * 1.4f else 0f
                 val top = (h - block) / 2
                 drawCentred(canvas, text, w / 2f, top + timeSize * 0.85f, timeSize, colors.digits, typeface, w - 2 * pad)
-                if (caption != null) drawCentred(canvas, caption, w / 2f, top + timeSize + captionSize * 1.15f, captionSize, colors.secondary, null, w - 2 * pad)
+                if (caption != null) drawCentred(canvas, caption, w / 2f, top + timeSize + captionSize * 1.15f, captionSize, colors.secondary, typeface, w - 2 * pad)
             }
         }
         return bitmap
