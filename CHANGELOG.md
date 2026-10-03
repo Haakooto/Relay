@@ -5,6 +5,49 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v1.0 (2026-10-03)
+
+A clean rebuild of the whole app. It installs as a new app, next to the old one (which can be
+uninstalled once you're happy). The alpha entries below have the step-by-step detail; this is the
+overview. A short usage guide is in `docs/usage-guide.md`.
+
+**Alarms**
+- Full-screen ringing over the lock screen that keeps going until you act, with gradual volume,
+  per-alarm sound, vibration, snooze length (any number) and snooze limit (including none).
+- One-off or repeating, ending on a date or after a number of times; skip or move single days or
+  date ranges, for several alarms at once.
+- An upcoming-alarm notice with "Dismiss now", a "delayed" ring after the phone was off, and a
+  banner when something would stop alarms from working.
+- New: an alarm can start a timer, a relay or a stopwatch instead of ringing, with a start cue.
+  If it can't start, it rings and says why.
+
+**Timers and relays**
+- Quick timers in one tap, saved timers in a library with headers, and any number running at
+  once, each with its own countdown notification. They survive closing the app and restarting
+  the phone.
+- Relays: chains of timers and other relays, written as short scripts with repeat, ranges,
+  arithmetic on names, step labels and comments. A helpful editor with suggestions, a live
+  preview and clear errors.
+- Steps pass by themselves with a cue, or wait for you; per-step sounds and transitions.
+
+**Stopwatch**
+- As many as you like, each with a name, a start offset (also below zero) and its own tags.
+- Laps with notes and one-tap tagged laps; fix lap mistakes (remove, insert, adjust) without
+  touching the total, with full undo and redo; a chart of lap times by tag.
+
+**Clock and widgets**
+- A big styled clock with cities and a home clock while travelling.
+- Digital (five fonts) or analogue (hands, marks, faces) with a colour for every part.
+- Home-screen widgets, each with its own style, city, background, corners and border.
+
+**Everything else**
+- Light, Dark and AMOLED themes; English (British) and Norwegian (Nynorsk).
+
+## v1.0-alpha.8 (2026-10-03)
+
+Untested pre-release, folded into v1.0: alarms can start a timer, relay or stopwatch, with a
+start cue, and show the length of the saved timer or relay you pick.
+
 ## v1.0-alpha.7 (2026-10-03)
 
 Untested pre-release: a much more capable stopwatch.

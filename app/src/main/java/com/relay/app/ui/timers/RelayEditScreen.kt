@@ -263,7 +263,7 @@ private val HELP = listOf(
     "MINUTE(NOW)   RANDOM(5, 10)" to R.string.help_time,
 )
 
-private fun toneLabel(tone: TransitionTone) = when (tone) {
+fun toneLabel(tone: TransitionTone) = when (tone) {
     TransitionTone.BEEP -> R.string.tone_beep
     TransitionTone.DOUBLE_BEEP -> R.string.tone_double_beep
     TransitionTone.CHIME -> R.string.tone_chime

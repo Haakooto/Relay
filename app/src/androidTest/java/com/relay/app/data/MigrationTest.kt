@@ -115,8 +115,30 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun migrate5To6KeepsAlarmsAsRinging() {
+        helper.createDatabase(TEST_DB, 5).apply {
+            execSQL(
+                "INSERT INTO schedules (id, label, hour, minute, oneOffEpochDay, repeatDays, endEpochDay, remainingCount, " +
+                    "afterFire, enabled, target, createdAtMillis, createdBy, snoozedUntilMillis, snoozesUsed, nextFireAtMillis, " +
+                    "ring_soundUri, ring_vibrate, ring_rampSeconds, ring_snoozeMinutes, ring_maxSnoozes) VALUES " +
+                    "('s1', 'Wake', 7, 0, NULL, 31, NULL, NULL, 'DISABLE', 1, 'RING', 0, 'user', NULL, 0, NULL, NULL, 1, 0, 10, NULL)",
+            )
+            close()
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 6, true, *RelayDatabase.MIGRATIONS).apply {
+            query("SELECT target, targetDefId, targetSpec FROM schedules WHERE id = 's1'").use {
+                assertTrue(it.moveToFirst())
+                assertEquals("RING", it.getString(0))
+                assertTrue(it.isNull(1))
+                assertEquals("{}", it.getString(2))
+            }
+            close()
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test"
-        const val LATEST_VERSION = 5
+        const val LATEST_VERSION = 6
     }
 }

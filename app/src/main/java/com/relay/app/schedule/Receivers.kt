@@ -6,6 +6,8 @@ import android.content.Intent
 import android.util.Log
 import com.relay.app.appContainer
 import com.relay.app.firing.RingService
+import com.relay.app.firing.RingSource
+import com.relay.app.run.TransitionBeep
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -32,6 +34,12 @@ private fun BroadcastReceiver.launchAsync(tag: String, block: suspend () -> Unit
 class FireReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val scheduleId = intent.data?.lastPathSegment ?: return
+        // A target that doesn't ring starts quietly here, with no ringing service and no
+        // full-screen flash. Anything unexpected falls back to ringing.
+        if (!intent.getBooleanExtra(EXTRA_RINGS, true)) {
+            startQuietly(context, scheduleId, intent.getLongExtra(EXTRA_TRIGGER_AT, System.currentTimeMillis()))
+            return
+        }
         val service = RingService.fireIntent(context, scheduleId)
             .putExtra(RingService.EXTRA_TRIGGER_AT, intent.getLongExtra(EXTRA_TRIGGER_AT, System.currentTimeMillis()))
             .putExtra(RingService.EXTRA_IS_SNOOZE, intent.getBooleanExtra(EXTRA_IS_SNOOZE, false))
@@ -44,9 +52,44 @@ class FireReceiver : BroadcastReceiver() {
         }
     }
 
+    private fun startQuietly(context: Context, scheduleId: String, triggerAt: Long) {
+        val container = context.appContainer
+        val pending = goAsync()
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            try {
+                when (val decision = container.schedules.onFired(scheduleId, triggerAt, isSnooze = false)) {
+                    is FireDecision.Start -> container.scheduledStarter.start(decision.schedule)
+                        .onSuccess { TransitionBeep.play(TargetSpec.decode(decision.schedule.targetSpec).startTone) }
+                        .onFailure { e ->
+                            Log.e(TAG, "scheduled start of $scheduleId failed", e)
+                            ringItem(context, ScheduledFailure.item(context, decision.schedule, triggerAt, e))
+                        }
+                    // The schedule was changed to ring since this fire was armed.
+                    is FireDecision.Ring -> ringItem(context, decision.item)
+                    FireDecision.Ignore -> {}
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "quiet fire of $scheduleId failed, ringing instead", e)
+                runCatching { context.startForegroundService(RingService.fireIntent(context, scheduleId)) }
+            } finally {
+                pending.finish()
+            }
+        }
+    }
+
+    private fun ringItem(context: Context, item: com.relay.app.firing.RingItem) {
+        try {
+            context.startForegroundService(RingService.itemIntent(context, item))
+        } catch (e: Exception) {
+            Log.e(TAG, "can't start RingService", e)
+            context.appContainer.firingNotifications.showFallback((item.source as? RingSource.Schedule)?.id ?: "unknown")
+        }
+    }
+
     companion object {
         const val EXTRA_TRIGGER_AT = "triggerAt"
         const val EXTRA_IS_SNOOZE = "isSnooze"
+        const val EXTRA_RINGS = "rings"
         private const val TAG = "FireReceiver"
     }
 }

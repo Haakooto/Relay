@@ -149,26 +149,30 @@ class LibraryRepository(
 
     // --- starting runs --------------------------------------------------------------------
 
-    suspend fun startTimer(id: String): RunView? {
+    /** [startedBy]: "user", or the id of the schedule that started it. */
+    suspend fun startTimer(id: String, startedBy: String = "user"): RunView? {
         val t = dao.timer(id) ?: return null
-        return startTimerSpec(t.spec(), sourceId = t.id)
+        return startTimerSpec(t.spec(), sourceId = t.id, startedBy = startedBy)
     }
 
-    suspend fun startRelay(id: String): RunView? {
+    suspend fun startRelay(id: String, startedBy: String = "user"): RunView? {
         val r = dao.relay(id) ?: return null
-        return startRelaySpec(r.spec(), sourceId = r.id)
+        return startRelaySpec(r.spec(), sourceId = r.id, startedBy = startedBy)
     }
 
     /** Unsaved (or draft) timer: the run keeps the label, nothing is saved. */
-    suspend fun startTimerSpec(spec: TimerSpec, sourceId: String? = null): RunView {
+    suspend fun startTimerSpec(spec: TimerSpec, sourceId: String? = null, startedBy: String = "user"): RunView {
         val plan = builder().forTimer(spec)
-        return runs.start(RunKind.TIMER, sourceId, spec.label, plan)
+        return runs.start(RunKind.TIMER, sourceId, spec.label, plan, startedBy)
     }
 
-    suspend fun startRelaySpec(spec: RelaySpec, sourceId: String? = null): RunView {
+    suspend fun startRelaySpec(spec: RelaySpec, sourceId: String? = null, startedBy: String = "user"): RunView {
         val plan = builder().forRelay(spec)
-        return runs.start(RunKind.RELAY, sourceId, spec.label, plan)
+        return runs.start(RunKind.RELAY, sourceId, spec.label, plan, startedBy)
     }
+
+    /** Labels of saved blocks by id, for describing schedule targets. */
+    suspend fun labelsById(): Map<String, String> = (dao.timers().map { it.id to it.label } + dao.relays().map { it.id to it.label }).toMap()
 
     /** The quick-start chips: an anonymous timer of [seconds]. */
     suspend fun quickStart(seconds: Long): RunView {

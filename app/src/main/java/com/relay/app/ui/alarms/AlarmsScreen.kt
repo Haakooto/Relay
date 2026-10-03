@@ -49,6 +49,7 @@ import java.time.LocalTime
 @Composable
 fun AlarmsScreen(onOpen: (String?) -> Unit, viewModel: AlarmsViewModel = viewModel()) {
     val alarms by viewModel.alarms.collectAsStateWithLifecycle()
+    val blockLabels by viewModel.blockLabels.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -80,7 +81,7 @@ fun AlarmsScreen(onOpen: (String?) -> Unit, viewModel: AlarmsViewModel = viewMod
             }
             items(list.orEmpty(), key = { it.schedule.id }) { item ->
                 AlarmRow(
-                    item = item, is24h = is24h, firstDay = firstDay, now = now,
+                    item = item, is24h = is24h, firstDay = firstDay, now = now, blockLabels = blockLabels,
                     onClick = { onOpen(item.schedule.id) },
                     onToggle = { enabled ->
                         viewModel.setEnabled(item.schedule.id, enabled) { next ->
@@ -106,7 +107,7 @@ fun armedToast(context: android.content.Context, nextFireMillis: Long?) {
 
 @Composable
 private fun AlarmRow(
-    item: AlarmListItem, is24h: Boolean, firstDay: DayOfWeek, now: Long,
+    item: AlarmListItem, is24h: Boolean, firstDay: DayOfWeek, now: Long, blockLabels: Map<String, String>,
     onClick: () -> Unit, onToggle: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
@@ -135,6 +136,9 @@ private fun AlarmRow(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = faded),
                 )
+                targetText(s, blockLabels)?.let {
+                    Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.secondary.copy(alpha = faded))
+                }
                 if (status != null) {
                     Text(status, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                 }
@@ -148,5 +152,21 @@ private fun AlarmRow(
             }
             Switch(checked = s.enabled, onCheckedChange = onToggle)
         }
+    }
+}
+
+/** "Starts timer Tea", "Starts a 25m timer", "Starts stopwatch Run"; null for a ringing alarm. */
+@Composable
+private fun targetText(s: com.relay.app.data.schedule.ScheduleEntity, blockLabels: Map<String, String>): String? {
+    val spec = com.relay.app.schedule.TargetSpec.decode(s.targetSpec)
+    val saved = s.targetDefId?.let { blockLabels[it] ?: stringResource(R.string.target_missing) }
+    return when (s.target) {
+        com.relay.app.data.schedule.TargetKind.RING -> null
+        com.relay.app.data.schedule.TargetKind.TIMER ->
+            saved?.let { stringResource(R.string.alarm_starts_timer, it) } ?: stringResource(R.string.alarm_starts_new_timer, spec.durationExpr)
+        com.relay.app.data.schedule.TargetKind.RELAY ->
+            saved?.let { stringResource(R.string.alarm_starts_relay, it) } ?: stringResource(R.string.alarm_starts_new_relay)
+        com.relay.app.data.schedule.TargetKind.STOPWATCH ->
+            spec.label.ifBlank { null }?.let { stringResource(R.string.alarm_starts_stopwatch_named, it) } ?: stringResource(R.string.alarm_starts_stopwatch)
     }
 }

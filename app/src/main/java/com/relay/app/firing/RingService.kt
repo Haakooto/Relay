@@ -48,7 +48,7 @@ class RingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action
-        val ringing = action == ACTION_FIRE || action == ACTION_RUN
+        val ringing = action == ACTION_FIRE || action == ACTION_RUN || action == ACTION_ITEM
         val placeholder = appContainer.firingNotifications.ringingPlaceholder(fullScreen = ringing)
         // The systemExempted type only exists from API 34; Android 13 needs no type at all, and
         // passing an unknown one there would throw.
@@ -63,6 +63,10 @@ class RingService : Service() {
                 val triggerAt = intent.getLongExtra(EXTRA_TRIGGER_AT, System.currentTimeMillis())
                 val isSnooze = intent.getBooleanExtra(EXTRA_IS_SNOOZE, false)
                 scope.launch { fireSchedule(id, triggerAt, isSnooze) }
+            }
+            ACTION_ITEM -> itemFrom(intent)?.let { item ->
+                acquireWakeLock()
+                scope.launch { startRinging(item) }
             }
             ACTION_RUN -> intent.getStringExtra(EXTRA_RUN_ID)?.let { id ->
                 acquireWakeLock()
@@ -90,6 +94,17 @@ class RingService : Service() {
         }
         val item = when (decision) {
             is FireDecision.Ring -> decision.item
+            // Armed as ringing but now a quiet target (changed in between): start it, ring only on failure.
+            is FireDecision.Start -> {
+                val failure = runCatching { withContext(Dispatchers.IO) { appContainer.scheduledStarter.start(decision.schedule) } }
+                    .getOrElse { Result.failure(it) }.exceptionOrNull()
+                if (failure == null) {
+                    com.relay.app.run.TransitionBeep.play(com.relay.app.schedule.TargetSpec.decode(decision.schedule.targetSpec).startTone)
+                    stopIfIdle()
+                    return
+                }
+                com.relay.app.schedule.ScheduledFailure.item(this, decision.schedule, triggerAt, failure)
+            }
             FireDecision.Ignore -> { stopIfIdle(); return }
             // Slow or broken database: ring anyway. A silent alarm is the worst outcome.
             null -> RingItem(
@@ -234,6 +249,16 @@ class RingService : Service() {
         const val ACTION_RUN = "com.relay.app.ring.RUN"
         const val ACTION_ACT = "com.relay.app.ring.ACT"
         const val ACTION_CANCEL = "com.relay.app.ring.CANCEL"
+        const val ACTION_ITEM = "com.relay.app.ring.ITEM"
+        private const val EXTRA_ITEM_SCHEDULE = "item.schedule"
+        private const val EXTRA_ITEM_LABEL = "item.label"
+        private const val EXTRA_ITEM_DETAIL = "item.detail"
+        private const val EXTRA_ITEM_AT = "item.at"
+        private const val EXTRA_ITEM_SOUND = "item.sound"
+        private const val EXTRA_ITEM_VIBRATE = "item.vibrate"
+        private const val EXTRA_ITEM_RAMP = "item.ramp"
+        private const val EXTRA_ITEM_SNOOZE = "item.snooze"
+        private const val EXTRA_ITEM_SNOOZE_MIN = "item.snoozeMinutes"
         const val EXTRA_SCHEDULE_ID = "scheduleId"
         const val EXTRA_TRIGGER_AT = "triggerAt"
         const val EXTRA_IS_SNOOZE = "isSnooze"
@@ -259,6 +284,30 @@ class RingService : Service() {
 
         fun actIntent(context: Context, key: String, verb: RingVerb): Intent =
             Intent(context, RingService::class.java).setAction(ACTION_ACT).putExtra(EXTRA_KEY, key).putExtra(EXTRA_VERB, verb.name)
+
+        /** Rings a prepared alarm item, for decisions already taken outside the service. */
+        fun itemIntent(context: Context, item: RingItem): Intent =
+            Intent(context, RingService::class.java).setAction(ACTION_ITEM)
+                .putExtra(EXTRA_ITEM_SCHEDULE, (item.source as? RingSource.Schedule)?.id)
+                .putExtra(EXTRA_ITEM_LABEL, item.label)
+                .putExtra(EXTRA_ITEM_DETAIL, item.detail)
+                .putExtra(EXTRA_ITEM_AT, item.scheduledAtMillis)
+                .putExtra(EXTRA_ITEM_SOUND, item.soundUri)
+                .putExtra(EXTRA_ITEM_VIBRATE, item.vibrate)
+                .putExtra(EXTRA_ITEM_RAMP, item.rampSeconds)
+                .putExtra(EXTRA_ITEM_SNOOZE, item.canSnooze)
+                .putExtra(EXTRA_ITEM_SNOOZE_MIN, item.snoozeMinutes)
+
+        private fun itemFrom(intent: Intent): RingItem? {
+            val id = intent.getStringExtra(EXTRA_ITEM_SCHEDULE) ?: return null
+            return RingItem(
+                RingSource.Schedule(id), RingContext.ALARM,
+                intent.getStringExtra(EXTRA_ITEM_LABEL).orEmpty(), intent.getStringExtra(EXTRA_ITEM_DETAIL),
+                intent.getLongExtra(EXTRA_ITEM_AT, System.currentTimeMillis()), intent.getStringExtra(EXTRA_ITEM_SOUND),
+                intent.getBooleanExtra(EXTRA_ITEM_VIBRATE, true), intent.getIntExtra(EXTRA_ITEM_RAMP, 0),
+                intent.getBooleanExtra(EXTRA_ITEM_SNOOZE, false), intent.getIntExtra(EXTRA_ITEM_SNOOZE_MIN, 10),
+            )
+        }
 
         fun cancelIntent(context: Context, key: String): Intent =
             Intent(context, RingService::class.java).setAction(ACTION_CANCEL).putExtra(EXTRA_KEY, key)

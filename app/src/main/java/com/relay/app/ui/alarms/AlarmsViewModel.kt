@@ -8,6 +8,7 @@ import com.relay.app.data.settings.AppSettings
 import com.relay.app.schedule.AlarmListItem
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -19,6 +20,11 @@ class AlarmsViewModel(application: Application) : AndroidViewModel(application) 
 
     val settings: StateFlow<AppSettings?> =
         application.appContainer.settings.settings.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Saved timer/relay labels by id, to describe what an alarm starts. */
+    val blockLabels: StateFlow<Map<String, String>> = application.appContainer.library.observe()
+        .map { state -> state.items.associate { it.id to it.label } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     fun setEnabled(id: String, enabled: Boolean, onArmed: (Long?) -> Unit) = viewModelScope.launch {
         val next = schedules.setEnabled(id, enabled)

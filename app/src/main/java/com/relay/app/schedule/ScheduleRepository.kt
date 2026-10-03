@@ -5,6 +5,7 @@ import com.relay.app.data.schedule.ExceptionKind
 import com.relay.app.data.schedule.ScheduleDao
 import com.relay.app.data.schedule.ScheduleEntity
 import com.relay.app.data.schedule.ScheduleExceptionEntity
+import com.relay.app.data.schedule.TargetKind
 import com.relay.app.data.settings.AppSettings
 import com.relay.app.firing.RingContext
 import com.relay.app.firing.RingItem
@@ -20,7 +21,8 @@ import java.util.UUID
 
 /** AlarmManager side, as the repository needs it. Implemented by [AlarmScheduler]; faked in tests. */
 interface ScheduleArming {
-    fun arm(scheduleId: String, triggerAtMillis: Long, isSnooze: Boolean, atMillis: Long = triggerAtMillis)
+    /** [rings]: whether this fire rings (vs. quietly starting a target), so the receiver can route it. */
+    fun arm(scheduleId: String, triggerAtMillis: Long, isSnooze: Boolean, atMillis: Long = triggerAtMillis, rings: Boolean = true)
     fun cancel(scheduleId: String)
     fun armUpcoming(scheduleId: String, atMillis: Long)
     fun cancelUpcoming(scheduleId: String)
@@ -40,6 +42,8 @@ data class AlarmListItem(val schedule: ScheduleEntity, val nextFire: Instant?, v
 
 sealed interface FireDecision {
     data class Ring(val item: RingItem) : FireDecision
+    /** A timer / relay / stopwatch target: start it quietly. The session is already finished. */
+    data class Start(val schedule: ScheduleEntity) : FireDecision
     /** A deleted/disabled schedule, or a duplicate of an occurrence already handled. */
     data object Ignore : FireDecision
 }
@@ -145,6 +149,13 @@ class ScheduleRepository(
         notifications.clearScheduleNotifications(id)
         rescheduleLocked(id)
 
+        if (s.target != TargetKind.RING) {
+            // Nothing rings, so nothing to dismiss later: end the session now (one-offs delete or
+            // switch off here), then hand back what to start.
+            finishSessionLocked(id)
+            return FireDecision.Start(s)
+        }
+
         val soundUri = s.ring.soundUri ?: settings().defaultAlarmSoundUri
         FireDecision.Ring(
             RingItem(
@@ -202,7 +213,7 @@ class ScheduleRepository(
             if (s.enabled && missedAt != null && missedAt < t - GRACE_MILLIS) {
                 if (t - missedAt <= LATE_WINDOW_MILLIS) {
                     // Through the normal fire path, so late fires get the same handling.
-                    scheduler.arm(s.id, missedAt, isSnooze = s.snoozedUntilMillis == missedAt, atMillis = t)
+                    scheduler.arm(s.id, missedAt, isSnooze = s.snoozedUntilMillis == missedAt, atMillis = t, rings = s.target == TargetKind.RING)
                     continue
                 }
                 notifications.showMissed(s, Instant.ofEpochMilli(missedAt))
@@ -246,7 +257,7 @@ class ScheduleRepository(
         // the missed-alarm path and an editor save clear a pending occurrence.
         val pending = s.nextFireAtMillis
         if (s.enabled && pending != null && pending <= t.toEpochMilli()) {
-            scheduler.arm(id, pending, isSnooze = s.snoozedUntilMillis == pending, atMillis = t.toEpochMilli())
+            scheduler.arm(id, pending, isSnooze = s.snoozedUntilMillis == pending, atMillis = t.toEpochMilli(), rings = s.target == TargetKind.RING)
             return Instant.ofEpochMilli(pending)
         }
         if (!s.enabled) {
@@ -265,7 +276,7 @@ class ScheduleRepository(
             return null
         }
         val isSnooze = s.snoozedUntilMillis == next.toEpochMilli()
-        scheduler.arm(id, next.toEpochMilli(), isSnooze)
+        scheduler.arm(id, next.toEpochMilli(), isSnooze, rings = s.target == TargetKind.RING)
         if (s.nextFireAtMillis != next.toEpochMilli()) dao.upsert(s.copy(nextFireAtMillis = next.toEpochMilli()))
 
         val lead = settings().upcomingLeadMinutes * 60_000L

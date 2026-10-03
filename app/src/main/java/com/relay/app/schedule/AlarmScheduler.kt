@@ -24,12 +24,13 @@ class AlarmScheduler(private val context: Context) : ScheduleArming {
      * which is only earlier-than-now for a late fire after boot.
      * setAlarmClock: the most Doze-proof API, and it shows the system next-alarm indicator.
      */
-    override fun arm(scheduleId: String, triggerAtMillis: Long, isSnooze: Boolean, atMillis: Long) {
+    override fun arm(scheduleId: String, triggerAtMillis: Long, isSnooze: Boolean, atMillis: Long, rings: Boolean) {
         val fire = PendingIntent.getBroadcast(
             context, 0,
             fireIntent(scheduleId)
                 .putExtra(FireReceiver.EXTRA_TRIGGER_AT, triggerAtMillis)
-                .putExtra(FireReceiver.EXTRA_IS_SNOOZE, isSnooze),
+                .putExtra(FireReceiver.EXTRA_IS_SNOOZE, isSnooze)
+                .putExtra(FireReceiver.EXTRA_RINGS, rings),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val show = PendingIntent.getActivity(

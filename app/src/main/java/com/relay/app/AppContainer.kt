@@ -13,6 +13,7 @@ import com.relay.app.run.RunRepository
 import com.relay.app.run.RunScheduler
 import com.relay.app.schedule.AlarmScheduler
 import com.relay.app.schedule.ScheduleRepository
+import com.relay.app.schedule.ScheduledStarter
 
 /** Manual dependency container, one per process. Held by [RelayApplication]. */
 class AppContainer(context: Context) {
@@ -32,6 +33,7 @@ class AppContainer(context: Context) {
     val library: LibraryRepository by lazy {
         LibraryRepository(database.libraryDao(), database.libraryHeaderDao(), runs, settings::current)
     }
+    val scheduledStarter: ScheduledStarter by lazy { ScheduledStarter(library, stopwatches, settings) }
 }
 
 val Context.appContainer: AppContainer

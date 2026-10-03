@@ -1,5 +1,6 @@
 package com.relay.app.data.schedule
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -7,8 +8,12 @@ import androidx.room.PrimaryKey
 /** What a one-off schedule does once its ringing is finally over (spec §04). */
 enum class AfterFire { DELETE, DISABLE }
 
-/** Spec §03 target kinds. Only [RING] exists until build step 5 adds the others. */
-enum class TargetKind { RING }
+/**
+ * What a schedule does when it fires (spec §03/§04): ring, or quietly start a timer, a relay or a
+ * stopwatch. A timer or relay is either saved ([ScheduleEntity.targetDefId]) or inline
+ * ([ScheduleEntity.targetSpec]).
+ */
+enum class TargetKind { RING, TIMER, RELAY, STOPWATCH }
 
 /** Config for the Ring target (spec §14 `Ring(sound, ramp, snooze, maxSnoozes)`). */
 data class RingOptions(
@@ -54,6 +59,11 @@ data class ScheduleEntity(
     val snoozesUsed: Int,
     /** The trigger time currently handed to AlarmManager. Used to spot missed and duplicate fires. */
     val nextFireAtMillis: Long?,
+
+    /** TIMER / RELAY: a saved definition's id. Null = the inline one in [targetSpec]. */
+    val targetDefId: String? = null,
+    /** [com.relay.app.schedule.TargetSpec] JSON: inline timer/relay, or the stopwatch to start. */
+    @ColumnInfo(defaultValue = "{}") val targetSpec: String = "{}",
 ) {
     val isRepeating: Boolean get() = repeatDays != 0
 }

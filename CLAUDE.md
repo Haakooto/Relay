@@ -4,16 +4,18 @@ Personal Android app that rivals and replaces the stock Android Clock: alarms, t
 relay (chain), stopwatch, world clock, home-screen widgets. Built because the stock app can't
 chain timers, can't schedule anything but a ringing alarm, and can't run one timer twice at once.
 
-## Status: v1.0 clean restart
+## Status: v1.0
 
-The v0.5 codebase lives on `main` (last commit before the restart) and in git history. v1.0 is
-being rebuilt from scratch on the `restart` branch, following the build order in the spec (§16).
-Only `chainlang/` was carried over as-is.
+v1.0 is a clean rebuild (the old v0.5 code is in git history before the `restart` branch, which
+is merged into `main`). All seven build steps in the spec are done. Next is the post-1.0 list in
+the feature map: bedtime, assistant automation, more widget types, CSV export of laps.
 
 ## Docs
 
 - [`docs/spec.html`](docs/spec.html): the v1.0 design baseline (core model, panes, relay
   language, firing module, data model, build order). Update it when a design decision changes.
+- [`docs/usage-guide.md`](docs/usage-guide.md): the user-facing guide, one section per pane.
+  **Update it when a feature's behaviour changes** (keep it short: main ideas, not every option).
 - [`docs/feature-map.html`](docs/feature-map.html): source of truth for what's actually built.
   **Update it whenever you build, fix or retest a feature**: one row per feature, a status chip
   (Approved/WIP/Lacking/Planned/Deferred/Declined) and a one-line note. Keep the header counts in
@@ -26,13 +28,13 @@ Only `chainlang/` was carried over as-is.
 
 ## Stack
 
-- Kotlin + Jetpack Compose (Material 3), Room, DataStore, Glance (widgets, from build step 7),
-  AlarmManager exact alarms.
+- Kotlin + Jetpack Compose (Material 3), Room, DataStore, Glance (widgets), AlarmManager exact
+  alarms, kotlinx-serialization (JSON columns).
 - Package and `applicationId`: `com.relay.app`. It installs alongside the old v0.5 app
   (`applicationId` of the old build differs), so v1.0 never touches v0.5 data.
 - `app/`: the Android app. `chainlang/`: standalone Kotlin/JVM parser and evaluator for the relay
   language (`com.relay.chainlang`), no Android dependency. `./gradlew :chainlang:test`
-  (currently 30/30 passing). The module keeps the "chain" name internally; in the app, new code
+  (currently 54/54 passing). The module keeps the "chain" name internally; in the app, new code
   says "relay" (`RelayDef`, not `ChainDef`).
 - `minSdk = 33` deliberately: single code path, no legacy branches.
 - Per-app language uses the system `LocaleManager` API (`ui/settings/AppLanguage.kt`), not

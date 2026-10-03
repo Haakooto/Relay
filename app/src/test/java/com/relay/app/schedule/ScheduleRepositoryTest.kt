@@ -47,7 +47,9 @@ private class FakeArming : ScheduleArming {
     data class Armed(val triggerAt: Long, val isSnooze: Boolean, val at: Long)
     val armed = mutableMapOf<String, Armed>()
     val upcoming = mutableMapOf<String, Long>()
-    override fun arm(scheduleId: String, triggerAtMillis: Long, isSnooze: Boolean, atMillis: Long) {
+    var lastRings = true
+    override fun arm(scheduleId: String, triggerAtMillis: Long, isSnooze: Boolean, atMillis: Long, rings: Boolean) {
+        lastRings = rings
         armed[scheduleId] = Armed(triggerAtMillis, isSnooze, atMillis)
     }
     override fun cancel(scheduleId: String) { armed -= scheduleId }
@@ -214,5 +216,35 @@ class ScheduleRepositoryTest {
         clock = at("2026-09-30T07:00")
         repo.onFired("a", ms("2026-09-30T07:00"), false)
         assertEquals(ms("2026-10-01T05:00"), arming.upcoming["a"])
+    }
+
+    @Test fun timerTargetStartsQuietlyAndArmsAsNonRinging() = runBlocking {
+        repo.save(alarm().copy(target = TargetKind.TIMER, targetDefId = "tea"))
+        assertEquals(false, arming.lastRings)
+        clock = at("2026-09-30T07:00")
+        val decision = repo.onFired("a", ms("2026-09-30T07:00"), isSnooze = false)
+        assertTrue(decision is FireDecision.Start)
+        assertEquals("tea", (decision as FireDecision.Start).schedule.targetDefId)
+        assertEquals(ms("2026-10-01T07:00"), arming.armed["a"]?.triggerAt) // next day still armed
+    }
+
+    @Test fun oneOffTargetFinishesItsSessionAtOnce() = runBlocking {
+        repo.save(alarm(days = emptySet(), afterFire = AfterFire.DELETE).copy(target = TargetKind.STOPWATCH))
+        clock = at("2026-09-30T07:00")
+        assertTrue(repo.onFired("a", ms("2026-09-30T07:00"), false) is FireDecision.Start)
+        assertNull(dao.get("a")) // nothing rings, so nothing to dismiss: deleted straight away
+    }
+
+    @Test fun targetFireIsIdempotentToo() = runBlocking {
+        repo.save(alarm().copy(target = TargetKind.RELAY, targetDefId = "wake"))
+        clock = at("2026-09-30T07:00")
+        repo.onFired("a", ms("2026-09-30T07:00"), false)
+        assertEquals(FireDecision.Ignore, repo.onFired("a", ms("2026-09-30T07:00"), false))
+    }
+
+    @Test fun targetSpecRoundTrips() {
+        val spec = TargetSpec(label = "Run", t0Millis = -120_000, tags = listOf("run"))
+        assertEquals(spec, TargetSpec.decode(TargetSpec.encode(spec)))
+        assertEquals(TargetSpec(), TargetSpec.decode("{}"))
     }
 }

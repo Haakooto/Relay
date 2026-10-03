@@ -229,7 +229,7 @@
   </div>
   <h1>One clock app, and timers that relay.</h1>
   <p class="tagline">Relay rivals and replaces the stock Android Clock. Where the stock app is good, copy it closely. Where it is limited (timers can't chain, only alarms can be scheduled, a timer can't run twice at once), fix it.</p>
-  <div class="cover-note"><strong>Rev 7, a clean restart.</strong> Consolidates the v0.5 spec, what the v0.5 device test pass taught us, the re-brief from 2026-09-30 and the first read-through (labels on unsaved timers, lap notes, the automation API, and answers to the rev 6 open questions). It replaces every earlier revision and the old feature map as the design baseline. The earlier docs are still in git history. Section tags show what is <span class="tag keep">keep</span> (proven in v0.5, carry over), <span class="tag changed">changed</span>, <span class="tag new">new</span> or <span class="tag later">later</span>.</div>
+  <div class="cover-note"><strong>v1.0, built.</strong> This is the baseline v1.0 was built from: all seven build steps (§16) are done and on-device tested, and the "As built" notes record where the build settled details the design left open. The earlier docs are in git history. Section tags show what is <span class="tag keep">keep</span> (proven in v0.5, carried over), <span class="tag changed">changed</span>, <span class="tag new">new</span> or <span class="tag later">later</span>. How to use the app: <code>docs/usage-guide.md</code>.</div>
 </div>
 
 <div class="shell layout">
@@ -398,6 +398,7 @@
         <li>If it fires late (device off, clock change), it rings with a clear "delayed from 07:00" notice instead of silently skipping. That applies up to 60 minutes late. Anything older only gets a "missed alarm" notification, since a 07:00 alarm ringing at 15:00 helps nobody.</li>
         <li>When the ring timeout passes unanswered, the alarm stops and leaves a notification saying so. It counts as dismissed.</li>
       </ul>
+      <p><strong>As built:</strong> a non-ringing target starts quietly at the alarm time (no ringing screen); its own run or stopwatch notification shows up as when started by hand. A start cue (beep, chime, … or silent, chosen per alarm) plays as it starts. If it can't start (the saved timer was deleted, the relay is broken), the alarm rings instead and says why: a scheduled start never fails silently. A one-off's "after it fires" choice applies the moment it starts.</p>
       <div class="callout">Snooze only applies to the Ring target. For Timer, Relay and Stopwatch targets, the run's own controls take over when it fires. Their "snooze" is simply the relay itself (see the wake-up example in §06).</div>
     </section>
 
@@ -822,6 +823,7 @@
         <li><strong>Clock pane + ClockStyle renderer + widgets.</strong></li>
         <li><strong>After 1.0:</strong> automation (standard clock intents, then batch import, then AppFunctions after a spike), Bedtime (after a feasibility spike), extra widgets.</li>
       </ol>
+      <p><strong>Status:</strong> steps 1 to 7 are done; "After 1.0" is what's left.</p>
       <h3>Worth salvaging from v0.5</h3>
       <ul class="plain">
         <li><code>chainlang/</code> in full, including its tests.</li>

@@ -353,4 +353,30 @@
     <string name="stats_average">Average</string>
     <string name="stats_best">Fastest</string>
     <string name="stats_worst">Slowest</string>
+    <!-- Scheduled targets (build step 5) -->
+    <string name="fires_title">When it goes off</string>
+    <string name="fires_ring">Ring</string>
+    <string name="fires_timer">Start a timer</string>
+    <string name="fires_relay">Start a relay</string>
+    <string name="fires_stopwatch">Start a stopwatch</string>
+    <string name="target_which">Which</string>
+    <string name="target_new">New</string>
+    <string name="target_save_to_library">Save to library</string>
+    <string name="target_save_hint">Give it a script-safe label to save it to the library.</string>
+    <string name="target_relay_total">Total %1$s</string>
+    <string name="target_missing">(deleted)</string>
+    <string name="alarm_starts_timer">Starts timer %1$s</string>
+    <string name="alarm_starts_new_timer">Starts a %1$s timer</string>
+    <string name="alarm_starts_relay">Starts relay %1$s</string>
+    <string name="alarm_starts_new_relay">Starts a relay</string>
+    <string name="alarm_starts_stopwatch">Starts a stopwatch</string>
+    <string name="alarm_starts_stopwatch_named">Starts stopwatch %1$s</string>
+    <string name="schedule_start_failed">Couldn\'t start: %1$s</string>
+    <string name="target_start_tone">Cue when it starts</string>
+    <string name="target_length">Length %1$s</string>
+    <string name="target_broken">Can\'t run right now: open it in Timers to fix</string>
+    <plurals name="target_length_steps">
+        <item quantity="one">Length %1$s · %2$d step</item>
+        <item quantity="other">Length %1$s · %2$d steps</item>
+    </plurals>
 </resources>

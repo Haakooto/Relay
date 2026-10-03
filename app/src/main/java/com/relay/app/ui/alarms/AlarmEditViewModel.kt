@@ -11,7 +11,20 @@ import com.relay.app.data.schedule.ScheduleEntity
 import com.relay.app.data.schedule.ScheduleExceptionEntity
 import com.relay.app.data.schedule.TargetKind
 import com.relay.app.data.schedule.WeekdayMask
+import com.relay.app.data.library.RelayDefEntity
+import com.relay.app.data.library.SoundSpec
+import com.relay.app.data.library.TimerDefEntity
+import com.relay.app.library.BlockKind
+import com.relay.app.library.spec
+import com.relay.app.library.SaveError
+import com.relay.app.library.SaveResult
+import com.relay.app.run.RelaySpec
 import com.relay.app.schedule.NextFire
+import com.relay.app.schedule.TargetSpec
+import com.relay.chainlang.ChainLang
+import com.relay.chainlang.ChainLangException
+import com.relay.chainlang.NowClock
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +40,9 @@ enum class EndRule { NEVER, DATE, COUNT }
 
 /** Another alarm, for "apply this exception to these too". */
 data class OtherAlarm(val id: String, val hour: Int, val minute: Int, val label: String)
+
+/** A saved timer or relay to pick, with its length and step count (null = currently broken). */
+data class SavedBlock(val id: String, val label: String, val totalSeconds: Long?, val steps: Int?)
 
 data class AlarmEditState(
     val loaded: Boolean = false,
@@ -50,6 +66,20 @@ data class AlarmEditState(
     val others: List<OtherAlarm> = emptyList(),
     val firstDay: DayOfWeek = DayOfWeek.MONDAY,
     val is24h: Boolean = true,
+    // What it fires (spec §04).
+    val target: TargetKind = TargetKind.RING,
+    /** A saved timer/relay; null = the inline one in [spec]. */
+    val targetDefId: String? = null,
+    val spec: TargetSpec = TargetSpec(),
+    val savedTimers: List<SavedBlock> = emptyList(),
+    val savedRelays: List<SavedBlock> = emptyList(),
+    /** Inline timer: its length, or null when the expression is broken. */
+    val inlineTimerSeconds: Long? = 300,
+    /** Inline relay: total, or null with [inlineError]. */
+    val inlineRelaySeconds: Long? = null,
+    val inlineError: String? = null,
+    val labelCandidates: List<String> = emptyList(),
+    val promoteError: SaveError? = null,
     /** Preserved from the loaded row, so an edit doesn't reset them. */
     val createdAtMillis: Long = System.currentTimeMillis(),
     val createdBy: String = "user",
@@ -94,9 +124,14 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
                 rampSeconds = existing.ring.rampSeconds,
                 snoozeMinutes = existing.ring.snoozeMinutes,
                 maxSnoozes = existing.ring.maxSnoozes,
+                target = existing.target,
+                targetDefId = existing.targetDefId,
+                spec = TargetSpec.decode(existing.targetSpec),
                 createdAtMillis = existing.createdAtMillis,
                 createdBy = existing.createdBy,
             )
+            loadLibrary()
+            revalidate().join()
             baseline = _state.value.editable()
             refreshExceptions()
         }
@@ -107,8 +142,87 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
     private var baseline: List<Any?>? = null
     private fun AlarmEditState.editable() = listOf(
         hour, minute, label, repeatDays, oneOffDate, afterFire, endRule, endDate, endCount,
-        soundUri, vibrate, rampSeconds, snoozeMinutes, maxSnoozes,
+        soundUri, vibrate, rampSeconds, snoozeMinutes, maxSnoozes, target, targetDefId, spec,
     )
+
+    /** Whether Save can work: a ring always can; a target needs something valid to start. */
+    fun canSave(s: AlarmEditState): Boolean = when (s.target) {
+        TargetKind.RING, TargetKind.STOPWATCH -> true
+        TargetKind.TIMER -> s.targetDefId != null || s.inlineTimerSeconds != null
+        TargetKind.RELAY -> s.targetDefId != null || (s.inlineRelaySeconds != null && s.inlineError == null)
+    }
+
+    fun setTarget(kind: TargetKind) {
+        _state.update {
+            // Keep a saved pick only if it's the right kind.
+            val keep = it.targetDefId != null && ((kind == TargetKind.TIMER && it.savedTimers.any { t -> t.id == it.targetDefId }) ||
+                (kind == TargetKind.RELAY && it.savedRelays.any { r -> r.id == it.targetDefId }))
+            it.copy(target = kind, targetDefId = if (keep) it.targetDefId else null, promoteError = null)
+        }
+        revalidate()
+    }
+
+    fun setStartTone(tone: com.relay.app.data.library.TransitionTone) {
+        setSpec { it.copy(startTone = tone) }
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) { com.relay.app.run.TransitionBeep.play(tone) }
+    }
+
+    fun setTargetDef(id: String?) { _state.update { it.copy(targetDefId = id, promoteError = null) } }
+
+    fun setSpec(transform: (TargetSpec) -> TargetSpec) {
+        _state.update { it.copy(spec = transform(it.spec), promoteError = null) }
+        revalidate()
+    }
+
+    private fun revalidate() = viewModelScope.launch {
+        val s = _state.value
+        val now = NowClock.now()
+        val timerSeconds = runCatching { ChainLang.run("(${s.spec.durationExpr})", now).singleOrNull()?.durationSeconds }.getOrNull()
+        val (relaySeconds, relayError) = try {
+            val plan = container.library.builder().forRelay(RelaySpec(s.spec.label.ifBlank { "(this relay)" }, s.spec.script, SoundSpec(), s.spec.mode, s.spec.tone))
+            plan.sumOf { it.seconds } to null
+        } catch (e: ChainLangException) {
+            null to e.message
+        }
+        _state.update { it.copy(inlineTimerSeconds = timerSeconds, inlineRelaySeconds = relaySeconds, inlineError = relayError) }
+    }
+
+    /** "Save to library": turns the inline timer or relay into a saved one this alarm then uses. */
+    fun promote() = viewModelScope.launch {
+        val s = _state.value
+        val id = UUID.randomUUID().toString()
+        val result = when (s.target) {
+            TargetKind.TIMER -> container.library.saveTimer(
+                TimerDefEntity(id, s.spec.label.trim(), s.spec.durationExpr.trim(), SoundSpec(), null, System.currentTimeMillis()),
+            )
+            TargetKind.RELAY -> container.library.saveRelay(
+                RelayDefEntity(id, s.spec.label.trim(), s.spec.script, SoundSpec(), s.spec.mode, s.spec.tone, "", null, System.currentTimeMillis()),
+            )
+            else -> return@launch
+        }
+        when (result) {
+            is SaveResult.Saved -> {
+                loadLibrary()
+                _state.update { it.copy(targetDefId = result.id, promoteError = null) }
+            }
+            is SaveResult.Refused -> _state.update { it.copy(promoteError = result.error) }
+        }
+    }
+
+    private suspend fun loadLibrary() {
+        val items = container.library.observe().first().items
+        val builder = container.library.builder()
+        val relaySteps = items.filter { it.kind == BlockKind.RELAY }.associate { i ->
+            i.id to runCatching { container.library.relay(i.id)?.let { r -> builder.forRelay(r.spec()).size } }.getOrNull()
+        }
+        _state.update {
+            it.copy(
+                savedTimers = items.filter { i -> i.kind == BlockKind.TIMER }.map { i -> SavedBlock(i.id, i.label, i.totalSeconds, 1) },
+                savedRelays = items.filter { i -> i.kind == BlockKind.RELAY }.map { i -> SavedBlock(i.id, i.label, i.totalSeconds, relaySteps[i.id]) },
+                labelCandidates = items.map { i -> i.label }.sorted(),
+            )
+        }
+    }
 
     /** Unsaved edits? Exceptions don't count: they're saved the moment they're added. */
     fun isDirty(): Boolean = baseline != null && baseline != _state.value.editable()
@@ -129,13 +243,15 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
             afterFire = s.afterFire,
             // Saving is a clear "I want this alarm": always enable.
             enabled = true,
-            target = TargetKind.RING,
+            target = s.target,
             ring = RingOptions(s.soundUri, s.vibrate, s.rampSeconds, s.snoozeMinutes, s.maxSnoozes),
             createdAtMillis = s.createdAtMillis,
             createdBy = s.createdBy,
             snoozedUntilMillis = null,
             snoozesUsed = 0,
             nextFireAtMillis = null,
+            targetDefId = if (s.target == TargetKind.TIMER || s.target == TargetKind.RELAY) s.targetDefId else null,
+            targetSpec = TargetSpec.encode(s.spec),
         )
         val next = container.schedules.save(entity)
         onSaved(next?.toEpochMilli())

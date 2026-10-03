@@ -53,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
 import com.relay.app.data.schedule.AfterFire
 import com.relay.app.data.schedule.ExceptionKind
+import com.relay.app.data.schedule.TargetKind
 import com.relay.app.ui.common.NumberOptionChips
 import com.relay.app.ui.common.rememberDiscardGuard
 import com.relay.app.ui.common.OptionChips
@@ -138,7 +139,7 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
                 fontSize = 64.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f).clickable { pickingTime = true },
             )
-            Button(onClick = onSave) { Text(stringResource(R.string.action_save)) }
+            Button(onClick = onSave, enabled = viewModel.canSave(state)) { Text(stringResource(R.string.action_save)) }
         }
         OutlinedTextField(
             value = state.label,
@@ -202,6 +203,11 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
         }
 
         HorizontalDivider()
+        AlarmTargetSection(state, viewModel)
+
+        // Sound and snooze only matter when it rings.
+        if (state.target == TargetKind.RING) {
+        HorizontalDivider()
         SoundPickerRow(stringResource(R.string.alarm_sound), state.soundUri) { uri -> viewModel.update { it.copy(soundUri = uri) } }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.alarm_vibrate), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
@@ -233,6 +239,7 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
                 label = { stringResource(R.string.minutes_short, it) },
                 onChange = { v -> viewModel.update { it.copy(snoozeMinutes = v) } },
             )
+        }
         }
 
         HorizontalDivider()

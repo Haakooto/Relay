@@ -213,3 +213,17 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Running: first line is Lap, Pause, Restart; the tag-lap buttons are on a second line.
 - [ ] Lap tags show as small outlined boxes; the note is on its own line in italic.
 - [ ] New stopwatch with − ticked and 2 m: counts -02:00.00 up through 00:00.00 and on; the notification shows a minus too.
+
+## Uncommitted: alarms that start things (build step 5)
+
+- [ ] New alarm → "When it goes off" → Start a timer → pick a saved timer: the list says "Starts timer …". At the time, it starts quietly (no ringing screen) and its countdown notification appears.
+- [ ] Start a timer → New → `2m`: starts a 2-minute timer at the alarm time, which rings 2 minutes later.
+- [ ] Start a relay → pick a saved relay (e.g. Wake with "Wait for me"): starts at the alarm time; rings at its first boundary.
+- [ ] Start a relay → New → write a script; the total shows; a broken script greys out Save.
+- [ ] New inline timer with a script-safe label → Save to library: it appears in the Timers library and the alarm now uses it.
+- [ ] Start a stopwatch with name "Run", start −1m and tag "run": at the alarm time it appears on the Stopwatch pane counting from −01:00, with a "Lap: run" button.
+- [ ] Ringing options (sound, snooze, …) are hidden unless "Ring" is picked.
+- [ ] Delete the saved timer an alarm uses, then let the alarm go off: it rings with "Couldn't start: …".
+- [ ] A one-off "Delete after" alarm that starts a timer: gone from the list once it has started the timer.
+- [ ] Picking a saved timer shows its length (on the chip and below); a saved relay also shows its step count.
+- [ ] "Cue when it starts": each choice plays as you pick it; at the alarm time the chosen cue plays as the target starts (Silent plays nothing).

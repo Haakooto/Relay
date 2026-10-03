@@ -340,4 +340,30 @@
     <string name="stats_average">Snitt</string>
     <string name="stats_best">Raskast</string>
     <string name="stats_worst">Seinast</string>
+    <!-- Scheduled targets (build step 5) -->
+    <string name="fires_title">Når han går av</string>
+    <string name="fires_ring">Ring</string>
+    <string name="fires_timer">Start ein tidtakar</string>
+    <string name="fires_relay">Start eit relé</string>
+    <string name="fires_stopwatch">Start ei stoppeklokke</string>
+    <string name="target_which">Kva for ein</string>
+    <string name="target_new">Ny</string>
+    <string name="target_save_to_library">Lagre i biblioteket</string>
+    <string name="target_save_hint">Gje han ein etikett med berre bokstavar, tal og _ for å lagre i biblioteket.</string>
+    <string name="target_relay_total">Totalt %1$s</string>
+    <string name="target_missing">(sletta)</string>
+    <string name="alarm_starts_timer">Startar tidtakaren %1$s</string>
+    <string name="alarm_starts_new_timer">Startar ein tidtakar på %1$s</string>
+    <string name="alarm_starts_relay">Startar reléet %1$s</string>
+    <string name="alarm_starts_new_relay">Startar eit relé</string>
+    <string name="alarm_starts_stopwatch">Startar ei stoppeklokke</string>
+    <string name="alarm_starts_stopwatch_named">Startar stoppeklokka %1$s</string>
+    <string name="schedule_start_failed">Kunne ikkje starte: %1$s</string>
+    <string name="target_start_tone">Signal når han startar</string>
+    <string name="target_length">Lengd %1$s</string>
+    <string name="target_broken">Kan ikkje køyre no: opne han i Tidtakarar for å fikse</string>
+    <plurals name="target_length_steps">
+        <item quantity="one">Lengd %1$s · %2$d steg</item>
+        <item quantity="other">Lengd %1$s · %2$d steg</item>
+    </plurals>
 </resources>
