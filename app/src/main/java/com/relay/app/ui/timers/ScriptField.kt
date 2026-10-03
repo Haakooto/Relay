@@ -25,6 +25,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.OffsetMapping
@@ -55,7 +56,7 @@ fun ScriptField(
 
     val colors = MaterialTheme.colorScheme
     val highlighter = remember(candidates, colors) {
-        ScriptHighlighter(candidates.toSet(), colors.primary, colors.secondary, colors.tertiary, colors.error)
+        ScriptHighlighter(candidates.toSet(), colors.primary, colors.secondary, colors.tertiary, colors.error, colors.onSurfaceVariant)
     }
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -111,8 +112,9 @@ private class ScriptHighlighter(
     private val functionColor: Color,
     private val labelColor: Color,
     private val unknownColor: Color,
+    private val commentColor: Color,
 ) : VisualTransformation {
-    private val token = Regex("\"[^\"]*\"?|\\d[\\dhms.]*|[\\p{L}][\\p{L}\\d_]*")
+    private val token = Regex("\"[^\"\\n]*\"?|#[^\\n]*|\\d[\\dhms.]*|[\\p{L}][\\p{L}\\d_]*")
     private val functions = setOf("repeat", "range", "RANDOM", "MINUTE", "HOUR", "SECOND", "NOW")
 
     override fun filter(text: AnnotatedString): TransformedText {
@@ -121,6 +123,7 @@ private class ScriptHighlighter(
             for (m in token.findAll(text.text)) {
                 val t = m.value
                 val style = when {
+                    t.startsWith("#") -> SpanStyle(color = commentColor, fontStyle = FontStyle.Italic)
                     t.startsWith("\"") -> SpanStyle(color = labelColor)
                     t[0].isDigit() -> SpanStyle(color = numberColor)
                     t in functions -> SpanStyle(color = functionColor)

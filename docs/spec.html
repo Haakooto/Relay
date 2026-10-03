@@ -443,6 +443,7 @@
         <li><span class="tag new">new</span> <strong>Autocomplete:</strong> while you type a name, a drop-down lists named timers and relays that match. It leaves out the relay being edited and anything that would create a cycle.</li>
         <li>Live preview: resolved steps and total duration, recomputed as you type. Errors appear inline, with position.</li>
         <li>A syntax help sheet, since the language is powerful but unfamiliar to most people. That's accepted.</li>
+        <li>Start is enabled only for a valid relay; Save only for a valid relay with a valid label. The beep-between-steps choice is hidden when every boundary waits for you.</li>
         <li><strong>A relay can never contain itself</strong>, directly or indirectly. Saving is rejected, and the cycle path is shown (Workday → Session → Workday).</li>
       </ul>
     </section>
@@ -454,7 +455,7 @@
       <h2>Relay language</h2>
       <p class="lede">Carried over from <code>chainlang</code>, with one extension: a named block can be used as a number in duration arithmetic.</p>
       <div class="panel"><pre style="margin:0"><span class="c1">relay</span>      = "(" element (<span class="c2">sep</span> element)* ")"
-<span class="c1">sep</span>        = "," | NEWLINE
+<span class="c1">sep</span>        = "," | NEWLINE                <span class="c3">// # starts a comment, to the end of the line</span>
 <span class="c1">element</span>    = ref | dur_expr [STRING] | call | relay   <span class="c3">// STRING: optional label, e.g. 5m "stretch"</span>
 <span class="c1">ref</span>        = IDENT                      <span class="c3">// bare name: a reference step, keeps its identity and sound</span>
 <span class="c1">call</span>       = "repeat" "(" int_expr "," element ")"
@@ -472,9 +473,10 @@
       <ul class="plain">
         <li><strong>A bare name is a reference</strong>: <code>(Test2)</code> runs Test2 as a step, with its own sound. References are resolved when a run starts, so retuning Test2 updates every relay that uses it. Once started, a run is a frozen snapshot.</li>
         <li><strong>A name inside arithmetic is a value</strong> <span class="tag new">new</span>: with Test2 = 10m, <code>(Test2 - 2)</code> is a relay of <em>one anonymous 8m step</em>. <code>Test2 + 30s</code> also works. A relay name used this way contributes its total duration. A result ≤ 0 is an error. <strong>Sound:</strong> with exactly one name in the expression, the step inherits that block's sound. Otherwise it uses the relay default.</li>
-        <li><code>range(a, b, step)</code> expands to anonymous steps of a, a+step, … minutes, half-open, direction-aware (numpy semantics). Fractional values are allowed: <code>range(1, 3, 0.5)</code> gives 1m, 1m30s, 2m, 2m30s. <code>arange</code> is dropped <span class="tag changed">changed</span>. <code>repeat(n, element)</code> repeats any element, references included.</li>
+        <li><code>range(a, b, step)</code> expands to anonymous steps of a, a+step, … minutes, <strong>including b when it lands on a step</strong> (<code>range(1, 3)</code> is 1, 2, 3; <code>range(1, 4, 2)</code> is 1, 3), which reads naturally to non-programmers. Direction-aware; fractional values allowed: <code>range(1, 3, 0.5)</code> gives 1m, 1m30s, 2m, 2m30s, 3m. <code>arange</code> is dropped <span class="tag changed">changed</span>.</li>
         <li>An anonymous step can carry a display-only label, written <code>5m "stretch"</code>, which is shown at ring time. <span class="tag new">new</span></li>
         <li><code>NOW</code> is evaluated once, when the run starts.</li>
+        <li><code>#</code> starts a comment that runs to the end of the line (except inside a quoted label). <span class="tag new">new</span></li>
       </ul>
       <h3>Worked examples</h3>
       <div class="tablewrap"><table>

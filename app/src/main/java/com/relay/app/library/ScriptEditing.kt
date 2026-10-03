@@ -30,6 +30,9 @@ object ScriptEditing {
         val at = old.selectionStart
         val text = old.text
         val next = text.getOrNull(at)
+        // Comments are free text: no pairing there. Enter still keeps the indent.
+        if (c != '\n' && ScriptRefs.inLabelOrComment(text, at) && c != '"') return insert(text, at, c.toString())
+        if (c == '"' && isInComment(text, at)) return insert(text, at, c.toString())
         return when (c) {
             '(' -> insert(text, at, "()", cursorOffset = 1)
             ')' -> if (next == ')') EditState(text, at + 1) else insert(text, at, ")")
@@ -68,7 +71,9 @@ object ScriptEditing {
     private fun insert(text: String, at: Int, s: String, cursorOffset: Int = s.length) =
         EditState(text.substring(0, at) + s + text.substring(at), at + cursorOffset)
 
-    private fun insideLabel(text: String, at: Int) = text.substring(0, at).count { it == '"' } % 2 == 1
+    private fun insideLabel(text: String, at: Int) = text.substring(text.lastIndexOf('\n', at - 1) + 1, at).count { it == '"' } % 2 == 1
+
+    private fun isInComment(text: String, at: Int) = ScriptRefs.inLabelOrComment(text, at) && !insideLabel(text, at)
 
     /** Replaces the word starting at [start] (up to the cursor) with [replacement]. */
     fun complete(state: EditState, start: Int, replacement: String): EditState {

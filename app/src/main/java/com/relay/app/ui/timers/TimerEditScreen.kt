@@ -37,6 +37,7 @@ import com.relay.app.R
 import com.relay.app.ui.common.SoundPickerRow
 import com.relay.app.ui.common.rememberDiscardGuard
 import com.relay.app.util.DurationText
+import com.relay.chainlang.ChainLang
 
 @Composable
 fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
@@ -64,13 +65,18 @@ fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f),
             )
             OutlinedButton(onClick = { viewModel.start(onDone) }, enabled = state.seconds != null) { Text(stringResource(R.string.action_start)) }
-            Button(onClick = { viewModel.save(onDone) }) { Text(stringResource(R.string.action_save)) }
+            Button(onClick = { viewModel.save(onDone) }, enabled = state.seconds != null && ChainLang.isReferenceableLabel(state.label.trim())) {
+                Text(stringResource(R.string.action_save))
+            }
         }
         OutlinedTextField(
             value = state.label,
             onValueChange = viewModel::setLabel,
             label = { Text(stringResource(R.string.block_label)) },
-            supportingText = { Text(stringResource(R.string.block_label_hint)) },
+            isError = state.label.isNotBlank() && !ChainLang.isReferenceableLabel(state.label.trim()),
+            supportingText = {
+                Text(stringResource(if (state.label.isNotBlank() && !ChainLang.isReferenceableLabel(state.label.trim())) R.string.save_label_invalid else R.string.block_label_hint))
+            },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )

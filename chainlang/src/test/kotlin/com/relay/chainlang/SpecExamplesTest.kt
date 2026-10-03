@@ -20,13 +20,13 @@ class SpecExamplesTest {
 
     @Test
     fun `range counts down`() {
-        val steps = run("(range(20, 0, 5))")
+        val steps = run("(range(20, 5, 5))")
         assertEquals(listOf(20L, 15L, 10L, 5L).map { it * 60 }, steps.map { it.durationSeconds })
     }
 
     @Test
     fun `nested repeat of range`() {
-        val steps = run("(3, repeat(3, range(10,0,5)))")
+        val steps = run("(3, repeat(3, range(10,5,5)))")
         assertEquals(listOf(3, 10, 5, 10, 5, 10, 5).map { it * 60L }, steps.map { it.durationSeconds })
     }
 

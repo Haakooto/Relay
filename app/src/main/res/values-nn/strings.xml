@@ -175,7 +175,6 @@
     <string name="help_refs">Namn på lagra tidtakarar og relé køyrer som steg, med eigne lydar. Endrar du dei, blir alle relé som brukar dei oppdaterte.</string>
     <string name="help_ref_math">Eit namn i reknestykke er lengda: med Test2 = 10m blir dette eitt steg på 8 minutt, med lyden til Test2.</string>
     <string name="help_repeat">Gjenta kva som helst, òg namn.</string>
-    <string name="help_range">Steg på 1, 1,5, 2 og 2,5 minutt. Slutten er ikkje med; steget kan vere ein brøk.</string>
     <string name="help_label">Ein etikett på eit steg utan namn, vist medan det går og ringjer.</string>
     <string name="help_time">Blir rekna ut éin gong, når reléet startar.</string>
     <string name="settings_timers_title">Tidtakarar</string>
@@ -293,4 +292,6 @@
         <item quantity="one">%1$d runde</item>
         <item quantity="other">%1$d rundar</item>
     </plurals>
+    <string name="help_range">Steg på 1, 1,5, 2, 2,5 og 3 minutt. Slutten er med når eit steg treffer han; steget kan vere ein brøk.</string>
+    <string name="help_comment">Alt etter # på ei linje blir ignorert: notat til deg sjølv.</string>
 </resources>

@@ -69,11 +69,11 @@ object ChainSafety {
         is TimeFunc -> 0.0
     }
 
-    /** Same half-open stepping as the evaluator, but on bounds, so a fractional step counts right. */
+    /** Same inclusive stepping as the evaluator, but on bounds, so a fractional step counts right. */
     private fun estimateRangeCount(startExpr: IntExpr, stopExpr: IntExpr, stepExpr: IntExpr?): Long {
         val spread = maxOf(upperBound(stopExpr) - lowerBound(startExpr), upperBound(startExpr) - lowerBound(stopExpr))
         val minStep = stepExpr?.let { kotlin.math.abs(lowerBound(it)).coerceAtLeast(MIN_STEP) } ?: 1.0
-        return kotlin.math.ceil(kotlin.math.abs(spread) / minStep).toLong()
+        return kotlin.math.floor(kotlin.math.abs(spread) / minStep + 1e-9).toLong() + 1
     }
 
     /** A step bound that could be ~0 (e.g. `RANDOM(0, 2)`) must not divide into infinity. */

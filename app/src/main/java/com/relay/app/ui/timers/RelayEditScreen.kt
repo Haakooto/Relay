@@ -49,6 +49,7 @@ import com.relay.app.ui.common.OptionChips
 import com.relay.app.ui.common.SoundPickerRow
 import com.relay.app.ui.common.rememberDiscardGuard
 import com.relay.app.util.DurationText
+import com.relay.chainlang.ChainLang
 
 @Composable
 fun RelayEditScreen(relayId: String?, onDone: () -> Unit) {
@@ -84,16 +85,22 @@ fun RelayEditScreen(relayId: String?, onDone: () -> Unit) {
             IconButton(onClick = { showHelp = true }) {
                 Icon(Icons.AutoMirrored.Outlined.HelpOutline, contentDescription = stringResource(R.string.relay_syntax_help))
             }
-            OutlinedButton(onClick = { viewModel.start(onDone) }, enabled = state.preview.error == null && state.preview.steps.isNotEmpty()) {
+            val valid = state.preview.error == null && state.preview.steps.isNotEmpty()
+            OutlinedButton(onClick = { viewModel.start(onDone) }, enabled = valid) {
                 Text(stringResource(R.string.action_start))
             }
-            Button(onClick = { viewModel.save(onDone) }) { Text(stringResource(R.string.action_save)) }
+            Button(onClick = { viewModel.save(onDone) }, enabled = valid && ChainLang.isReferenceableLabel(state.label.trim())) {
+                Text(stringResource(R.string.action_save))
+            }
         }
         OutlinedTextField(
             value = state.label,
             onValueChange = viewModel::setLabel,
             label = { Text(stringResource(R.string.block_label)) },
-            supportingText = { Text(stringResource(R.string.block_label_hint)) },
+            isError = state.label.isNotBlank() && !ChainLang.isReferenceableLabel(state.label.trim()),
+            supportingText = {
+                Text(stringResource(if (state.label.isNotBlank() && !ChainLang.isReferenceableLabel(state.label.trim())) R.string.save_label_invalid else R.string.block_label_hint))
+            },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -113,7 +120,9 @@ fun RelayEditScreen(relayId: String?, onDone: () -> Unit) {
             label = { stringResource(if (it == TransitionMode.SEAMLESS) R.string.relay_seamless else R.string.relay_interaction) },
             onSelect = viewModel::setMode,
         )
-        OptionChips(
+        // The cue only plays at seamless boundaries: hide it when every boundary waits for you.
+        val anySeamless = state.mode == TransitionMode.SEAMLESS || state.overrides.values.any { it.transition == TransitionMode.SEAMLESS }
+        if (anySeamless) OptionChips(
             title = stringResource(R.string.relay_tone),
             options = TransitionTone.entries, selected = state.tone,
             label = { stringResource(toneLabel(it)) },
@@ -249,6 +258,7 @@ private val HELP = listOf(
     "(Test2 - 2)" to R.string.help_ref_math,
     "repeat(4, (Work, Break))" to R.string.help_repeat,
     "range(1, 3, 0.5)" to R.string.help_range,
+    "5m  # a comment" to R.string.help_comment,
     "5m \"stretch\"" to R.string.help_label,
     "MINUTE(NOW)   RANDOM(5, 10)" to R.string.help_time,
 )

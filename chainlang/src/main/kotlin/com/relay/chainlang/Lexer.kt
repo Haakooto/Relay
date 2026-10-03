@@ -46,12 +46,22 @@ internal class Lexer(private val input: String) {
         return tokens
     }
 
-    /** @return whether a newline was among the whitespace skipped. */
+    /**
+     * Skips whitespace and `#` comments (a comment runs to the end of its line; its newline still
+     * counts as a separator). @return whether a newline was among what was skipped.
+     */
     private fun skipWhitespace(): Boolean {
         var sawNewline = false
-        while (pos < input.length && input[pos].isWhitespace()) {
-            if (input[pos] == '\n') sawNewline = true
-            pos++
+        while (pos < input.length) {
+            val c = input[pos]
+            when {
+                c == '#' -> while (pos < input.length && input[pos] != '\n') pos++
+                c.isWhitespace() -> {
+                    if (c == '\n') sawNewline = true
+                    pos++
+                }
+                else -> break
+            }
         }
         return sawNewline
     }

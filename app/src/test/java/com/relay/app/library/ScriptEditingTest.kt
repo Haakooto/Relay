@@ -47,4 +47,9 @@ class ScriptEditingTest {
     @Test fun renameIsTokenAware() {
         assertEquals("(Focus, Workday, 25m \"Work\", Focus - 2)", ScriptRefs.rename("(Work, Workday, 25m \"Work\", Work - 2)", "Work", "Focus"))
     }
+
+    @Test fun noPairingInsideComments() = assertEquals("(5m # note (|)", type("(5m # note |)", '('))
+    @Test fun noSuggestionsInComments() = assertNull(ScriptRefs.wordAt("(5m # Wo", 8))
+    @Test fun renameSkipsComments() = assertEquals("(Focus # Work here)", ScriptRefs.rename("(Work # Work here)", "Work", "Focus"))
+    @Test fun hashInsideLabelIsNotAComment() = assertEquals(10 to "Wo", ScriptRefs.wordAt("(5m \"#1\", Wo", 12))
 }

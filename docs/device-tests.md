@@ -173,3 +173,14 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Tap a widget: Relay opens on the Clock pane. Then change the language in Settings: it stays on Settings (the old app jumped back to Clock).
 - [ ] Leave the phone locked for 10 minutes, unlock: the widget shows the right time straight away.
 - [ ] Switch 24-hour clock off in Settings: widgets change to 12-hour.
+
+## Uncommitted: relay language and editor fixes
+
+- [ ] `(range(1, 3))` previews 1m, 2m, 3m; `(range(1, 4, 2))` previews 1m, 3m.
+- [ ] `(25m  # focus` on one line, `5m)` on the next: two steps; the comment shows greyed and italic.
+- [ ] Typing `(` inside a comment adds no `)`; no name suggestions appear inside a comment.
+- [ ] "Wait for me": the "Cue between steps" row disappears. Back to "Continue by itself": it returns.
+- [ ] A broken script: Start and Save are both greyed out.
+- [ ] A valid script with no label: Start works, Save is greyed out.
+- [ ] A label with a space: the label field turns red and explains why; Save stays greyed out.
+- [ ] Timer editor: Save is greyed out without a valid label or duration.

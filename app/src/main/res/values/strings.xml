@@ -196,7 +196,6 @@
     <string name="help_refs">Names of saved timers and relays run as steps, with their own sounds. Editing them updates every relay that uses them.</string>
     <string name="help_ref_math">A name in arithmetic is its length: with Test2 = 10m, this is one 8-minute step, with Test2\'s sound.</string>
     <string name="help_repeat">Repeat anything, including names.</string>
-    <string name="help_range">Steps of 1, 1.5, 2 and 2.5 minutes. The end is left out; the step can be a fraction.</string>
     <string name="help_label">A label on an unnamed step, shown while it runs and rings.</string>
     <string name="help_time">Worked out once, when the relay starts.</string>
     <string name="settings_timers_title">Timers</string>
@@ -306,4 +305,6 @@
         <item quantity="one">%1$d lap</item>
         <item quantity="other">%1$d laps</item>
     </plurals>
+    <string name="help_range">Steps of 1, 1.5, 2, 2.5 and 3 minutes. The end is included when a step lands on it; the step can be a fraction.</string>
+    <string name="help_comment">Everything after # on a line is ignored: notes for yourself.</string>
 </resources>

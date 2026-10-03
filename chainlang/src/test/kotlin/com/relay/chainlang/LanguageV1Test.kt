@@ -52,16 +52,40 @@ class LanguageV1Test {
         assertFailsWith<NonPositiveDurationException> { run("(range(0, 3))") }
     }
 
+    @Test fun `range includes the end when it lands on a step`() {
+        assertEquals(listOf(1L, 2L, 3L), run("(range(1, 3, 1))").map { it.durationSeconds / 60 })
+        assertEquals(listOf(1L, 2L, 3L), run("(range(1, 3))").map { it.durationSeconds / 60 })
+        assertEquals(listOf(1L, 3L), run("(range(1, 3, 2))").map { it.durationSeconds / 60 })
+        assertEquals(listOf(1L, 3L), run("(range(1, 4, 2))").map { it.durationSeconds / 60 })
+    }
+
     @Test fun `fractional range steps`() {
-        assertEquals(listOf(60L, 90L, 120L, 150L), run("(range(1, 3, 0.5))").map { it.durationSeconds })
+        assertEquals(listOf(60L, 90L, 120L, 150L, 180L), run("(range(1, 3, 0.5))").map { it.durationSeconds })
     }
 
     @Test fun `fractional range down`() {
-        assertEquals(listOf(90L, 60L), run("(range(1.5, 0.5, 0.5))").map { it.durationSeconds })
+        assertEquals(listOf(90L, 60L, 30L), run("(range(1.5, 0.5, 0.5))").map { it.durationSeconds })
     }
 
     @Test fun `tenth-minute steps don't drift`() {
-        assertEquals(10, run("(range(1, 2, 0.1))").size)
+        assertEquals(11, run("(range(1, 2, 0.1))").size)
+    }
+
+    @Test fun `range down to zero hits the zero-step rule`() {
+        assertFailsWith<NonPositiveDurationException> { run("(range(20, 0, 5))") }
+    }
+
+    @Test fun `comments run to the end of the line`() {
+        val steps = run("(\n  25m, # focus\n  5m # break, with a (paren) and \"quote\n)")
+        assertEquals(listOf(1500L, 300L), steps.map { it.durationSeconds })
+    }
+
+    @Test fun `a comment's newline still separates steps`() {
+        assertEquals(2, run("(1 # one\n2)").size)
+    }
+
+    @Test fun `hash inside a label is just text`() {
+        assertEquals("set #2", (run("(5m \"set #2\")").single() as LeafStep).label)
     }
 
     @Test fun `arange is gone with a helpful message`() {
@@ -92,7 +116,7 @@ class LanguageV1Test {
     }
 
     @Test fun `fractional step can't sneak past the multiplier cap`() {
-        assertFailsWith<MultiplierTooLargeException> { ChainLang.parseAndValidate("(range(0, 100, 0.25))") }
+        assertFailsWith<MultiplierTooLargeException> { ChainLang.parseAndValidate("(range(1, 100, 0.25))") }
     }
 
     @Test fun `referenceable labels`() {

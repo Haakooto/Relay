@@ -5,6 +5,19 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v1.0-alpha.6 (2026-10-03)
+
+Untested pre-release: fixes from the first round of testing.
+
+- `range` now includes its end when a step lands on it: `range(1, 3)` is 1, 2 and 3 minutes, and
+  `range(1, 4, 2)` is 1 and 3.
+- Relay scripts can have comments: everything after `#` on a line is ignored.
+- Save and Start are greyed out until a relay or timer can actually be saved or started, and an
+  invalid label says why.
+- "Cue between steps" is hidden when every step waits for you.
+- A clock's font now applies to its date too, and an analogue face with quarter marks shows only
+  12, 3, 6 and 9.
+
 ## v1.0-alpha.5 (2026-10-01)
 
 Untested pre-release: stopwatches, the clock and home-screen widgets. Not tried on a device yet.

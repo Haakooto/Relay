@@ -1,14 +1,19 @@
 package com.relay.app.library
 
-/** Text-level helpers over relay scripts that must respect quoted labels. Pure, unit-tested. */
+/** Text-level helpers over relay scripts that must respect quoted labels and `#` comments. Pure, unit-tested. */
 object ScriptRefs {
-    /** Replaces every reference to [old] with [new]; words inside "quoted labels" are left alone. */
+    /** Replaces every reference to [old] with [new]; words in "quoted labels" and comments are left alone. */
     fun rename(script: String, old: String, new: String): String {
         val out = StringBuilder()
         var i = 0
         while (i < script.length) {
             val c = script[i]
             when {
+                c == '#' -> {
+                    val end = script.indexOf('\n', i).let { if (it < 0) script.length else it }
+                    out.append(script, i, end)
+                    i = end
+                }
                 c == '"' -> {
                     val end = script.indexOf('"', i + 1).let { if (it < 0) script.length else it + 1 }
                     out.append(script, i, end)
@@ -40,10 +45,23 @@ object ScriptRefs {
      */
     fun wordAt(script: String, cursor: Int): Pair<Int, String>? {
         if (cursor <= 0 || cursor > script.length) return null
-        if (script.substring(0, cursor).count { it == '"' } % 2 == 1) return null
+        if (inLabelOrComment(script, cursor)) return null
         var start = cursor
         while (start > 0 && (script[start - 1].isLetterOrDigit() || script[start - 1] == '_')) start--
         if (start == cursor || !script[start].isLetter()) return null
         return start to script.substring(start, cursor)
+    }
+
+    /** Whether [at] is inside a "quoted label" or after a `#` on its line (outside a label). */
+    fun inLabelOrComment(script: String, at: Int): Boolean {
+        var inLabel = false
+        val lineStart = script.lastIndexOf('\n', at - 1) + 1
+        for (i in 0 until at) {
+            val c = script[i]
+            if (c == '"') inLabel = !inLabel
+            if (c == '\n') inLabel = false
+            if (c == '#' && !inLabel && i >= lineStart) return true
+        }
+        return inLabel
     }
 }

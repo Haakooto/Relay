@@ -85,8 +85,9 @@ class Evaluator(
     }
 
     /**
-     * numpy-style half-open, direction-aware stepping, in minutes, returned as whole seconds.
-     * Values are computed as start + i * step rather than accumulated, so 0.1 steps don't drift.
+     * Inclusive range in minutes, returned as whole seconds: the end is included when it's a
+     * whole number of steps from the start (`range(1, 3)` is 1, 2, 3; `range(1, 4, 2)` is 1, 3).
+     * Direction-aware, and computed as start + i * step so 0.1 steps don't drift.
      */
     private fun evalRange(startExpr: IntExpr, stopExpr: IntExpr, stepExpr: IntExpr?): List<Long> {
         val start = evalNum(startExpr)
@@ -99,7 +100,7 @@ class Evaluator(
         var i = 0
         while (true) {
             val v = start + i * step
-            if (if (step > 0) v >= stop - epsilon else v <= stop + epsilon) break
+            if (if (step > 0) v > stop + epsilon else v < stop - epsilon) break
             values += kotlin.math.round(v * 60).toLong()
             i++
         }
