@@ -98,8 +98,25 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun migrate4To5KeepsLapsAndDefaultsTags() {
+        helper.createDatabase(TEST_DB, 4).apply {
+            execSQL("INSERT INTO stopwatches (id, name, t0Millis, accumulatedMillis, startedAtMillis, sortOrder) VALUES ('w', 'Run', 0, 5000, NULL, 1)")
+            execSQL("INSERT INTO laps (id, stopwatchId, number, elapsedMillis, note) VALUES ('l', 'w', 1, 5000, 'first')")
+            close()
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 5, true, *RelayDatabase.MIGRATIONS).apply {
+            query("SELECT note, tags FROM laps WHERE id = 'l'").use {
+                assertTrue(it.moveToFirst())
+                assertEquals("first", it.getString(0))
+                assertEquals("[]", it.getString(1))
+            }
+            close()
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test"
-        const val LATEST_VERSION = 4
+        const val LATEST_VERSION = 5
     }
 }

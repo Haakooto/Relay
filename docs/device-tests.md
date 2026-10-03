@@ -31,28 +31,29 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [x] Snooze works; it rings again after the snooze length.
 - [x] Dismiss stops it.
 - [ ] While ringing, get a text or other notification: the alarm sound keeps going.
-- [ ] Two alarms set to the same minute: both show as stacked cards; dismiss them one at a time.
+- [x] Two alarms set to the same minute: both show as stacked cards; dismiss them one at a time.
 - [ ] Let one ring without touching it: it stops after 10 minutes and leaves a notification saying so.
-- [ ] Gradual volume increase (set 30 s on an alarm): starts quiet, gets loud.
-- [ ] Vibrate off on an alarm: no vibration. On: vibrates.
-- [ ] Pick a different sound in the editor: that sound plays.
+- [x] Gradual volume increase (set 30 s on an alarm): starts quiet, gets loud.
+- [!] Vibrate off on an alarm: no vibration. On: vibrates.
+    Doesnt vibrate if no nor off.
+- [x] Pick a different sound in the editor: that sound plays.
 
 ### Snooze
-- [ ] Max snoozes 1: after one snooze, the Snooze button is gone on the next ring.
-- [ ] Max snoozes None: no Snooze button at all, and the editor hides the snooze length.
-- [ ] Snooze length Custom (e.g. 2 min): the alarm comes back after 2 minutes.
-- [ ] While snoozed, the "Snoozed until" notification's Dismiss cancels the snooze.
+- [x] Max snoozes 1: after one snooze, the Snooze button is gone on the next ring.
+- [x] Max snoozes None: no Snooze button at all, and the editor hides the snooze length.
+- [x] Snooze length Custom (e.g. 2 min): the alarm comes back after 2 minutes.
+- [x] While snoozed, the "Snoozed until" notification's Dismiss cancels the snooze.
 
 ### Creating and editing
 - [x] New alarm opens straight into the time picker.
-- [ ] After Save, a toast says how long until it rings.
+- [x] After Save, a toast says how long until it rings.
 - [x] The list is sorted by next ring time and shows "Rings in …".
-- [ ] One-off with "Delete" after ringing: gone from the list after you dismiss it.
-- [ ] One-off with "Keep, switched off": stays, toggled off.
-- [ ] Repeating on chosen days: the list shows the days in your first-day-of-week order.
+- [x] One-off with "Delete" after ringing: gone from the list after you dismiss it.
+- [x] One-off with "Keep, switched off": stays, toggled off.
+- [x] Repeating on chosen days: the list shows the days in your first-day-of-week order.
 - [ ] Repeating, "After a number of times" = 2: switches itself off after ringing twice.
-- [ ] Toggle an alarm off and on from the list: toast on enable, no ring while off.
-- [ ] Delete from the editor.
+- [x] Toggle an alarm off and on from the list: toast on enable, no ring while off.
+- [x] Delete from the editor.
 
 ### Exceptions
 - [ ] On a saved repeating alarm, add a Skip for tomorrow: "Rings in" jumps past tomorrow.
@@ -63,67 +64,68 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 ### Upcoming, missed, restarts
 - [ ] About 2 hours before an alarm, an "Upcoming alarm" notification appears.
 - [ ] Its "Dismiss now" skips just that occurrence; the alarm still rings the next day.
-- [ ] Restart the phone, unlock: the alarm is still set and rings. (Known gap: not before the first unlock.)
+- [x] Restart the phone, unlock: the alarm is still set and rings. (Known gap: not before the first unlock.)
 - [ ] Turn the phone off across an alarm time, turn it on within the hour: it rings, saying "Delayed from …".
 - [ ] Change the phone's time zone: alarms keep their local time.
 
 ### Warnings banner
-- [ ] Alarm volume at 0: a red banner on the Alarms pane with "Turn up".
-- [ ] Deny notifications (phone settings): the banner asks to allow them.
+- [!] Alarm volume at 0: a red banner on the Alarms pane with "Turn up".
+    Not at all.
+- [x] Deny notifications (phone settings): the banner asks to allow them.
 
 ## Uncommitted: snooze tweaks
 
-- [ ] Alarm editor → Snooze length → Custom → 2: saves, and the chip shows "2 min".
-- [ ] Max snoozes → None: the snooze length row disappears, and the alarm rings with no Snooze button.
-- [ ] Settings → Default snooze length → Custom works the same way.
+- [x] Alarm editor → Snooze length → Custom → 2: saves, and the chip shows "2 min".
+- [x] Max snoozes → None: the snooze length row disappears, and the alarm rings with no Snooze button.
+- [x] Settings → Default snooze length → Custom works the same way.
 
 ## Uncommitted: timers and relays (build steps 3 and 4)
 
 ### Quick timers and runs
-- [ ] Timers → + → tap "1m": a card appears at the top and counts down; a notification shows the countdown too.
-- [ ] At zero it rings full screen (like an alarm) with Stop / Restart / +1 min. Each does what it says.
-- [ ] Start two quick timers at once: two independent cards, two notifications.
-- [ ] Pause, then Resume from the card: the time left is kept.
-- [ ] Pause from the notification: the card updates too.
-- [ ] Reset (while paused): back to the full time, still paused.
-- [ ] +1 min while running adds a minute.
-- [ ] Lock the phone during a 1-minute timer: it still rings on time.
-- [ ] Settings → Timers → tap a quick-start chip, change it to 3: the + menu shows 3m.
+- [x] Timers → + → tap "1m": a card appears at the top and counts down; a notification shows the countdown too.
+- [x] At zero it rings full screen (like an alarm) with Stop / Restart / +1 min. Each does what it says.
+- [x] Start two quick timers at once: two independent cards, two notifications.
+- [x] Pause, then Resume from the card: the time left is kept.
+- [x] Pause from the notification: the card updates too.
+- [x] Reset (while paused): back to the full time, still paused.
+- [x] +1 min while running adds a minute.
+- [x] Lock the phone during a 1-minute timer: it still rings on time.
+- [x] Settings → Timers → tap a quick-start chip, change it to 3: the + menu shows 3m.
 
 ### Saved timers
-- [ ] + → New timer, label `Tea`, duration `4m`, Save: appears in the library as "Timer · 4m".
-- [ ] Try saving a label with a space (`Green tea`): refused with an explanation.
-- [ ] New timer with a label but no Save, tap Start: it runs with that label and isn't saved.
-- [ ] ▶ on Tea twice: two Tea runs at once.
-- [ ] Open Tea, change the duration, then back out without saving: the library still shows 4m.
+- [x] + → New timer, label `Tea`, duration `4m`, Save: appears in the library as "Timer · 4m".
+- [x] Try saving a label with a space (`Green tea`): refused with an explanation.
+- [x] New timer with a label but no Save, tap Start: it runs with that label and isn't saved.
+- [x] ▶ on Tea twice: two Tea runs at once.
+- [x] Open Tea, change the duration, then back out without saving: the library still shows 4m.
 
 ### Relays
-- [ ] + → New relay, label `Wake`, steps `(1, 1, 1)`, Wait for me, Save.
-- [ ] Start Wake: after 1 minute it rings with Continue / Stop relay; Continue starts the next minute.
-- [ ] Change Wake to Continue by itself: steps pass with a short beep, and it rings only at the end.
-- [ ] Pick each cue (Beep, Chime, ...) in the editor: you hear it as you pick it.
-- [ ] Type `(Te` in the steps: a `Tea` suggestion appears; tapping it completes the name.
-- [ ] Type `(` : `)` appears after the cursor. Enter between them: indented new line.
-- [ ] `(Tea - 1)`: preview shows one 3-minute step.
-- [ ] `(range(1, 3, 0.5))`: preview shows 1m, 1m 30s, 2m, 2m 30s.
-- [ ] `(5m "stretch")`: the step label shows while it runs and when it rings.
-- [ ] A relay that includes itself (`(Wake)` inside Wake): Save is refused, showing the loop.
-- [ ] A broken script (`(1,`): the error shows its line and column, and Start is disabled.
-- [ ] Tap a step in the preview, set "Wait for me" after it: only that boundary waits.
-- [ ] Rename Tea to `Chai`: relays using Tea now say Chai.
-- [ ] Delete a timer a relay uses: the dialog names that relay.
+- [x] + → New relay, label `Wake`, steps `(1, 1, 1)`, Wait for me, Save.
+- [x] Start Wake: after 1 minute it rings with Continue / Stop relay; Continue starts the next minute.
+- [x] Change Wake to Continue by itself: steps pass with a short beep, and it rings only at the end.
+- [x] Pick each cue (Beep, Chime, ...) in the editor: you hear it as you pick it.
+- [x] Type `(Te` in the steps: a `Tea` suggestion appears; tapping it completes the name.
+- [x] Type `(` : `)` appears after the cursor. Enter between them: indented new line.
+- [x] `(Tea - 1)`: preview shows one 3-minute step.
+- [x] `(range(1, 3, 0.5))`: preview shows 1m, 1m 30s, 2m, 2m 30s, 3m.
+- [x] `(5m "stretch")`: the step label shows while it runs and when it rings.
+- [x] A relay that includes itself (`(Wake)` inside Wake): Save is refused, showing the loop.
+- [x] A broken script (`(1,`): the error shows its line and column, and Start is disabled.
+- [x] Tap a step in the preview, set "Wait for me" after it: only that boundary waits.
+- [x] Rename Tea to `Chai`: relays using Tea now say Chai.
+- [x] Delete a timer a relay uses: the dialog names that relay.
 
 ### Library
-- [ ] + → New header "Morning"; long-press a timer and drag it under the header.
-- [ ] Move headers up and down; rename and delete one (its timers drop back to the top).
+- [x] + → New header "Morning"; long-press a timer and drag it under the header.
+- [x] Move headers up and down; rename and delete one (its timers drop back to the top).
 
 ### Restarts
-- [ ] Start a 5-minute timer, swipe the app away from recents: it still rings on time.
+- [x] Start a 5-minute timer, swipe the app away from recents: it still rings on time.
 - [ ] Start a 10-minute timer, restart the phone, unlock: the timer is still there and rings on time.
 
 ## Uncommitted: languages and editors
 
-- [ ] Settings → Language → Norsk: everything is Nynorsk ("Innstillingar", "Tidtakarar", "Nytt relé").
+- [x] Settings → Language → Norsk: everything is Nynorsk ("Innstillingar", "Tidtakarar", "Nytt relé").
 - [ ] Phone set to bokmål, app language System: the app shows Nynorsk too.
 - [ ] Phone set to US English, app language System: dates read like "1 Oct 2026", and 12-hour times say "pm".
 - [ ] Open an alarm, timer or relay editor: the bottom bar is gone.
@@ -142,45 +144,72 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 
 ## Uncommitted: stopwatch (build step 6)
 
-- [ ] Stopwatch → + → no name, no start time → Start: it counts, with hundredths.
-- [ ] + again with name "Run" and start time 1 m: shows 01:00.00 and counts up; "Started from" shows under it.
-- [ ] Lap at about 01:05: the lap shows 00:05 (measured from the start time) and 01:05 total.
-- [ ] Tap a lap: add a note; it shows under the lap. The lap time can't be changed.
-- [ ] Pause and Resume keep the time; Restart goes back to the start time and clears the laps.
-- [ ] While running, the notification counts up; its Lap and Pause work.
-- [ ] Swipe the app away, reopen: the stopwatch kept counting.
-- [ ] Rename and delete work.
+- [x] Stopwatch → + → no name, no start time → Start: it counts, with hundredths.
+- [x] + again with name "Run" and start time 1 m: shows 01:00.00 and counts up; "Started from" shows under it.
+- [x] Lap at about 01:05: the lap shows 00:05 (measured from the start time) and 01:05 total.
+- [x] Tap a lap: add a note; it shows under the lap. The lap time can't be changed.
+- [x] Pause and Resume keep the time; Restart goes back to the start time and clears the laps.
+- [x] While running, the notification counts up; its Lap and Pause work.
+- [x] Swipe the app away, reopen: the stopwatch kept counting.
+- [x] Rename and delete work.
 
 ## Uncommitted: clock and widgets (build step 7)
 
 ### Clock pane
-- [ ] A big clock on top, ticking every second, in the display font.
-- [ ] Tap it (or the palette icon): the style editor opens without the bottom bar, with a live preview.
-- [ ] Try each font, including 7-segment with seconds: the clock always fits the width.
-- [ ] Analogue: thick, thin and dot hands; each mark style; ring, filled and numeral faces; second hand on and off.
-- [ ] Change a colour (palette, then a custom one): the preview follows; Save keeps it.
-- [ ] + → search "tokyo" → pick: Tokyo shows "Tomorrow" or "Today" with "+7 h" or "+8 h", and the time.
-- [ ] Swipe a city away to delete; long-press and drag to reorder.
-- [ ] Settings → Clock → Home time zone → pick a city in another zone: a "Home" row appears at the top of the cities.
+- [x] A big clock on top, ticking every second, in the display font.
+- [x] Tap it (or the palette icon): the style editor opens without the bottom bar, with a live preview.
+- [x] Try each font, including 7-segment with seconds: the clock always fits the width.
+- [x] Analogue: thick, thin and dot hands; each mark style; ring, filled and numeral faces; second hand on and off.
+- [x] Change a colour (palette, then a custom one): the preview follows; Save keeps it.
+- [x] + → search "tokyo" → pick: Tokyo shows "Tomorrow" or "Today" with "+7 h" or "+8 h", and the time.
+- [x] Swipe a city away to delete; long-press and drag to reorder.
+- [x] Settings → Clock → Home time zone → pick a city in another zone: a "Home" row appears at the top of the cities.
 
 ### Widgets
-- [ ] Long-press home screen → Widgets → Relay: placing it opens the setup screen first.
-- [ ] Back out of setup: no widget is added.
-- [ ] Save a digital widget: it shows the time; the minute changes on time.
-- [ ] Place a second, analogue widget for another city: both show their own time and style.
-- [ ] Background: transparent, colour, gradient; corners: sharp, rounded, pill; a border: all show on the widget.
-- [ ] Long-press a widget → Widget settings: change it; the widget updates.
-- [ ] Tap a widget: Relay opens on the Clock pane. Then change the language in Settings: it stays on Settings (the old app jumped back to Clock).
-- [ ] Leave the phone locked for 10 minutes, unlock: the widget shows the right time straight away.
-- [ ] Switch 24-hour clock off in Settings: widgets change to 12-hour.
+- [x] Long-press home screen → Widgets → Relay: placing it opens the setup screen first.
+- [x] Back out of setup: no widget is added.
+- [x] Save a digital widget: it shows the time; the minute changes on time.
+- [x] Place a second, analogue widget for another city: both show their own time and style.
+- [x] Background: transparent, colour, gradient; corners: sharp, rounded, pill; a border: all show on the widget.
+- [x] Long-press a widget → Widget settings: change it; the widget updates.
+- [x] Tap a widget: Relay opens on the Clock pane. Then change the language in Settings: it stays on Settings (the old app jumped back to Clock).
+- [x] Leave the phone locked for 10 minutes, unlock: the widget shows the right time straight away.
+- [x] Switch 24-hour clock off in Settings: widgets change to 12-hour.
 
 ## Uncommitted: relay language and editor fixes
 
-- [ ] `(range(1, 3))` previews 1m, 2m, 3m; `(range(1, 4, 2))` previews 1m, 3m.
-- [ ] `(25m  # focus` on one line, `5m)` on the next: two steps; the comment shows greyed and italic.
-- [ ] Typing `(` inside a comment adds no `)`; no name suggestions appear inside a comment.
-- [ ] "Wait for me": the "Cue between steps" row disappears. Back to "Continue by itself": it returns.
-- [ ] A broken script: Start and Save are both greyed out.
-- [ ] A valid script with no label: Start works, Save is greyed out.
-- [ ] A label with a space: the label field turns red and explains why; Save stays greyed out.
-- [ ] Timer editor: Save is greyed out without a valid label or duration.
+- [x] `(range(1, 3))` previews 1m, 2m, 3m; `(range(1, 4, 2))` previews 1m, 3m.
+- [x] `(25m  # focus` on one line, `5m)` on the next: two steps; the comment shows greyed and italic.
+- [x] Typing `(` inside a comment adds no `)`; no name suggestions appear inside a comment.
+- [x] "Wait for me": the "Cue between steps" row disappears. Back to "Continue by itself": it returns.
+- [x] A broken script: Start and Save are both greyed out.
+- [x] A valid script with no label: Start works, Save is greyed out.
+- [x] A label with a space: the label field turns red and explains why; Save stays greyed out.
+- [x] Timer editor: Save is greyed out without a valid label or duration.
+
+## Uncommitted: stopwatch tags, corrections and chart
+
+### Tags
+- [ ] New stopwatch with tags "run" and "break": while running, buttons "Lap", "Lap: run" and "Lap: break" show.
+- [ ] "Lap: run" makes a lap tagged run (shown under the lap).
+- [ ] Tap a lap: edit its note and toggle its tags.
+- [ ] Edit (pencil in the header): rename and add or remove tags.
+
+### Corrections
+- [ ] The lap list has faint column headers: Lap, Lap time, Total.
+- [ ] Lap's pencil → Remove lap: it merges into the previous lap; the total doesn't change; ★ on the merged lap.
+- [ ] Remove lap 1: merges into lap 2 instead.
+- [ ] Insert lap into a 20 s lap at `5`: it becomes 5 s, then a new 15 s lap; later laps renumber.
+- [ ] Adjust lap by `-5s`, then by `2m` (too much): the second is refused with "shorter than zero".
+- [ ] `5min` isn't accepted; `5m` and `1:30` are.
+- [ ] Undo and Redo (header arrows) step back and forth; ★ comes and goes with them.
+- [ ] Corrections (n) lists every correction with its label; undone ones are greyed. A new correction removes the greyed ones.
+- [ ] Take a new lap after a correction, then undo the correction: the new lap is kept.
+
+### Chart
+- [ ] The chart icon shows bars per lap, in order, with count, average, fastest, slowest.
+- [ ] Tap a bar: its lap number and time show above the chart.
+- [ ] Tick "run": only run-tagged laps show, and the stats follow.
+- [ ] Running: first line is Lap, Pause, Restart; the tag-lap buttons are on a second line.
+- [ ] Lap tags show as small outlined boxes; the note is on its own line in italic.
+- [ ] New stopwatch with − ticked and 2 m: counts -02:00.00 up through 00:00.00 and on; the notification shows a minus too.

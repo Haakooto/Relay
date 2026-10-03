@@ -5,6 +5,21 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v1.0-alpha.7 (2026-10-03)
+
+Untested pre-release: a much more capable stopwatch.
+
+- Tags: give a stopwatch its own tags (say "run" and "break"), then tag laps in one tap with a
+  Lap button per tag. Laps show tags as small boxes and notes on their own line.
+- Fix lap mistakes without changing the total time: remove a lap (it merges into the one
+  before), insert a lap partway into another, or move a lap's end by a few seconds. Each fix can
+  have a reason, changed laps get a star, and every fix is listed with unlimited undo and redo.
+- A chart of lap times, one bar per lap, filterable by tag, with count, average, fastest and
+  slowest.
+- A stopwatch can start below zero: −2 minutes counts up through zero and keeps going.
+- Lap columns are labelled (Lap, Lap time, Total), and Lap, Pause and Restart sit together on
+  the first line.
+
 ## v1.0-alpha.6 (2026-10-03)
 
 Untested pre-release: fixes from the first round of testing.

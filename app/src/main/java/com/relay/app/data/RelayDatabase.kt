@@ -11,6 +11,7 @@ import com.relay.app.data.clock.ClockDao
 import com.relay.app.data.clock.LocationEntity
 import com.relay.app.data.clock.WidgetConfigEntity
 import com.relay.app.data.library.LibraryDao
+import com.relay.app.data.stopwatch.LapCorrectionEntity
 import com.relay.app.data.stopwatch.LapEntity
 import com.relay.app.data.stopwatch.StopwatchDao
 import com.relay.app.data.stopwatch.StopwatchEntity
@@ -33,8 +34,9 @@ import com.relay.app.data.schedule.ScheduleExceptionEntity
         LibraryHeaderEntity::class, ScheduleEntity::class, ScheduleExceptionEntity::class,
         TimerDefEntity::class, RelayDefEntity::class, RunEntity::class,
         StopwatchEntity::class, LapEntity::class, LocationEntity::class, WidgetConfigEntity::class,
+        LapCorrectionEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class RelayDatabase : RoomDatabase() {
@@ -120,8 +122,24 @@ abstract class RelayDatabase : RoomDatabase() {
             }
         }
 
+        /** v5: stopwatch and lap tags, and the per-stopwatch lap-correction history. From schemas/5.json. */
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `stopwatches` ADD COLUMN `tags` TEXT NOT NULL DEFAULT '[]'")
+                db.execSQL("ALTER TABLE `laps` ADD COLUMN `tags` TEXT NOT NULL DEFAULT '[]'")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `lap_corrections` (`id` TEXT NOT NULL, `stopwatchId` TEXT NOT NULL, " +
+                        "`seq` INTEGER NOT NULL, `kind` TEXT NOT NULL, `lapNumber` INTEGER NOT NULL, `amountMillis` INTEGER NOT NULL, " +
+                        "`label` TEXT NOT NULL, `ops` TEXT NOT NULL, `affected` TEXT NOT NULL, `undone` INTEGER NOT NULL, " +
+                        "`createdAtMillis` INTEGER NOT NULL, PRIMARY KEY(`id`), " +
+                        "FOREIGN KEY(`stopwatchId`) REFERENCES `stopwatches`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_lap_corrections_stopwatchId` ON `lap_corrections` (`stopwatchId`)")
+            }
+        }
+
         /** Append each migration here as the schema grows. */
-        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
 
         fun build(context: Context): RelayDatabase =
             Room.databaseBuilder(context.applicationContext, RelayDatabase::class.java, FILE_NAME)

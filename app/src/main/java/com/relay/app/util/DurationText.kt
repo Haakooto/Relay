@@ -32,4 +32,7 @@ object DurationText {
         val cs = (ms / 10) % 100
         return if (h > 0) "%d:%02d:%02d.%02d".format(h, m, s, cs) else "%02d:%02d.%02d".format(m, s, cs)
     }
+
+    /** Like [stopwatch] but keeps a minus sign: "-00:05.00". No "-00:00.00" in the last 10 ms. */
+    fun signedStopwatch(millis: Long): String = (if (millis <= -10) "-" else "") + stopwatch(kotlin.math.abs(millis))
 }

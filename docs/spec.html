@@ -522,9 +522,15 @@
       <ul class="plain">
         <li>Any number of stopwatches at once, each a card in a list, running or paused, until deleted.</li>
         <li>Per card: lap (while running), pause/resume, restart (to t₀), rename, delete.</li>
-        <li>Optional name, optional t₀ start offset.</li>
+        <li>Optional name, optional t₀ start offset, which may be negative: −2 m counts up from −2:00 through zero and on (a v0.5 accident worth keeping).</li>
         <li>Laps show both the delta and the cumulative time. The first lap's delta is measured from t₀.</li>
-        <li><strong>Each lap can take a free-text note</strong>, added or edited at any time. Lap times themselves stay read-only. <span class="tag new">new</span></li>
+        <li><strong>Each lap can take a free-text note</strong>, added or edited at any time. <span class="tag new">new</span></li>
+        <li><strong>Tags:</strong> each stopwatch has its own tag list (e.g. "run", "break"; no shared pool). Laps take any of them, alongside the note. While running there's one Lap button per tag, for one-tap tagged laps. <span class="tag new">new</span></li>
+        <li><strong>Lap corrections</strong> fix tapping mistakes without changing the total: <em>remove</em> a lap (merges into the previous one, which keeps its note and tags; lap 1 merges into lap 2), <em>insert</em> a lap a given time into an existing one, or <em>adjust</em> a lap's end by a signed amount (<code>5</code> = seconds, <code>5s</code>, <code>2m</code>, <code>-5s</code>, <code>1:30</code>; units h/m/s only). No lap may end up shorter than zero. Each correction can carry a label, and a ★ marks laps it changed. <span class="tag new">new</span></li>
+        <li><strong>History, undo and redo:</strong> corrections are listed per stopwatch, including removed laps. Undo and redo walk that list without limit; undone entries stay greyed until a new correction drops them. Taking new laps doesn't break undo. Restart clears laps and history. <span class="tag new">new</span></li>
+        <li><strong>Lap chart:</strong> from the stopwatch's header, bars per lap in lap order, filterable by tag, with count, average, fastest and slowest above. <span class="tag new">new</span></li>
+        <li>A lap list header names the columns: Lap, Lap time, Total.</li>
+        <li>Export laps (CSV). <span class="tag later">later</span></li>
         <li>State: <code>accumulated</code> + <code>startedAt?</code>. The elapsed time is computed, never ticked.</li>
         <li><strong>Persisted in Room</strong> <span class="tag changed">changed</span>. This is needed for scheduled starts, and it removes v0.5's unresolved "seed row" workaround. The cost is small.</li>
         <li>An ongoing notification with Lap / Pause while one is running. <span class="tag new">new</span></li>
