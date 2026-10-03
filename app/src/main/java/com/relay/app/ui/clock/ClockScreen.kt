@@ -50,6 +50,8 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
+import com.relay.app.guide.GuideButton
+import com.relay.app.guide.GuideSection
 import com.relay.app.clock.Cities
 import com.relay.app.clock.ClockStyle
 import com.relay.app.data.clock.LocationEntity
@@ -90,6 +92,7 @@ fun ClockScreen(onEditStyle: () -> Unit, viewModel: ClockViewModel = viewModel()
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.pane_clock), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
                     IconButton(onClick = onEditStyle) { Icon(Icons.Outlined.Palette, stringResource(R.string.clock_edit_style)) }
+                    GuideButton(GuideSection.CLOCK)
                 }
             }
             item {

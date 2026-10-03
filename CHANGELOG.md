@@ -9,7 +9,8 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 A clean rebuild of the whole app. It installs as a new app, next to the old one (which can be
 uninstalled once you're happy). The alpha entries below have the step-by-step detail; this is the
-overview. A short usage guide is in `docs/usage-guide.md`.
+overview. A short usage guide is built into the app (Settings → How to use Relay, or the ? on
+each pane), in English and Nynorsk.
 
 **Alarms**
 - Full-screen ringing over the lock screen that keeps going until you act, with gradual volume,

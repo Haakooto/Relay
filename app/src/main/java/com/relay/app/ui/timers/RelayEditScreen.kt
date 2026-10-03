@@ -82,6 +82,7 @@ fun RelayEditScreen(relayId: String?, onDone: () -> Unit) {
                 stringResource(if (state.isNew) R.string.relay_new else R.string.relay_edit),
                 style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f),
             )
+            com.relay.app.guide.GuideButton(com.relay.app.guide.GuideSection.RELAYS)
             IconButton(onClick = { showHelp = true }) {
                 Icon(Icons.AutoMirrored.Outlined.HelpOutline, contentDescription = stringResource(R.string.relay_syntax_help))
             }

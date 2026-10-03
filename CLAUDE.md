@@ -14,8 +14,13 @@ the feature map: bedtime, assistant automation, more widget types, CSV export of
 
 - [`docs/spec.html`](docs/spec.html): the v1.0 design baseline (core model, panes, relay
   language, firing module, data model, build order). Update it when a design decision changes.
-- [`docs/usage-guide.md`](docs/usage-guide.md): the user-facing guide, one section per pane.
-  **Update it when a feature's behaviour changes** (keep it short: main ideas, not every option).
+- [`docs/usage-guide.md`](docs/usage-guide.md) and its Nynorsk twin `docs/usage-guide.nn.md`:
+  the user-facing guide, one `##` section per pane. **Update both when a feature's behaviour
+  changes** (keep it short: main ideas, not every option). The build copies them into the app
+  (Settings → How to use Relay, and the ? in each pane header), so the `##` sections must stay in
+  the order of `GuideSection`; `GuideMarkdownTest` checks it. Markdown is limited to what
+  `GuideMarkdown` parses: headings, paragraphs, `- ` lists, pipe tables, fenced code, `---`,
+  `**bold**`, `*italic*` and `` `code` ``.
 - [`docs/feature-map.html`](docs/feature-map.html): source of truth for what's actually built.
   **Update it whenever you build, fix or retest a feature**: one row per feature, a status chip
   (Approved/WIP/Lacking/Planned/Deferred/Declined) and a one-line note. Keep the header counts in

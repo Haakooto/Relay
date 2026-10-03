@@ -379,4 +379,6 @@
         <item quantity="one">Length %1$s · %2$d step</item>
         <item quantity="other">Length %1$s · %2$d steps</item>
     </plurals>
+    <string name="guide_title">How to use Relay</string>
+    <string name="action_back">Back</string>
 </resources>

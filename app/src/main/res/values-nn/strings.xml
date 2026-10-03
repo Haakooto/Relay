@@ -366,4 +366,6 @@
         <item quantity="one">Lengd %1$s · %2$d steg</item>
         <item quantity="other">Lengd %1$s · %2$d steg</item>
     </plurals>
+    <string name="guide_title">Slik brukar du Relay</string>
+    <string name="action_back">Tilbake</string>
 </resources>

@@ -19,7 +19,11 @@ import androidx.navigation.compose.rememberNavController
 import com.relay.app.R
 import com.relay.app.ui.alarms.AlarmEditScreen
 import com.relay.app.ui.alarms.AlarmsScreen
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import com.relay.app.guide.GuideScreen
+import com.relay.app.guide.GuideSection
+import com.relay.app.guide.LocalOpenGuide
 import com.relay.app.ui.clock.ClockScreen
 import com.relay.app.ui.clock.ClockStyleScreen
 import com.relay.app.ui.stopwatch.StopwatchScreen
@@ -44,8 +48,11 @@ fun RelayApp(openClock: Boolean = false, onClockOpened: () -> Unit = {}) {
     val current = backStack?.destination
 
     // Editors are modal: no bottom bar, so leaving means saving or discarding.
-    val inEditor = current?.route?.let { route -> route == CLOCK_STYLE || EDITOR_ROUTES.any { route.startsWith("$it/") } } == true
+    val inEditor = current?.route?.let { route -> route == CLOCK_STYLE || (EDITOR_ROUTES + GUIDE).any { route.startsWith("$it/") } } == true
 
+    val openGuide: (GuideSection?) -> Unit = { navController.navigate("$GUIDE/${it?.name ?: NEW}") }
+
+    CompositionLocalProvider(LocalOpenGuide provides openGuide) {
     Scaffold(
         bottomBar = {
             if (!inEditor) NavigationBar {
@@ -93,8 +100,13 @@ fun RelayApp(openClock: Boolean = false, onClockOpened: () -> Unit = {}) {
             composable(Pane.STOPWATCH.route) { StopwatchScreen() }
             composable(Pane.CLOCK.route) { ClockScreen(onEditStyle = { navController.navigate(CLOCK_STYLE) }) }
             composable(CLOCK_STYLE) { ClockStyleScreen(onDone = { navController.popBackStack() }) }
+            composable("$GUIDE/{section}") { entry ->
+                val section = entry.arguments?.getString("section")?.let { s -> GuideSection.entries.firstOrNull { it.name == s } }
+                GuideScreen(section, onBack = { navController.popBackStack() })
+            }
             composable(Pane.SETTINGS.route) { SettingsScreen() }
         }
+    }
     }
 }
 
@@ -103,4 +115,5 @@ private const val TIMER_EDIT = "timer"
 private const val RELAY_EDIT = "relay"
 private const val NEW = "new"
 private const val CLOCK_STYLE = "clockstyle"
+private const val GUIDE = "guide"
 private val EDITOR_ROUTES = listOf(ALARM_EDIT, TIMER_EDIT, RELAY_EDIT)

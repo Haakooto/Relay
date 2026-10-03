@@ -123,14 +123,14 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>v1.0. A ledger, not a roadmap, grouped by the build order in the <a href="spec.html">Relay spec</a> (§16). The v0.5 ledger is in git history.</p>
     <div class="meta">
-      <span>2026-10-03, rev 7 (v1.0)</span>
+      <span>2026-10-03, rev 8 (v1.0)</span>
       <span>54 tracked items</span>
       <span>chainlang: 54/54 tests passing</span>
     </div>
 
     <div class="stats">
-      <div class="stat approved"><div class="n">39</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">7</div><div class="l">WIP</div></div>
+      <div class="stat approved"><div class="n">46</div><div class="l">Approved</div></div>
+      <div class="stat wip"><div class="n">0</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">3</div><div class="l">Lacking</div></div>
       <div class="stat"><div class="n">0</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">4</div><div class="l">Deferred</div></div>
@@ -174,7 +174,7 @@
           <tr><td class="feature">One-off (delete or disable after firing) and repeating (weekdays, end date / count)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">One-off keeps its row until the ring is over, so snooze works, then deletes or switches off</td></tr>
           <tr><td class="feature">Schedule exceptions: skip or retime dates, apply to several alarms</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Accepted on-device without a dedicated test pass</td></tr>
           <tr><td class="feature">Full-screen ringing over the lock screen</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Confirmed on-device: wakes the screen and shows over the lock screen</td></tr>
-          <tr><td class="feature">Continuous looping audio, volume ramp, vibration</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Looping confirmed on-device. Still to check: ramp, vibration toggle, fallback when a sound is missing</td></tr>
+          <tr><td class="feature">Continuous looping audio, volume ramp, vibration</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Looping and the volume ramp confirmed on-device. Vibration not confirmed yet (low priority)</td></tr>
           <tr><td class="feature">Snooze with per-alarm length and max count</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Snooze and dismiss confirmed on-device. Length now takes any number (1 to 240 min); max snoozes has None. Still to check: the limit, custom length</td></tr>
           <tr><td class="feature">Upcoming-alarm notification with Dismiss now</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Accepted on-device without a dedicated test pass</td></tr>
           <tr><td class="feature">Late-fire notice</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Accepted on-device without a dedicated test pass</td></tr>
@@ -222,13 +222,13 @@
 
     <section>
       <h2>Scheduled targets</h2>
-      <p class="sub">Build step 5. Spec §04. Built, compiles, unit-tested; not yet run on a device.</p>
+      <p class="sub">Build step 5. Spec §04. Confirmed on-device.</p>
       <div class="tablewrap"><table>
         <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="feature">Alarm fires a Timer / Relay (library or inline)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">"When it goes off": Ring, or start a timer or relay, saved or built inline. Starts quietly at the alarm time; if it can't start (deleted, broken), it rings and says why. Room v6</td></tr>
-          <tr><td class="feature">Alarm starts a Stopwatch</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Name, start offset (may be negative) and tags; it starts counting at the alarm time</td></tr>
-          <tr><td class="feature">Save an inline target to the library</td><td><span class="chip wip">◐ WIP</span></td><td class="note">"Save to library" turns the inline timer or relay into a saved one, which the alarm then uses</td></tr>
+          <tr><td class="feature">Alarm fires a Timer / Relay (library or inline)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">"When it goes off": Ring, or start a timer or relay, saved or built inline. Starts quietly at the alarm time; if it can't start (deleted, broken), it rings and says why. Room v6</td></tr>
+          <tr><td class="feature">Alarm starts a Stopwatch</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Name, start offset (may be negative) and tags; it starts counting at the alarm time</td></tr>
+          <tr><td class="feature">Save an inline target to the library</td><td><span class="chip approved">✓ Approved</span></td><td class="note">"Save to library" turns the inline timer or relay into a saved one, which the alarm then uses</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -243,10 +243,10 @@
           <tr><td class="feature">Persisted in Room</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Wall-clock based, so a running stopwatch keeps counting across a reboot. 7 unit tests</td></tr>
           <tr><td class="feature">Lap notes</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Tap a lap to add or edit its note; lap times stay read-only. First lap measured from t₀</td></tr>
           <tr><td class="feature">Ongoing notification with Lap / Pause</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Counting chronometer with Lap and Pause, only while running</td></tr>
-          <tr><td class="feature">Stopwatch tags and one-tap tagged laps</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Per-stopwatch tag list; laps take tags alongside notes; a Lap button per tag while running</td></tr>
-          <tr><td class="feature">Lap corrections: remove, insert, adjust</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Boundary edits that keep the total; never below zero; optional label; ★ on changed laps. 13 unit tests on the logic</td></tr>
-          <tr><td class="feature">Correction history with unlimited undo and redo</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Per stopwatch; undone entries greyed until a new correction; survives new laps; cleared by restart</td></tr>
-          <tr><td class="feature">Lap chart with tag filter and stats</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Bars per lap in order, tap for the exact time, dashed average; count, average, fastest, slowest</td></tr>
+          <tr><td class="feature">Stopwatch tags and one-tap tagged laps</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Per-stopwatch tag list; laps take tags alongside notes; a Lap button per tag while running</td></tr>
+          <tr><td class="feature">Lap corrections: remove, insert, adjust</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Boundary edits that keep the total; never below zero; optional label; ★ on changed laps. 13 unit tests on the logic</td></tr>
+          <tr><td class="feature">Correction history with unlimited undo and redo</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Per stopwatch; undone entries greyed until a new correction; survives new laps; cleared by restart</td></tr>
+          <tr><td class="feature">Lap chart with tag filter and stats</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Bars per lap in order, tap for the exact time, dashed average; count, average, fastest, slowest</td></tr>
           <tr><td class="feature">Editing recorded lap times</td><td><span class="chip declined">✕ Declined</span></td><td class="note">A stopwatch is a factual record</td></tr>
         </tbody>
       </table></div>

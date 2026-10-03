@@ -4,7 +4,7 @@ A personal Android clock app that replaces the stock one: alarms, timers that ch
 **relays**, stopwatches with tagged and correctable laps, a world clock, and per-instance
 home-screen widgets. Alarms can also start a timer, relay or stopwatch instead of ringing.
 
-- **How to use it:** [`docs/usage-guide.md`](docs/usage-guide.md)
+- **How to use it:** [`docs/usage-guide.md`](docs/usage-guide.md) (also in the app: Settings → How to use Relay, or the ? on each pane)
 - **Design spec:** [`docs/spec.html`](docs/spec.html) (open in a browser)
 - **What's built and tested:** [`docs/feature-map.html`](docs/feature-map.html)
 - **On-device test checklist:** [`docs/device-tests.md`](docs/device-tests.md)

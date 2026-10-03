@@ -44,6 +44,8 @@ android {
     // Room's exported schemas feed MigrationTestHelper in androidTest.
     sourceSets {
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
+        // The in-app guide: docs/usage-guide*.md, copied in at build time (one source of truth).
+        getByName("main").assets.srcDir(layout.buildDirectory.dir("generated/guide"))
     }
 
     buildTypes {
@@ -71,6 +73,12 @@ android {
         compose = true
     }
 }
+
+val copyUsageGuide = tasks.register<Copy>("copyUsageGuide") {
+    from(rootProject.file("docs")) { include("usage-guide*.md") }
+    into(layout.buildDirectory.dir("generated/guide/guide"))
+}
+tasks.named("preBuild") { dependsOn(copyUsageGuide) }
 
 ksp {
     // Every schema version is exported and committed, so each migration can be tested against

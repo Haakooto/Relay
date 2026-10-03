@@ -58,6 +58,8 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
+import com.relay.app.guide.GuideButton
+import com.relay.app.guide.GuideSection
 import com.relay.app.data.library.LibraryHeaderEntity
 import com.relay.app.library.BlockKind
 import com.relay.app.library.LibraryItem
@@ -143,7 +145,12 @@ fun TimersScreen(onOpenTimer: (String?) -> Unit, onOpenRelay: (String?) -> Unit,
             contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { Text(stringResource(R.string.pane_timers), style = MaterialTheme.typography.headlineMedium) }
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.pane_timers), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+                    GuideButton(GuideSection.TIMERS)
+                }
+            }
             item { ReadinessBanner() }
             runs.forEach { view ->
                 item(key = "run:${view.run.id}") {

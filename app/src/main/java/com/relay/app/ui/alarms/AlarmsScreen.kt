@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
+import com.relay.app.guide.GuideButton
+import com.relay.app.guide.GuideSection
 import com.relay.app.data.schedule.WeekdayMask
 import com.relay.app.schedule.AlarmListItem
 import com.relay.app.util.RelativeText
@@ -67,7 +69,12 @@ fun AlarmsScreen(onOpen: (String?) -> Unit, viewModel: AlarmsViewModel = viewMod
             contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { Text(stringResource(R.string.pane_alarms), style = MaterialTheme.typography.headlineMedium) }
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.pane_alarms), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+                    GuideButton(GuideSection.ALARMS)
+                }
+            }
             item { ReadinessBanner() }
             val list = alarms
             if (list != null && list.isEmpty()) {

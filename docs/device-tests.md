@@ -227,3 +227,10 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] A one-off "Delete after" alarm that starts a timer: gone from the list once it has started the timer.
 - [ ] Picking a saved timer shows its length (on the chip and below); a saved relay also shows its step count.
 - [ ] "Cue when it starts": each choice plays as you pick it; at the alarm time the chosen cue plays as the target starts (Silent plays nothing).
+
+## Uncommitted: in-app guide
+
+- [ ] Settings → How to use Relay: the guide opens from the top, with no bottom bar; back returns.
+- [ ] The ? on Alarms, Timers, Stopwatch and Clock opens the guide at that pane's section; the ? in the relay editor opens the Relays section.
+- [ ] Headings, lists, the code example and the tables read well; `code` bits are monospace.
+- [ ] In Norsk, the guide is the Nynorsk one.

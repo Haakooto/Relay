@@ -183,6 +183,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
         SectionTitle(R.string.settings_general_title)
         SwitchRow(R.string.settings_haptics_label, current.haptics, viewModel::setHaptics)
 
+        val openGuide = com.relay.app.guide.LocalOpenGuide.current
+        TextButton(onClick = { openGuide(null) }) { Text(stringResource(R.string.guide_title)) }
+
         HorizontalDivider()
         Text(
             stringResource(R.string.settings_app_version, viewModel.versionName),
