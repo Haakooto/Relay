@@ -43,7 +43,7 @@
             android:launchMode="singleInstance"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
-            android:taskAffinity="com.relay.app.ringing" />
+            android:taskAffinity="${applicationId}.ringing" />
 
         <service
             android:name=".firing.RingService"
@@ -89,7 +89,7 @@
             android:name=".widget.WidgetConfigActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:taskAffinity="com.relay.app.widgetconfig">
+            android:taskAffinity="${applicationId}.widgetconfig">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>

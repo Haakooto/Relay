@@ -1,6 +1,5 @@
 <resources>
     <!-- British English throughout (not configurable): optimise, colour, cancelled, and so on. -->
-    <string name="app_name" translatable="false">Relay</string>
 
     <!-- Panes -->
     <string name="pane_alarms">Alarms</string>

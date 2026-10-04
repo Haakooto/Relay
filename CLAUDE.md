@@ -50,6 +50,17 @@ the feature map: bedtime, assistant automation, more widget types, CSV export of
   `values-nb/strings.xml` (Android doesn't fall back from nb to nn; `NorwegianStringsTest` fails if
   they differ). A relay is **eit relé** (reléet, relé, relea), never "stafett".
 
+## Releases and signing
+
+- `./gradlew :app:assembleRelease` builds `app/build/outputs/apk/release/app-release.apk`,
+  shrunk with R8 (rules in `app/proguard-rules.pro`; @Serializable classes are kept) and signed
+  with the user's key via `keystore.properties` (git-ignored; template in
+  `keystore.properties.example`). Never read, print or commit the key or that file.
+- Debug builds install separately as "Relay Debug" (`com.relay.app.debug`).
+- `versionCode` comes from the tag (`gitVersionCode()`): vX.Y = X*10000 + Y*100 + 99,
+  vX.Y-alpha.N = X*10000 + Y*100 + N. Updates only install when it goes up, so tag before
+  building a release to share.
+
 ## Versioning
 
 - Releases are manual annotated git tags in two parts, `vX.Y`. No auto-bumping.

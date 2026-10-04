@@ -10,3 +10,14 @@
 local.properties
 build/
 /app/release
+
+# Release signing: the key and its passwords never go in git.
+keystore.properties
+*.jks
+*.keystore
+.env/
+
+# Built packages shared by hand.
+*.apk
+*.aab
+*.zip
