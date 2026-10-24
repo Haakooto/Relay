@@ -234,3 +234,11 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] The ? on Alarms, Timers, Stopwatch and Clock opens the guide at that pane's section; the ? in the relay editor opens the Relays section.
 - [ ] Headings, lists, the code example and the tables read well; `code` bits are monospace.
 - [ ] In Norsk, the guide is the Nynorsk one.
+
+## Uncommitted: v1.1 requests (not yet compiled)
+
+### Last pane
+- [ ] Open Timers, leave the app (home), swipe it away from recents, open it again: it opens on Timers.
+- [ ] Same with Stopwatch, then tap a clock widget: it opens on Stopwatch.
+- [ ] Open Settings last, close and reopen: it opens on the pane you used before Settings.
+- [ ] Change language in Settings: you stay on Settings.

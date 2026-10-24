@@ -5,7 +5,8 @@ moduler på heimeskjermen. Det som skil Relay ut: tidtakarar kan lenkjast saman 
 alarmar kan **starte** ein tidtakar, eit relé eller ei stoppeklokke i staden for berre å ringje,
 og stoppeklokker har **rundar med merkelappar som kan rettast**.
 
-Dei fem rutene nedst er Alarmar, Tidtakarar, Stoppeklokke, Klokke og Innstillingar.
+Dei fem rutene nedst er Alarmar, Tidtakarar, Stoppeklokke, Klokke og Innstillingar. Relay opnar
+på ruta du brukte sist.
 
 ---
 
@@ -199,7 +200,7 @@ Hald inne på heimeskjermen → Moduler → Relay. Kvar modul får sitt eige opp
 - **hjørne** og **kant**.
 
 Kvar modul kan sjå ulik ut. Vil du endre ein seinare, hald inne på han og vel innstillingar for
-modulen. Trykk på ein modul opnar Klokke-ruta.
+modulen. Trykk på ein modul opnar Relay på ruta du brukte sist.
 
 ---
 

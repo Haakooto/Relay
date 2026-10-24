@@ -123,14 +123,14 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>v1.0. A ledger, not a roadmap, grouped by the build order in the <a href="spec.html">Relay spec</a> (§16). The v0.5 ledger is in git history.</p>
     <div class="meta">
-      <span>2026-10-03, rev 8 (v1.0)</span>
-      <span>54 tracked items</span>
+      <span>2026-10-24, rev 9 (v1.1 in progress)</span>
+      <span>55 tracked items</span>
       <span>chainlang: 54/54 tests passing</span>
     </div>
 
     <div class="stats">
       <div class="stat approved"><div class="n">46</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">0</div><div class="l">WIP</div></div>
+      <div class="stat wip"><div class="n">1</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">3</div><div class="l">Lacking</div></div>
       <div class="stat"><div class="n">0</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">4</div><div class="l">Deferred</div></div>
@@ -261,9 +261,20 @@
           <tr><td class="feature">Large main clock + locations list</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Main clock in the chosen style, then cities with day and offset ("Tomorrow, +9 h"). Search the time-zone database; swipe to delete, long-press to drag</td></tr>
           <tr><td class="feature">Home clock while travelling</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Settings → Home time zone. Shown at the top of the cities when the phone is in a different zone</td></tr>
           <tr><td class="feature">ClockStyle: digital and analogue options, colors</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Fonts: system, serif, mono, 7-segment (DSEG7) and a display face (Fraunces), both bundled under the SIL OFL. Analogue: hands, marks, face, second hand. A colour per element: Auto, palette, or custom. One renderer for app and widgets</td></tr>
-          <tr><td class="feature">Per-instance widgets with style and location</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Each widget is drawn as a bitmap from its own settings, so fonts, gradients and borders match the app. Configure on placement and from "Widget settings"; tap opens the Clock pane; minute ticks via a non-wakeup alarm</td></tr>
+          <tr><td class="feature">Per-instance widgets with style and location</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Each widget is drawn as a bitmap from its own settings, so fonts, gradients and borders match the app. Configure on placement and from "Widget settings"; tap opens the app on the last pane (v1.1, see below); minute ticks via a non-wakeup alarm</td></tr>
           <tr><td class="feature">World-clock list and next-alarm widgets</td><td><span class="chip deferred">Deferred</span></td><td class="note">After 1.0</td></tr>
           <tr><td class="feature">Export stopwatch laps (CSV)</td><td><span class="chip deferred">Deferred</span></td><td class="note">After 1.0</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>v1.1</h2>
+      <p class="sub">Requested after the v1.0 device test. Code written 2026-10-24, not yet compiled (no JDK/SDK on the Pi) or device-tested.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Open on the last pane</td><td><span class="chip wip">◐ WIP</span></td><td class="note">App icon and widget tap open the last of Alarms / Timers / Stopwatch / Clock (Settings isn't remembered). Stored in DataStore <code>last_pane</code></td></tr>
         </tbody>
       </table></div>
     </section>

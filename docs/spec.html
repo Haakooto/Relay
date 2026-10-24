@@ -580,7 +580,7 @@
         <li>A configure screen appears on placement, and you can reconfigure through the long-press "Widget settings". Removing a widget deletes its config.</li>
         <li>Extra widget-only axes: background (transparent / follow theme / solid / gradient), corner shape, border.</li>
         <li>Each widget is drawn as one bitmap from its own settings: Glance can't use bundled fonts, gradients or a canvas, and a bitmap makes the widget look exactly like the in-app clock.</li>
-        <li>Minute granularity, from a non-wakeup exact alarm at each minute boundary: no battery cost with the screen off, and the pending tick lands as soon as the phone wakes. Tapping the widget opens the Clock pane.</li>
+        <li>Minute granularity, from a non-wakeup exact alarm at each minute boundary: no battery cost with the screen off, and the pending tick lands as soon as the phone wakes. Tapping the widget opens the app like its icon does, on the pane last used (v1.1; v1.0 opened the Clock pane).</li>
         <li>A world-clock list widget and a "next alarm" widget. <span class="tag later">later</span></li>
       </ul>
     </section>
@@ -821,6 +821,7 @@
         <li><strong>Scheduled targets:</strong> Timer, Relay and Stopwatch on the Alarms pane.</li>
         <li><strong>Stopwatch</strong> (persisted).</li>
         <li><strong>Clock pane + ClockStyle renderer + widgets.</strong></li>
+        <li><strong>v1.1:</strong> open on the last pane.</li>
         <li><strong>After 1.0:</strong> automation (standard clock intents, then batch import, then AppFunctions after a spike), Bedtime (after a feasibility spike), extra widgets.</li>
       </ol>
       <p><strong>Status:</strong> steps 1 to 7 are done; "After 1.0" is what's left.</p>

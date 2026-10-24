@@ -4,7 +4,8 @@ Relay replaces the stock Clock app: alarms, timers, stopwatches, a world clock a
 widgets. What sets it apart: timers can be chained into **relays**, alarms can **start** a timer,
 relay or stopwatch instead of just ringing, and stopwatches keep **tagged, correctable laps**.
 
-The five panes along the bottom are Alarms, Timers, Stopwatch, Clock and Settings.
+The five panes along the bottom are Alarms, Timers, Stopwatch, Clock and Settings. Relay opens
+on the pane you used last.
 
 ---
 
@@ -197,7 +198,7 @@ Long-press the home screen → Widgets → Relay. Each widget gets its own setup
 - **corners** and a **border**.
 
 Every widget can look different. To change one later, long-press it and pick Widget settings.
-Tapping a widget opens the Clock pane.
+Tapping a widget opens Relay on the pane you used last.
 
 ---
 

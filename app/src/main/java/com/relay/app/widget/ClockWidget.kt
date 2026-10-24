@@ -60,8 +60,8 @@ class ClockWidget : GlanceAppWidget() {
                 contentDescription = null,
                 modifier = GlanceModifier.fillMaxSize().clickable(
                     actionStartActivity(
+                        // Like the launcher icon: the app opens on the pane it was last left on.
                         Intent(ctx, MainActivity::class.java)
-                            .putExtra(MainActivity.EXTRA_OPEN_CLOCK, true)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
                     ),
                 ),
