@@ -21,3 +21,6 @@ keystore.properties
 *.apk
 *.aab
 *.zip
+
+# Claude Code local state (agent worktrees, local settings).
+.claude/
