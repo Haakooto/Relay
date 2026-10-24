@@ -10,7 +10,9 @@ Change a rule here only on purpose, in its own commit, and say why in the messag
 ## 1. Product
 
 1. **Nothing that should ring may fail to ring.** Reliability beats every feature. A change that
-   could delay, drop or silence a ring is wrong even if the feature is nice.
+   could delay, drop or silence a ring is wrong even if the feature is nice. A ring the user
+   chose to make silent is not a failure: Relay never goes silent on its own (a missing sound
+   falls back to the default), but it honours a silent choice the user made on purpose.
 2. **One app, no companion needed.** Relay replaces the stock Clock. Where the stock app is good,
    copy it closely; spend novelty only where it is limited.
 3. **Local and private.** No account, no sync, no analytics, no ads, no network by default.
