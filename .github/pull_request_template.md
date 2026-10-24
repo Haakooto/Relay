@@ -10,6 +10,8 @@ Closes #
 - [ ] Tests for new rules and fixed bugs; CI green
 - [ ] Strings in English and Nynorsk, `values-nb` copied from `values-nn`
 - [ ] Room: version bump with a real `Migration`, a `MigrationTest` case and the schema JSON (or no schema change)
+- [ ] Schema changed: dev APK installed over the previous build, data intact (resolve the migration thread)
+- [ ] No new lint or detekt findings added to the baselines
 - [ ] No new permission, dependency or settings key (or justified below)
 - [ ] Usage guide updated in both languages (or no visible behaviour change)
 - [ ] `docs/device-tests.md` has a section for this build

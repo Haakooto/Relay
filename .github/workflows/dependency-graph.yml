@@ -1,0 +1,26 @@
+# GitHub can't read Gradle dependencies from the build files on its own, so this sends the
+# resolved dependency tree on every merge. Dependabot alerts for vulnerable libraries use it.
+
+name: Dependency graph
+
+on:
+  push:
+    branches: [main]
+    paths: ["**.kts", "gradle/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/dependency-submission@v4

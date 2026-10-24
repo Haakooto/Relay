@@ -1,0 +1,386 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>AnnotationOnSeparateLine:ClockDao.kt$ClockDao$@Query("DELETE FROM locations WHERE id = :id") suspend</ID>
+    <ID>AnnotationOnSeparateLine:ClockDao.kt$ClockDao$@Query("DELETE FROM widget_configs WHERE appWidgetId = :appWidgetId") suspend</ID>
+    <ID>AnnotationOnSeparateLine:ClockDao.kt$ClockDao$@Query("UPDATE locations SET sortOrder = :sortOrder WHERE id = :id") suspend</ID>
+    <ID>AnnotationOnSeparateLine:LapEdits.kt$LapOp.Delete$@Serializable @SerialName("delete") data</ID>
+    <ID>AnnotationOnSeparateLine:LapEdits.kt$LapOp.Insert$@Serializable @SerialName("insert") data</ID>
+    <ID>AnnotationOnSeparateLine:LapEdits.kt$LapOp.Move$@Serializable @SerialName("move") data</ID>
+    <ID>AnnotationOnSeparateLine:LapEdits.kt$LapOp.SetDetails$@Serializable @SerialName("details") data</ID>
+    <ID>AnnotationOnSeparateLine:LibraryDao.kt$LibraryDao$@Query("DELETE FROM relay_defs WHERE id = :id") suspend</ID>
+    <ID>AnnotationOnSeparateLine:LibraryDao.kt$LibraryDao$@Query("DELETE FROM timer_defs WHERE id = :id") suspend</ID>
+    <ID>AnnotationOnSeparateLine:StopwatchDao.kt$StopwatchDao$@Query("DELETE FROM lap_corrections WHERE stopwatchId = :stopwatchId AND undone = 1") suspend</ID>
+    <ID>AnnotationOnSeparateLine:StopwatchDao.kt$StopwatchDao$@Query("DELETE FROM lap_corrections WHERE stopwatchId = :stopwatchId") suspend</ID>
+    <ID>AnnotationOnSeparateLine:StopwatchDao.kt$StopwatchDao$@Query("DELETE FROM laps WHERE id = :lapId") suspend</ID>
+    <ID>AnnotationOnSeparateLine:StopwatchDao.kt$StopwatchDao$@Query("DELETE FROM laps WHERE stopwatchId = :stopwatchId") suspend</ID>
+    <ID>AnnotationOnSeparateLine:StopwatchDao.kt$StopwatchDao$@Query("DELETE FROM stopwatches WHERE id = :id") suspend</ID>
+    <ID>AnnotationOnSeparateLine:StopwatchDao.kt$StopwatchDao$@Query("UPDATE laps SET note = :note, tags = :tags WHERE id = :lapId") suspend</ID>
+    <ID>ComplexCondition:GuideMarkdown.kt$GuideMarkdown$t.isEmpty() || t.startsWith("#") || t.startsWith("- ") || t.startsWith("|") || t.startsWith("```") || t == "---"</ID>
+    <ID>ComplexCondition:RunRepository.kt$RunRepository$run.phase != RunPhase.RUNNING || run.stepIndex != stepIndex || endsAt == null || t &lt; endsAt - EARLY_TOLERANCE_MILLIS</ID>
+    <ID>CyclomaticComplexMethod:AlarmEditScreen.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun AlarmEditScreen(scheduleId: String?, onDone: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:AlarmTargetSection.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun AlarmTargetSection(state: AlarmEditState, viewModel: AlarmEditViewModel)</ID>
+    <ID>CyclomaticComplexMethod:ClockRenderer.kt$AnalogueRenderer$fun draw( canvas: Canvas, width: Float, height: Float, hours: Int, minutes: Int, seconds: Float, style: ClockStyle, colors: ResolvedClockColors, numeralTypeface: Typeface? = null, )</ID>
+    <ID>CyclomaticComplexMethod:ClockScreen.kt$@Composable fun ClockScreen(onEditStyle: () -&gt; Unit, viewModel: ClockViewModel = viewModel())</ID>
+    <ID>CyclomaticComplexMethod:ClockStyleEditor.kt$@Composable fun ClockStyleEditor(style: ClockStyle, onChange: (ClockStyle) -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:GuideMarkdown.kt$GuideMarkdown$fun parse(text: String): List&lt;GuideBlock&gt;</ID>
+    <ID>CyclomaticComplexMethod:Lexer.kt$Lexer$private fun lexNumberOrDuration(): Token</ID>
+    <ID>CyclomaticComplexMethod:RelayEditScreen.kt$@Composable fun RelayEditScreen(relayId: String?, onDone: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:RingService.kt$RingService$override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int</ID>
+    <ID>CyclomaticComplexMethod:RunCard.kt$@Composable fun RunCard(view: RunView, now: Long, actions: RunActions)</ID>
+    <ID>CyclomaticComplexMethod:ScriptEditing.kt$ScriptEditing$private fun typed(old: EditState, c: Char): EditState</ID>
+    <ID>CyclomaticComplexMethod:ScriptRefs.kt$ScriptRefs$fun rename(script: String, old: String, new: String): String</ID>
+    <ID>CyclomaticComplexMethod:StopwatchDialogs.kt$@Composable fun CorrectionDialog( kind: CorrectionKind, lap: LapView, onDismiss: () -&gt; Unit, onConfirm: (amountMillis: Long, label: String, onError: (EditError) -&gt; Unit) -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:StopwatchScreen.kt$@Composable fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel())</ID>
+    <ID>CyclomaticComplexMethod:TimerEditScreen.kt$@Composable fun TimerEditScreen(timerId: String?, onDone: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:TimersScreen.kt$@Composable fun TimersScreen(onOpenTimer: (String?) -&gt; Unit, onOpenRelay: (String?) -&gt; Unit, viewModel: TimersViewModel = viewModel())</ID>
+    <ID>CyclomaticComplexMethod:WidgetConfigActivity.kt$@Composable private fun WidgetConfigScreen(spec: WidgetSpec, is24h: Boolean, onChange: (WidgetSpec) -&gt; Unit, onCancel: () -&gt; Unit, onSave: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:WidgetRenderer.kt$WidgetRenderer$fun render(context: Context, spec: WidgetSpec, widthDp: Float, heightDp: Float, is24hSetting: Boolean, nowMillis: Long): Bitmap</ID>
+    <ID>EmptyFunctionBlock:RunRepositoryTest.kt$FakeRunNotices${}</ID>
+    <ID>EmptyFunctionBlock:ScheduleRepositoryTest.kt$FakeNotices${}</ID>
+    <ID>ImportOrdering:AlarmEditScreen.kt$import android.Manifest import android.app.Application import android.content.pm.PackageManager import androidx.activity.compose.rememberLauncherForActivityResult import androidx.activity.result.contract.ActivityResultContracts import androidx.compose.foundation.clickable import androidx.compose.foundation.layout.Arrangement import androidx.compose.foundation.layout.Column import androidx.compose.foundation.layout.ExperimentalLayoutApi import androidx.compose.foundation.layout.FlowRow import androidx.compose.foundation.layout.Row import androidx.compose.foundation.layout.Spacer import androidx.compose.foundation.layout.fillMaxSize import androidx.compose.foundation.layout.fillMaxWidth import androidx.compose.foundation.layout.height import androidx.compose.foundation.layout.padding import androidx.compose.foundation.rememberScrollState import androidx.compose.foundation.text.KeyboardOptions import androidx.compose.foundation.verticalScroll import androidx.compose.material.icons.Icons import androidx.compose.material.icons.outlined.Close import androidx.compose.material3.Button import androidx.compose.material3.FilterChip import androidx.compose.material3.HorizontalDivider import androidx.compose.material3.Icon import androidx.compose.material3.IconButton import androidx.compose.material3.MaterialTheme import androidx.compose.material3.OutlinedButton import androidx.compose.material3.OutlinedTextField import androidx.compose.material3.Switch import androidx.compose.material3.Text import androidx.compose.material3.TextButton import androidx.compose.runtime.Composable import androidx.compose.runtime.LaunchedEffect import androidx.compose.runtime.getValue import androidx.compose.runtime.mutableStateOf import androidx.compose.runtime.remember import androidx.compose.runtime.saveable.rememberSaveable import androidx.compose.runtime.setValue import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.platform.LocalContext import androidx.compose.ui.res.stringResource import androidx.compose.ui.text.font.FontWeight import androidx.compose.ui.text.input.KeyboardType import androidx.compose.ui.unit.dp import androidx.compose.ui.unit.sp import androidx.core.content.ContextCompat import androidx.lifecycle.compose.collectAsStateWithLifecycle import androidx.lifecycle.viewmodel.compose.viewModel import com.relay.app.R import com.relay.app.data.schedule.AfterFire import com.relay.app.data.schedule.ExceptionKind import com.relay.app.data.schedule.TargetKind import com.relay.app.ui.common.NumberOptionChips import com.relay.app.ui.common.rememberDiscardGuard import com.relay.app.ui.common.OptionChips import com.relay.app.ui.common.SoundPickerRow import com.relay.app.util.RelativeText import com.relay.app.util.TimeText import java.time.LocalDate import java.time.LocalTime import java.time.format.TextStyle import com.relay.app.util.AppLocale</ID>
+    <ID>ImportOrdering:AlarmEditViewModel.kt$import android.app.Application import androidx.lifecycle.AndroidViewModel import androidx.lifecycle.viewModelScope import com.relay.app.appContainer import com.relay.app.data.schedule.AfterFire import com.relay.app.data.schedule.ExceptionKind import com.relay.app.data.schedule.RingOptions import com.relay.app.data.schedule.ScheduleEntity import com.relay.app.data.schedule.ScheduleExceptionEntity import com.relay.app.data.schedule.TargetKind import com.relay.app.data.schedule.WeekdayMask import com.relay.app.data.library.RelayDefEntity import com.relay.app.data.library.SoundSpec import com.relay.app.data.library.TimerDefEntity import com.relay.app.library.BlockKind import com.relay.app.library.spec import com.relay.app.library.SaveError import com.relay.app.library.SaveResult import com.relay.app.run.RelaySpec import com.relay.app.schedule.NextFire import com.relay.app.schedule.TargetSpec import com.relay.chainlang.ChainLang import com.relay.chainlang.ChainLangException import com.relay.chainlang.NowClock import kotlinx.coroutines.flow.first import kotlinx.coroutines.flow.MutableStateFlow import kotlinx.coroutines.flow.StateFlow import kotlinx.coroutines.flow.asStateFlow import kotlinx.coroutines.flow.update import kotlinx.coroutines.launch import java.time.DayOfWeek import java.time.Instant import java.time.LocalDate import java.time.ZoneId import java.util.UUID</ID>
+    <ID>ImportOrdering:AlarmTargetSection.kt$import androidx.compose.foundation.layout.Arrangement import androidx.compose.foundation.layout.Column import androidx.compose.foundation.layout.ExperimentalLayoutApi import androidx.compose.foundation.layout.FlowRow import androidx.compose.foundation.layout.Row import androidx.compose.foundation.layout.fillMaxWidth import androidx.compose.foundation.text.KeyboardOptions import androidx.compose.material3.FilterChip import androidx.compose.material3.MaterialTheme import androidx.compose.material3.OutlinedButton import androidx.compose.material3.OutlinedTextField import androidx.compose.material3.Text import androidx.compose.runtime.Composable import androidx.compose.runtime.getValue import androidx.compose.runtime.mutableStateOf import androidx.compose.runtime.remember import androidx.compose.runtime.setValue import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.res.stringResource import androidx.compose.ui.text.TextStyle import androidx.compose.ui.text.font.FontFamily import androidx.compose.ui.text.input.KeyboardType import androidx.compose.ui.unit.dp import com.relay.app.R import com.relay.app.data.library.TransitionMode import com.relay.app.data.library.TransitionTone import androidx.compose.ui.res.pluralStringResource import com.relay.app.ui.timers.toneLabel import com.relay.app.data.schedule.TargetKind import com.relay.app.ui.common.OptionChips import com.relay.app.ui.stopwatch.TagListEditor import com.relay.app.ui.timers.ScriptField import com.relay.app.ui.timers.saveErrorText import com.relay.app.util.DurationText import com.relay.chainlang.ChainLang</ID>
+    <ID>ImportOrdering:AlarmsScreen.kt$import android.widget.Toast import androidx.compose.foundation.clickable import androidx.compose.foundation.layout.Arrangement import androidx.compose.foundation.layout.Box import androidx.compose.foundation.layout.Column import androidx.compose.foundation.layout.PaddingValues import androidx.compose.foundation.layout.Row import androidx.compose.foundation.layout.fillMaxSize import androidx.compose.foundation.layout.fillMaxWidth import androidx.compose.foundation.layout.padding import androidx.compose.foundation.lazy.LazyColumn import androidx.compose.foundation.lazy.items import androidx.compose.material.icons.Icons import androidx.compose.material.icons.filled.Add import androidx.compose.material3.Card import androidx.compose.material3.FloatingActionButton import androidx.compose.material3.Icon import androidx.compose.material3.MaterialTheme import androidx.compose.material3.Switch import androidx.compose.material3.Text import androidx.compose.runtime.Composable import androidx.compose.runtime.LaunchedEffect import androidx.compose.runtime.getValue import androidx.compose.runtime.mutableLongStateOf import androidx.compose.runtime.remember import androidx.compose.runtime.setValue import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.platform.LocalContext import androidx.compose.ui.res.pluralStringResource import androidx.compose.ui.res.stringResource import androidx.compose.ui.text.font.FontWeight import androidx.compose.ui.unit.dp import androidx.compose.ui.unit.sp import androidx.lifecycle.compose.collectAsStateWithLifecycle import androidx.lifecycle.viewmodel.compose.viewModel import com.relay.app.R import com.relay.app.guide.GuideButton import com.relay.app.guide.GuideSection import com.relay.app.data.schedule.WeekdayMask import com.relay.app.schedule.AlarmListItem import com.relay.app.util.RelativeText import com.relay.app.util.TimeText import kotlinx.coroutines.delay import java.time.DayOfWeek import java.time.LocalDate import java.time.LocalTime</ID>
+    <ID>ImportOrdering:AppContainer.kt$import android.content.Context import com.relay.app.data.RelayDatabase import com.relay.app.data.settings.SettingsRepository import com.relay.app.clock.ClockRepository import com.relay.app.firing.FiringNotifications import com.relay.app.stopwatch.StopwatchNotifications import com.relay.app.stopwatch.StopwatchRepository import com.relay.app.library.LibraryRepository import com.relay.app.run.RunNotifications import com.relay.app.run.RunRepository import com.relay.app.run.RunScheduler import com.relay.app.schedule.AlarmScheduler import com.relay.app.schedule.ScheduleRepository import com.relay.app.schedule.ScheduledStarter</ID>
+    <ID>ImportOrdering:ClockFonts.kt$import android.content.Context import android.graphics.Typeface import androidx.compose.ui.text.font.Font import androidx.compose.ui.text.ExperimentalTextApi import androidx.compose.ui.text.font.FontFamily import androidx.compose.ui.text.font.FontVariation import androidx.compose.ui.text.font.FontWeight import androidx.core.content.res.ResourcesCompat import com.relay.app.R</ID>
+    <ID>ImportOrdering:ClockScreen.kt$import android.content.Context import androidx.compose.foundation.background import androidx.compose.foundation.clickable import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress import androidx.compose.foundation.layout.Arrangement import androidx.compose.foundation.layout.Box import androidx.compose.foundation.layout.Column import androidx.compose.foundation.layout.PaddingValues import androidx.compose.foundation.layout.Row import androidx.compose.foundation.layout.fillMaxSize import androidx.compose.foundation.layout.fillMaxWidth import androidx.compose.foundation.layout.padding import androidx.compose.foundation.lazy.LazyColumn import androidx.compose.material.icons.Icons import androidx.compose.material.icons.filled.Add import androidx.compose.material.icons.outlined.Palette import androidx.compose.material3.Card import androidx.compose.material3.CardDefaults import androidx.compose.material3.FloatingActionButton import androidx.compose.material3.Icon import androidx.compose.material3.IconButton import androidx.compose.material3.MaterialTheme import androidx.compose.material3.SwipeToDismissBox import androidx.compose.material3.SwipeToDismissBoxValue import androidx.compose.material3.Text import androidx.compose.material3.rememberSwipeToDismissBoxState import androidx.compose.runtime.Composable import androidx.compose.runtime.LaunchedEffect import androidx.compose.runtime.getValue import androidx.compose.runtime.mutableFloatStateOf import androidx.compose.runtime.mutableLongStateOf import androidx.compose.runtime.mutableStateListOf import androidx.compose.runtime.mutableStateMapOf import androidx.compose.runtime.mutableStateOf import androidx.compose.runtime.remember import androidx.compose.runtime.setValue import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.graphics.graphicsLayer import androidx.compose.ui.input.pointer.pointerInput import androidx.compose.ui.layout.onGloballyPositioned import androidx.compose.ui.platform.LocalContext import androidx.compose.ui.res.stringResource import androidx.compose.ui.text.font.FontWeight import androidx.compose.ui.unit.dp import androidx.compose.ui.unit.sp import androidx.compose.ui.zIndex import androidx.lifecycle.compose.collectAsStateWithLifecycle import androidx.lifecycle.viewmodel.compose.viewModel import com.relay.app.R import com.relay.app.guide.GuideButton import com.relay.app.guide.GuideSection import com.relay.app.clock.Cities import com.relay.app.clock.ClockStyle import com.relay.app.data.clock.LocationEntity import com.relay.app.util.TimeText import kotlinx.coroutines.delay import java.time.Instant import java.time.ZoneId</ID>
+    <ID>ImportOrdering:Pickers.kt$import androidx.compose.material3.AlertDialog import androidx.compose.material3.DatePicker import androidx.compose.material3.DatePickerDialog import androidx.compose.material3.DateRangePicker import androidx.compose.material3.ExperimentalMaterial3Api import androidx.compose.material3.SelectableDates import androidx.compose.material3.Text import androidx.compose.material3.TextButton import androidx.compose.material3.TimePicker import androidx.compose.material3.rememberDatePickerState import androidx.compose.material3.rememberDateRangePickerState import androidx.compose.material3.rememberTimePickerState import androidx.compose.runtime.Composable import androidx.compose.foundation.layout.padding import androidx.compose.ui.res.stringResource import androidx.compose.ui.unit.dp import com.relay.app.R import java.time.Instant import java.time.LocalDate import java.time.ZoneOffset</ID>
+    <ID>ImportOrdering:RelayApp.kt$import androidx.compose.foundation.layout.padding import androidx.compose.material3.Icon import androidx.compose.material3.NavigationBar import androidx.compose.material3.NavigationBarItem import androidx.compose.material3.Scaffold import androidx.compose.material3.Text import androidx.compose.runtime.Composable import androidx.compose.runtime.getValue import androidx.compose.runtime.remember import androidx.compose.ui.Modifier import androidx.compose.ui.res.stringResource import androidx.navigation.NavDestination.Companion.hierarchy import androidx.navigation.NavGraph.Companion.findStartDestination import androidx.navigation.compose.NavHost import androidx.navigation.compose.composable import androidx.navigation.compose.currentBackStackEntryAsState import androidx.navigation.compose.rememberNavController import com.relay.app.R import com.relay.app.ui.alarms.AlarmEditScreen import com.relay.app.ui.alarms.AlarmsScreen import androidx.compose.runtime.CompositionLocalProvider import androidx.compose.runtime.LaunchedEffect import com.relay.app.guide.GuideScreen import com.relay.app.guide.GuideSection import com.relay.app.guide.LocalOpenGuide import com.relay.app.ui.clock.ClockScreen import com.relay.app.ui.clock.ClockStyleScreen import com.relay.app.ui.stopwatch.StopwatchScreen import com.relay.app.ui.timers.RelayEditScreen import com.relay.app.ui.timers.TimerEditScreen import com.relay.app.ui.timers.TimersScreen import com.relay.app.ui.settings.SettingsScreen</ID>
+    <ID>ImportOrdering:RelayDatabase.kt$import android.content.Context import androidx.room.Database import androidx.room.Room import androidx.room.RoomDatabase import androidx.room.migration.Migration import androidx.sqlite.db.SupportSQLiteDatabase import com.relay.app.data.library.LibraryHeaderDao import com.relay.app.data.clock.ClockDao import com.relay.app.data.clock.LocationEntity import com.relay.app.data.clock.WidgetConfigEntity import com.relay.app.data.library.LibraryDao import com.relay.app.data.stopwatch.LapCorrectionEntity import com.relay.app.data.stopwatch.LapEntity import com.relay.app.data.stopwatch.StopwatchDao import com.relay.app.data.stopwatch.StopwatchEntity import com.relay.app.data.library.LibraryHeaderEntity import com.relay.app.data.library.RelayDefEntity import com.relay.app.data.library.TimerDefEntity import com.relay.app.data.run.RunDao import com.relay.app.data.run.RunEntity import com.relay.app.data.schedule.ScheduleDao import com.relay.app.data.schedule.ScheduleEntity import com.relay.app.data.schedule.ScheduleExceptionEntity</ID>
+    <ID>ImportOrdering:SettingsScreen.kt$import androidx.annotation.StringRes import androidx.compose.foundation.layout.Arrangement import androidx.compose.foundation.layout.Column import androidx.compose.foundation.layout.ExperimentalLayoutApi import androidx.compose.foundation.layout.FlowRow import androidx.compose.foundation.layout.Row import androidx.compose.foundation.layout.fillMaxSize import androidx.compose.foundation.layout.fillMaxWidth import androidx.compose.foundation.layout.padding import androidx.compose.foundation.rememberScrollState import androidx.compose.foundation.verticalScroll import androidx.compose.material3.FilterChip import androidx.compose.material3.HorizontalDivider import androidx.compose.material3.MaterialTheme import androidx.compose.material3.Switch import androidx.compose.material3.Text import androidx.compose.runtime.Composable import androidx.compose.runtime.getValue import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.platform.LocalContext import androidx.compose.ui.res.stringResource import androidx.compose.ui.unit.dp import androidx.lifecycle.compose.collectAsStateWithLifecycle import androidx.lifecycle.viewmodel.compose.viewModel import com.relay.app.R import com.relay.app.data.settings.ThemeSetting import com.relay.app.ui.alarms.SNOOZE_PRESETS import com.relay.app.ui.alarms.SNOOZE_RANGE import com.relay.app.ui.common.NumberDialog import com.relay.app.ui.common.NumberOptionChips import com.relay.app.util.DurationText import androidx.compose.material3.AssistChip import androidx.compose.material3.TextButton import androidx.compose.foundation.clickable import androidx.compose.runtime.mutableStateOf import androidx.compose.runtime.remember import androidx.compose.runtime.setValue import com.relay.app.ui.common.OptionChips import com.relay.app.ui.common.SoundPickerRow import java.time.DayOfWeek import java.time.format.TextStyle import com.relay.app.util.AppLocale</ID>
+    <ID>ImportOrdering:StopwatchScreen.kt$import androidx.compose.foundation.border import androidx.compose.foundation.clickable import androidx.compose.foundation.shape.RoundedCornerShape import androidx.compose.foundation.layout.Arrangement import androidx.compose.foundation.layout.Box import androidx.compose.foundation.layout.Column import androidx.compose.foundation.layout.ExperimentalLayoutApi import androidx.compose.foundation.layout.FlowRow import androidx.compose.foundation.layout.PaddingValues import androidx.compose.foundation.layout.Row import androidx.compose.foundation.layout.fillMaxSize import androidx.compose.foundation.layout.fillMaxWidth import androidx.compose.foundation.layout.padding import androidx.compose.foundation.layout.size import androidx.compose.foundation.layout.width import androidx.compose.foundation.lazy.LazyColumn import androidx.compose.material.icons.Icons import androidx.compose.material.icons.automirrored.outlined.Redo import androidx.compose.material.icons.automirrored.outlined.Undo import androidx.compose.material.icons.filled.Add import androidx.compose.material.icons.outlined.BarChart import androidx.compose.material.icons.outlined.Delete import androidx.compose.material.icons.outlined.Edit import androidx.compose.material.icons.outlined.History import androidx.compose.material3.Button import androidx.compose.material3.Card import androidx.compose.material3.DropdownMenu import androidx.compose.material3.DropdownMenuItem import androidx.compose.material3.FloatingActionButton import androidx.compose.material3.HorizontalDivider import androidx.compose.material3.Icon import androidx.compose.material3.IconButton import androidx.compose.material3.MaterialTheme import androidx.compose.material3.OutlinedButton import androidx.compose.material3.Text import androidx.compose.material3.TextButton import androidx.compose.runtime.Composable import androidx.compose.runtime.LaunchedEffect import androidx.compose.runtime.getValue import androidx.compose.runtime.mutableLongStateOf import androidx.compose.runtime.mutableStateOf import androidx.compose.runtime.remember import androidx.compose.runtime.setValue import androidx.compose.runtime.withFrameMillis import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.res.stringResource import androidx.compose.ui.text.font.FontFamily import androidx.compose.ui.text.font.FontStyle import androidx.compose.ui.text.font.FontWeight import androidx.compose.ui.unit.dp import androidx.compose.ui.unit.sp import androidx.lifecycle.compose.collectAsStateWithLifecycle import androidx.lifecycle.viewmodel.compose.viewModel import com.relay.app.R import com.relay.app.guide.GuideButton import com.relay.app.guide.GuideSection import com.relay.app.stopwatch.CorrectionKind import com.relay.app.stopwatch.LapView import com.relay.app.stopwatch.StopwatchView import com.relay.app.util.DurationText</ID>
+    <ID>ImportOrdering:TimerEditScreen.kt$import android.app.Application import androidx.compose.foundation.layout.Arrangement import androidx.compose.foundation.layout.Column import androidx.compose.foundation.layout.Row import androidx.compose.foundation.layout.Spacer import androidx.compose.foundation.layout.fillMaxSize import androidx.compose.foundation.layout.fillMaxWidth import androidx.compose.foundation.layout.padding import androidx.compose.foundation.rememberScrollState import androidx.compose.foundation.verticalScroll import androidx.compose.material.icons.Icons import androidx.compose.material.icons.outlined.Close import androidx.compose.material3.AlertDialog import androidx.compose.material3.Button import androidx.compose.material3.Icon import androidx.compose.material3.IconButton import androidx.compose.material3.MaterialTheme import androidx.compose.material3.OutlinedButton import androidx.compose.material3.OutlinedTextField import androidx.compose.material3.Switch import androidx.compose.material3.Text import androidx.compose.material3.TextButton import androidx.compose.runtime.Composable import androidx.compose.runtime.getValue import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.platform.LocalContext import androidx.compose.ui.res.stringResource import androidx.compose.ui.text.font.FontFamily import androidx.compose.ui.text.TextStyle import androidx.compose.ui.unit.dp import androidx.lifecycle.compose.collectAsStateWithLifecycle import androidx.lifecycle.viewmodel.compose.viewModel import androidx.compose.foundation.text.KeyboardOptions import androidx.compose.material.icons.outlined.Dialpad import androidx.compose.material.icons.outlined.Keyboard import androidx.compose.runtime.mutableStateOf import androidx.compose.runtime.remember import androidx.compose.runtime.setValue import androidx.compose.ui.focus.FocusRequester import androidx.compose.ui.focus.focusRequester import androidx.compose.ui.focus.onFocusChanged import androidx.compose.ui.platform.LocalFocusManager import androidx.compose.ui.platform.LocalSoftwareKeyboardController import androidx.compose.runtime.LaunchedEffect import androidx.compose.ui.text.input.KeyboardCapitalization import com.relay.app.data.library.TransitionTone import com.relay.app.ui.common.NumberOptionChips import com.relay.app.ui.common.OptionChips import com.relay.app.R import com.relay.app.ui.common.SoundPickerRow import com.relay.app.ui.common.rememberDiscardGuard import com.relay.app.util.DurationText import com.relay.chainlang.ChainLang</ID>
+    <ID>ImportOrdering:TimersScreen.kt$import android.widget.Toast import androidx.compose.foundation.clickable import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress import androidx.compose.foundation.layout.Arrangement import androidx.compose.foundation.layout.Box import androidx.compose.foundation.layout.Column import androidx.compose.foundation.layout.PaddingValues import androidx.compose.foundation.layout.Row import androidx.compose.foundation.layout.fillMaxSize import androidx.compose.foundation.layout.fillMaxWidth import androidx.compose.foundation.layout.padding import androidx.compose.foundation.lazy.LazyColumn import androidx.compose.material.icons.Icons import androidx.compose.material.icons.filled.Add import androidx.compose.material.icons.filled.PlayArrow import androidx.compose.material.icons.outlined.Delete import androidx.compose.material.icons.outlined.Edit import androidx.compose.material.icons.outlined.KeyboardArrowDown import androidx.compose.material.icons.outlined.KeyboardArrowUp import androidx.compose.material3.AlertDialog import androidx.compose.material3.Card import androidx.compose.material3.DropdownMenu import androidx.compose.material3.DropdownMenuItem import androidx.compose.material3.FloatingActionButton import androidx.compose.material3.SmallFloatingActionButton import androidx.compose.material3.Icon import androidx.compose.material3.IconButton import androidx.compose.material3.MaterialTheme import androidx.compose.material3.OutlinedTextField import androidx.compose.material3.Text import androidx.compose.material3.TextButton import androidx.compose.runtime.Composable import androidx.compose.runtime.LaunchedEffect import androidx.compose.runtime.getValue import androidx.compose.runtime.mutableFloatStateOf import androidx.compose.runtime.mutableLongStateOf import androidx.compose.runtime.mutableStateListOf import androidx.compose.runtime.mutableStateMapOf import androidx.compose.runtime.mutableStateOf import androidx.compose.runtime.remember import androidx.compose.runtime.setValue import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.draw.alpha import androidx.compose.ui.graphics.graphicsLayer import androidx.compose.ui.input.pointer.pointerInput import androidx.compose.ui.layout.onGloballyPositioned import androidx.compose.ui.platform.LocalContext import androidx.compose.ui.res.stringResource import androidx.compose.ui.unit.dp import androidx.compose.ui.zIndex import androidx.lifecycle.compose.collectAsStateWithLifecycle import androidx.lifecycle.viewmodel.compose.viewModel import com.relay.app.R import com.relay.app.guide.GuideButton import com.relay.app.guide.GuideSection import com.relay.app.data.library.LibraryHeaderEntity import com.relay.app.library.BlockKind import com.relay.app.library.LibraryItem import com.relay.app.ui.alarms.ReadinessBanner import com.relay.app.util.DurationText import kotlinx.coroutines.delay</ID>
+    <ID>Indentation:AlarmEditScreen.kt$ </ID>
+    <ID>Indentation:PlanBuilderTest.kt$PlanBuilderTest$ </ID>
+    <ID>Indentation:RelayApp.kt$ </ID>
+    <ID>LongMethod:AlarmEditScreen.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun AlarmEditScreen(scheduleId: String?, onDone: () -&gt; Unit)</ID>
+    <ID>LongMethod:AlarmTargetSection.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun AlarmTargetSection(state: AlarmEditState, viewModel: AlarmEditViewModel)</ID>
+    <ID>LongMethod:ClockRenderer.kt$AnalogueRenderer$fun draw( canvas: Canvas, width: Float, height: Float, hours: Int, minutes: Int, seconds: Float, style: ClockStyle, colors: ResolvedClockColors, numeralTypeface: Typeface? = null, )</ID>
+    <ID>LongMethod:ClockScreen.kt$@Composable fun ClockScreen(onEditStyle: () -&gt; Unit, viewModel: ClockViewModel = viewModel())</ID>
+    <ID>LongMethod:ClockStyleEditor.kt$@Composable fun ClockStyleEditor(style: ClockStyle, onChange: (ClockStyle) -&gt; Unit)</ID>
+    <ID>LongMethod:ExceptionDialog.kt$@Composable fun ExceptionDialog( defaultHour: Int, defaultMinute: Int, is24h: Boolean, others: List&lt;OtherAlarm&gt;, onDismiss: () -&gt; Unit, onConfirm: (LocalDate, LocalDate, ExceptionKind, Int?, Int?, Set&lt;String&gt;) -&gt; Unit, )</ID>
+    <ID>LongMethod:RelayApp.kt$@Composable fun RelayApp(startRoute: String? = null, onPaneOpened: (String) -&gt; Unit = {})</ID>
+    <ID>LongMethod:RelayEditScreen.kt$@Composable fun RelayEditScreen(relayId: String?, onDone: () -&gt; Unit)</ID>
+    <ID>LongMethod:SettingsScreen.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun SettingsScreen(viewModel: SettingsViewModel = viewModel())</ID>
+    <ID>LongMethod:StopwatchDialogs.kt$@Composable fun CorrectionDialog( kind: CorrectionKind, lap: LapView, onDismiss: () -&gt; Unit, onConfirm: (amountMillis: Long, label: String, onError: (EditError) -&gt; Unit) -&gt; Unit, )</ID>
+    <ID>LongMethod:StopwatchScreen.kt$@Composable fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel())</ID>
+    <ID>LongMethod:TimerEditScreen.kt$@Composable fun TimerEditScreen(timerId: String?, onDone: () -&gt; Unit)</ID>
+    <ID>LongMethod:TimersScreen.kt$@Composable fun TimersScreen(onOpenTimer: (String?) -&gt; Unit, onOpenRelay: (String?) -&gt; Unit, viewModel: TimersViewModel = viewModel())</ID>
+    <ID>LongMethod:WidgetConfigActivity.kt$@Composable private fun WidgetConfigScreen(spec: WidgetSpec, is24h: Boolean, onChange: (WidgetSpec) -&gt; Unit, onCancel: () -&gt; Unit, onSave: () -&gt; Unit)</ID>
+    <ID>LongMethod:WidgetRenderer.kt$WidgetRenderer$fun render(context: Context, spec: WidgetSpec, widthDp: Float, heightDp: Float, is24hSetting: Boolean, nowMillis: Long): Bitmap</ID>
+    <ID>LongParameterList:ClockRenderer.kt$AnalogueRenderer$( canvas: Canvas, width: Float, height: Float, hours: Int, minutes: Int, seconds: Float, style: ClockStyle, colors: ResolvedClockColors, numeralTypeface: Typeface? = null, )</ID>
+    <ID>LongParameterList:ClockRenderer.kt$AnalogueRenderer$(canvas: Canvas, paint: Paint, cx: Float, cy: Float, degrees: Float, distance: Float, radius: Float, color: Int)</ID>
+    <ID>LongParameterList:ClockRenderer.kt$AnalogueRenderer$(canvas: Canvas, paint: Paint, cx: Float, cy: Float, degrees: Float, length: Float, width: Float, color: Int, tail: Float = 0f)</ID>
+    <ID>LongParameterList:WidgetRenderer.kt$WidgetRenderer$(canvas: Canvas, text: String, x: Float, baseline: Float, size: Float, color: Int, typeface: android.graphics.Typeface?, maxWidth: Float)</ID>
+    <ID>LoopWithTooManyJumpStatements:GuideScreen.kt$while</ID>
+    <ID>LoopWithTooManyJumpStatements:Parser.kt$Parser$while</ID>
+    <ID>LoopWithTooManyJumpStatements:ScheduleRepository.kt$ScheduleRepository$for</ID>
+    <ID>MagicNumber:AlarmEditViewModel.kt$AlarmEditViewModel$60</ID>
+    <ID>MagicNumber:Cities.kt$Cities$60</ID>
+    <ID>MagicNumber:CityPickerDialog.kt$60</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.012f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.025f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.035f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.03f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.045f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.04f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.055f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.06f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.075f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.085f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.14f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.17f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.1f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.48f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.5f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.66f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.76f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.78f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.84f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.88f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.96f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$0.9f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$12</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$3</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$30.0</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$30f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$360.0</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$3600f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$4</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$5</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$6</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$60</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$60f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$6f</ID>
+    <ID>MagicNumber:ClockRenderer.kt$AnalogueRenderer$9</ID>
+    <ID>MagicNumber:ClockScreen.kt$1_000_000L</ID>
+    <ID>MagicNumber:ClockScreen.kt$60</ID>
+    <ID>MagicNumber:DurationText.kt$DurationText$10</ID>
+    <ID>MagicNumber:DurationText.kt$DurationText$100</ID>
+    <ID>MagicNumber:DurationText.kt$DurationText$1000</ID>
+    <ID>MagicNumber:DurationText.kt$DurationText$3600</ID>
+    <ID>MagicNumber:DurationText.kt$DurationText$3_600_000</ID>
+    <ID>MagicNumber:DurationText.kt$DurationText$60</ID>
+    <ID>MagicNumber:DurationText.kt$DurationText$60_000</ID>
+    <ID>MagicNumber:Evaluator.kt$Evaluator$1e-9</ID>
+    <ID>MagicNumber:Evaluator.kt$Evaluator$60</ID>
+    <ID>MagicNumber:Evaluator.kt$NowClock$3600L</ID>
+    <ID>MagicNumber:Evaluator.kt$NowClock$60L</ID>
+    <ID>MagicNumber:Evaluator.kt$NowClock$86400L</ID>
+    <ID>MagicNumber:FiringNotifications.kt$FiringNotifications$34</ID>
+    <ID>MagicNumber:LapEdits.kt$LapEdits$1000</ID>
+    <ID>MagicNumber:LapEdits.kt$LapEdits$1_000.0</ID>
+    <ID>MagicNumber:LapEdits.kt$LapEdits$3</ID>
+    <ID>MagicNumber:LapEdits.kt$LapEdits$3_600_000.0</ID>
+    <ID>MagicNumber:LapEdits.kt$LapEdits$60</ID>
+    <ID>MagicNumber:LapEdits.kt$LapEdits$60_000.0</ID>
+    <ID>MagicNumber:Lexer.kt$Lexer$3600L</ID>
+    <ID>MagicNumber:Lexer.kt$Lexer$60L</ID>
+    <ID>MagicNumber:Parser.kt$Parser$60</ID>
+    <ID>MagicNumber:ReadinessBanner.kt$0.7f</ID>
+    <ID>MagicNumber:ReadinessBanner.kt$34</ID>
+    <ID>MagicNumber:RelativeText.kt$RelativeText$24</ID>
+    <ID>MagicNumber:RelativeText.kt$RelativeText$59_999</ID>
+    <ID>MagicNumber:RelativeText.kt$RelativeText$60</ID>
+    <ID>MagicNumber:RelativeText.kt$RelativeText$60_000</ID>
+    <ID>MagicNumber:RelativeText.kt$RelativeText$7</ID>
+    <ID>MagicNumber:RelativeText.kt$RelativeText$7L</ID>
+    <ID>MagicNumber:RelayEditViewModel.kt$RelayEditViewModel$250</ID>
+    <ID>MagicNumber:RingPlayer.kt$RingPlayer$1000</ID>
+    <ID>MagicNumber:RingPlayer.kt$RingPlayer$1000L</ID>
+    <ID>MagicNumber:RingPlayer.kt$RingPlayer$1500</ID>
+    <ID>MagicNumber:RingPlayer.kt$RingPlayer$50</ID>
+    <ID>MagicNumber:RingPlayer.kt$RingPlayer$800</ID>
+    <ID>MagicNumber:RingService.kt$RingService$10</ID>
+    <ID>MagicNumber:RingService.kt$RingService$34</ID>
+    <ID>MagicNumber:RingService.kt$RingService$60_000L</ID>
+    <ID>MagicNumber:RingService.kt$RingService.Companion$10</ID>
+    <ID>MagicNumber:RunNotifications.kt$RunNotifications$1000</ID>
+    <ID>MagicNumber:RunRepository.kt$RunRepository$60_000L</ID>
+    <ID>MagicNumber:SafetyLimits.kt$ChainSafety$1e-9</ID>
+    <ID>MagicNumber:SafetyLimits.kt$ChainSafety$23.0</ID>
+    <ID>MagicNumber:SafetyLimits.kt$ChainSafety$59.0</ID>
+    <ID>MagicNumber:ScheduleRepository.kt$ScheduleRepository$60</ID>
+    <ID>MagicNumber:ScheduleRepository.kt$ScheduleRepository$60L</ID>
+    <ID>MagicNumber:ScheduleRepository.kt$ScheduleRepository$60_000L</ID>
+    <ID>MagicNumber:SettingsViewModel.kt$SettingsViewModel$60L</ID>
+    <ID>MagicNumber:TimersScreen.kt$1_000_000L</ID>
+    <ID>MagicNumber:TransitionBeep.kt$TransitionBeep$150L</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$0.16f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$0.2f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$0.3f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$0.62f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$0.7f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$0.85f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$0.8f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$1.15f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$1.4f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$100f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$20f</ID>
+    <ID>MagicNumber:WidgetRenderer.kt$WidgetRenderer$8f</ID>
+    <ID>MagicNumber:WidgetTicker.kt$WidgetTicker$60_000</ID>
+    <ID>MatchingDeclarationName:RunCard.kt$RunActions</ID>
+    <ID>MaxLineLength:AlarmEditViewModel.kt$AlarmEditViewModel$RelayDefEntity(id, s.spec.label.trim(), s.spec.script, SoundSpec(), s.spec.mode, s.spec.tone, "", null, System.currentTimeMillis())</ID>
+    <ID>MaxLineLength:AlarmEditViewModel.kt$AlarmEditViewModel$oneOffEpochDay = if (oneOff) (s.oneOffDate ?: NextFire.nextDateFor(s.hour, s.minute, Instant.now(), ZoneId.systemDefault())).toEpochDay() else null</ID>
+    <ID>MaxLineLength:AlarmEditViewModel.kt$AlarmEditViewModel$savedRelays = items.filter { i -&gt; i.kind == BlockKind.RELAY }.map { i -&gt; SavedBlock(i.id, i.label, i.totalSeconds, relaySteps[i.id]) }</ID>
+    <ID>MaxLineLength:AlarmEditViewModel.kt$AlarmEditViewModel$val plan = container.library.builder().forRelay(RelaySpec(s.spec.label.ifBlank { "(this relay)" }, s.spec.script, SoundSpec(), s.spec.mode, s.spec.tone))</ID>
+    <ID>MaxLineLength:AlarmTargetSection.kt$FilterChip(selected = state.targetDefId == null, onClick = { viewModel.setTargetDef(null) }, label = { Text(stringResource(R.string.target_new)) })</ID>
+    <ID>MaxLineLength:AlarmTargetSection.kt$OutlinedButton(onClick = viewModel::promote, enabled = labelOk &amp;&amp; valid) { Text(stringResource(R.string.target_save_to_library)) }</ID>
+    <ID>MaxLineLength:AlarmTargetSection.kt$Text(state.inlineTimerSeconds?.let { stringResource(R.string.timer_duration_is, DurationText.short(it)) } ?: stringResource(R.string.timer_one_duration))</ID>
+    <ID>MaxLineLength:AlarmTargetSection.kt$color = if (block.totalSeconds == null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant</ID>
+    <ID>MaxLineLength:AlarmTargetSection.kt$pluralStringResource(R.plurals.target_length_steps, block.steps, DurationText.short(block.totalSeconds), block.steps)</ID>
+    <ID>MaxLineLength:AlarmTargetSection.kt$state.inlineError ?: state.inlineRelaySeconds?.let { stringResource(R.string.target_relay_total, DurationText.short(it)) }.orEmpty()</ID>
+    <ID>MaxLineLength:AlarmTargetSection.kt$state.spec.durationExpr</ID>
+    <ID>MaxLineLength:AlarmsScreen.kt$Text(stringResource(R.string.pane_alarms), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:AlarmsScreen.kt$saved?.let { stringResource(R.string.alarm_starts_timer, it) } ?: stringResource(R.string.alarm_starts_new_timer, spec.durationExpr)</ID>
+    <ID>MaxLineLength:AlarmsScreen.kt$spec.label.ifBlank { null }?.let { stringResource(R.string.alarm_starts_stopwatch_named, it) } ?: stringResource(R.string.alarm_starts_stopwatch)</ID>
+    <ID>MaxLineLength:ClockFace.kt$Text(date, style = MaterialTheme.typography.titleLarge, fontFamily = ClockFonts.compose(style.font), color = Color(resolved.secondary))</ID>
+    <ID>MaxLineLength:ClockFace.kt$Text(it, fontSize = digitSize * 0.3f * fit, color = Color(resolved.secondary), modifier = Modifier.padding(start = 6.dp, bottom = 10.dp))</ID>
+    <ID>MaxLineLength:ClockFace.kt$faceDefault = if (style.face == com.relay.app.clock.FaceStyle.FILLED) colors.surfaceContainerHigh.toArgb() else colors.outline.toArgb()</ID>
+    <ID>MaxLineLength:ClockRenderer.kt$AnalogueRenderer$private</ID>
+    <ID>MaxLineLength:ClockScreen.kt$CityRow(stringResource(R.string.clock_home, Cities.nameOf(home!!.id)), home, local, now, s.clockFormat24h, highlighted = true)</ID>
+    <ID>MaxLineLength:ClockScreen.kt$Text(stringResource(R.string.pane_clock), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:ClockScreen.kt$colors = if (highlighted) CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer) else CardDefaults.cardColors()</ID>
+    <ID>MaxLineLength:ClockStyleEditor.kt$fun set(transform: (com.relay.app.clock.ClockColors) -&gt; com.relay.app.clock.ClockColors)</ID>
+    <ID>MaxLineLength:ClockStyleEditor.kt$if (style.face != FaceStyle.NONE) ColorChoice(stringResource(R.string.clock_color_face), c.face) { v -&gt; set { it.copy(face = v) } }</ID>
+    <ID>MaxLineLength:ClockStyleEditor.kt$if (style.face == FaceStyle.NUMERALS) ColorChoice(stringResource(R.string.clock_color_numerals), c.digits) { v -&gt; set { it.copy(digits = v) } }</ID>
+    <ID>MaxLineLength:ClockStyleEditor.kt$if (style.secondHand) ColorChoice(stringResource(R.string.clock_color_second_hand), c.secondHand) { v -&gt; set { it.copy(secondHand = v) } }</ID>
+    <ID>MaxLineLength:ClockStyleEditor.kt$if (style.ticks != TickStyle.NONE) ColorChoice(stringResource(R.string.clock_color_ticks), c.ticks) { v -&gt; set { it.copy(ticks = v) } }</ID>
+    <ID>MaxLineLength:ClockViewModel.kt$ClockViewModel$val locations: StateFlow&lt;List&lt;LocationEntity&gt;&gt; = clocks.observeLocations().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())</ID>
+    <ID>MaxLineLength:ColorChoice.kt$CustomColorDialog(value?.let { Color(it.toInt()) } ?: Accent, onDismiss = { custom = false }) { onChange(it.toArgb().toLong()); custom = false }</ID>
+    <ID>MaxLineLength:DurationText.kt$DurationText$return listOf(s / 3600 to "h", (s % 3600) / 60 to "m", s % 60 to "s").filter { it.first &gt; 0 }.joinToString("") { "${it.first}${it.second}" }</ID>
+    <ID>MaxLineLength:ExceptionDialog.kt$modifier = Modifier.fillMaxWidth().clickable { alsoFor = if (checked) alsoFor - other.id else alsoFor + other.id }</ID>
+    <ID>MaxLineLength:FiringNotifications.kt$FiringNotifications$if</ID>
+    <ID>MaxLineLength:GuideMarkdown.kt$GuideMarkdown$if (t.isEmpty() || t.startsWith("#") || t.startsWith("- ") || t.startsWith("|") || t.startsWith("```") || t == "---") break</ID>
+    <ID>MaxLineLength:GuideMarkdownTest.kt$GuideMarkdownTest$assertEquals(GuideBlock.Bullets(listOf("**Label**: shown when it rings.", "Repeat: tick weekdays, or none for a one-off.")), blocks[4])</ID>
+    <ID>MaxLineLength:GuideScreen.kt$Text(inline(row.getOrElse(0) { "" }, colors.surfaceContainerHigh), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)</ID>
+    <ID>MaxLineLength:LapChart.kt$FilterChip(selected = on, onClick = { filter = if (on) filter - tag else filter + tag; selected = null }, label = { Text(tag) })</ID>
+    <ID>MaxLineLength:LapChart.kt$drawPath(path, if (selected == null || selected.lap.id == lap.lap.id) colors.primary else colors.primary.copy(alpha = 0.35f))</ID>
+    <ID>MaxLineLength:LapChart.kt$selected?.let { stringResource(R.string.stopwatch_chart_selected, it.lap.number, DurationText.stopwatch(it.deltaMillis)) }</ID>
+    <ID>MaxLineLength:LapEdits.kt$LapEdits$fun</ID>
+    <ID>MaxLineLength:LapEdits.kt$LapOp.SetDetails$data</ID>
+    <ID>MaxLineLength:LapEditsTest.kt$LapEditsTest$for</ID>
+    <ID>MaxLineLength:LapEditsTest.kt$LapEditsTest$private fun durations(l: List&lt;LapSnap&gt;, t0: Long = 0)</ID>
+    <ID>MaxLineLength:LibraryRepository.kt$LibraryRepository$LibraryItem(r.id, r.label, BlockKind.RELAY, runCatching { builder.forRelay(r.spec()).sumOf { it.seconds } }.getOrNull(), r.headerId, r.sortOrder)</ID>
+    <ID>MaxLineLength:LibraryRepository.kt$LibraryRepository$RunStep(null, seconds, s.defaultTimerSoundUri, true, com.relay.app.data.library.TransitionMode.SEAMLESS, com.relay.app.data.library.TransitionTone.SILENT)</ID>
+    <ID>MaxLineLength:LibraryRepository.kt$LibraryRepository$all.firstOrNull { it.label == label }?.let { r -&gt; runCatching { ChainLang.referencedLabels(r.script) }.getOrDefault(emptySet()) }</ID>
+    <ID>MaxLineLength:LibraryRepository.kt$LibraryRepository$suspend</ID>
+    <ID>MaxLineLength:LibraryRepository.kt$LibraryRepository$suspend fun addHeader(title: String)</ID>
+    <ID>MaxLineLength:MigrationTest.kt$MigrationTest$execSQL("INSERT INTO stopwatches (id, name, t0Millis, accumulatedMillis, startedAtMillis, sortOrder) VALUES ('w', 'Run', 0, 5000, NULL, 1)")</ID>
+    <ID>MaxLineLength:Pickers.kt$)</ID>
+    <ID>MaxLineLength:RelayDatabase.kt$RelayDatabase.Companion.&lt;no name provided&gt;$db.execSQL("CREATE TABLE IF NOT EXISTS `widget_configs` (`appWidgetId` INTEGER NOT NULL, `spec` TEXT NOT NULL, PRIMARY KEY(`appWidgetId`))")</ID>
+    <ID>MaxLineLength:RelayEditScreen.kt$Switch(checked = state.defaultSound.vibrate, onCheckedChange = { viewModel.setDefaultSound(state.defaultSound.copy(vibrate = it)) })</ID>
+    <ID>MaxLineLength:RelayEditScreen.kt$Text(pluralStringResource(R.plurals.relay_long_warning, state.longWarningHours, state.longWarningHours), color = MaterialTheme.colorScheme.error)</ID>
+    <ID>MaxLineLength:RelayEditScreen.kt$Text(stringResource(if (state.label.isNotBlank() &amp;&amp; !ChainLang.isReferenceableLabel(state.label.trim())) R.string.save_label_invalid else R.string.block_label_hint))</ID>
+    <ID>MaxLineLength:RelayEditScreen.kt$stringResource(R.string.override_then, stringResource(if (it == TransitionMode.SEAMLESS) R.string.relay_seamless else R.string.relay_interaction))</ID>
+    <ID>MaxLineLength:RelayEditViewModel.kt$RelayEditViewModel$val builder = PlanBuilder(lib, NowClock.now(), LibraryRepository.limitsFor(settings), SoundSpec(settings.defaultTimerSoundUri))</ID>
+    <ID>MaxLineLength:RingActivity.kt$Button</ID>
+    <ID>MaxLineLength:RunCard.kt$colors = if (alerting) CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer) else CardDefaults.cardColors()</ID>
+    <ID>MaxLineLength:RunNotifications.kt$RunNotifications$.</ID>
+    <ID>MaxLineLength:RunRepository.kt$RunRepository$if (run.phase == RunPhase.RUNNING &amp;&amp; run.stepEndsAtMillis != null) arming.armStepEnd(run.id, run.stepIndex, run.stepEndsAtMillis)</ID>
+    <ID>MaxLineLength:RunRepository.kt$RunRepository$run.copy(phase = RunPhase.PAUSED, remainingMillis = ((run.stepEndsAtMillis ?: now()) - now()).coerceAtLeast(0), stepEndsAtMillis = null)</ID>
+    <ID>MaxLineLength:RunRepository.kt$RunRepository$run.copy(stepIndex = 0, phase = RunPhase.RUNNING, stepEndsAtMillis = now() + plan[0].seconds * 1000, remainingMillis = null, alertSinceMillis = null)</ID>
+    <ID>MaxLineLength:ScheduleRepository.kt$ScheduleRepository$scheduler.arm(id, pending, isSnooze = s.snoozedUntilMillis == pending, atMillis = t.toEpochMilli(), rings = s.target == TargetKind.RING)</ID>
+    <ID>MaxLineLength:ScheduleRepository.kt$ScheduleRepository$scheduler.arm(s.id, missedAt, isSnooze = s.snoozedUntilMillis == missedAt, atMillis = t, rings = s.target == TargetKind.RING)</ID>
+    <ID>MaxLineLength:ScheduleRepositoryTest.kt$ScheduleRepositoryTest$repo.addException(listOf("a", "b"), java.time.LocalDate.parse("2026-09-30"), java.time.LocalDate.parse("2026-10-01"), ExceptionKind.SKIP, null, null)</ID>
+    <ID>MaxLineLength:ScriptEditingTest.kt$ScriptEditingTest$@Test fun enterAfterNestedOpenIndentsMore()</ID>
+    <ID>MaxLineLength:ScriptEditingTest.kt$ScriptEditingTest$assertEquals("(Focus, Workday, 25m \"Work\", Focus - 2)", ScriptRefs.rename("(Work, Workday, 25m \"Work\", Work - 2)", "Work", "Focus"))</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$SoundPickerRow(stringResource(R.string.settings_default_alarm_sound), current.defaultAlarmSoundUri, viewModel::setDefaultAlarmSoundUri)</ID>
+    <ID>MaxLineLength:SettingsScreen.kt$SoundPickerRow(stringResource(R.string.settings_default_timer_sound), current.defaultTimerSoundUri, viewModel::setDefaultTimerSoundUri)</ID>
+    <ID>MaxLineLength:StopwatchDao.kt$StopwatchDao$@Query("UPDATE laps SET note = :note, tags = :tags WHERE id = :lapId") suspend fun setLapDetails(lapId: String, note: String, tags: String)</ID>
+    <ID>MaxLineLength:StopwatchDialogs.kt$Column</ID>
+    <ID>MaxLineLength:StopwatchDialogs.kt$CorrectionKind.ADJUST -&gt; stringResource(R.string.correction_summary_adjust, n, (if (amount &gt;= 0) "+" else "") + DurationText.signedStopwatch(amount))</ID>
+    <ID>MaxLineLength:StopwatchDialogs.kt$CorrectionKind.REMOVE -&gt; if (lap.lap.number == 1) R.string.correction_remove_first_help else R.string.correction_remove_help</ID>
+    <ID>MaxLineLength:StopwatchDialogs.kt$Text(sub, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f * alpha))</ID>
+    <ID>MaxLineLength:StopwatchDialogs.kt$else -&gt; (if (kind == CorrectionKind.ADJUST &amp;&amp; parsed &gt;= 0) "+" else "") + DurationText.signedStopwatch(parsed)</ID>
+    <ID>MaxLineLength:StopwatchDialogs.kt$label = { Text(stringResource(if (kind == CorrectionKind.INSERT) R.string.correction_into else R.string.correction_by)) }</ID>
+    <ID>MaxLineLength:StopwatchDialogs.kt$listOf(Triple(h, { v: String -&gt; h = v }, "h"), Triple(m, { v: String -&gt; m = v }, "m"), Triple(s, { v: String -&gt; s = v }, "s"))</ID>
+    <ID>MaxLineLength:StopwatchDialogs.kt$trailingIcon = { TextButton(onClick = add, enabled = newTag.isNotBlank()) { Text(stringResource(R.string.stopwatch_add_tag_button)) } }</ID>
+    <ID>MaxLineLength:StopwatchNotifications.kt$StopwatchNotifications$.</ID>
+    <ID>MaxLineLength:StopwatchRepository.kt$StopwatchRepository$correct(stopwatchId, lapId, CorrectionKind.ADJUST, deltaMillis, label) { laps, s, t -&gt; LapEdits.adjust(laps, s.t0Millis, lapId, deltaMillis, elapsedOf(s, t)) }</ID>
+    <ID>MaxLineLength:StopwatchRepository.kt$StopwatchRepository$correct(stopwatchId, lapId, CorrectionKind.INSERT, intoMillis, label) { laps, s, _ -&gt; LapEdits.insert(laps, s.t0Millis, lapId, intoMillis) }</ID>
+    <ID>MaxLineLength:StopwatchRepository.kt$StopwatchRepository$fun</ID>
+    <ID>MaxLineLength:StopwatchRepository.kt$StopwatchRepository$suspend fun setLapDetails(lapId: String, note: String, tags: List&lt;String&gt;)</ID>
+    <ID>MaxLineLength:StopwatchRepository.kt$StopwatchRepository$suspend fun updateDetails(id: String, name: String, tags: List&lt;String&gt;)</ID>
+    <ID>MaxLineLength:StopwatchRepositoryTest.kt$FakeStopwatchDao$override suspend fun corrections(stopwatchId: String)</ID>
+    <ID>MaxLineLength:StopwatchRepositoryTest.kt$FakeStopwatchDao$override suspend fun deleteCorrections(stopwatchId: String)</ID>
+    <ID>MaxLineLength:StopwatchRepositoryTest.kt$FakeStopwatchDao$override suspend fun dropUndone(stopwatchId: String)</ID>
+    <ID>MaxLineLength:StopwatchRepositoryTest.kt$FakeStopwatchDao$override suspend fun setLapDetails(lapId: String, note: String, tags: String)</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$DropdownMenuItem(text = { Text(stringResource(R.string.correction_adjust)) }, onClick = { menu = false; onCorrect(CorrectionKind.ADJUST) })</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$DropdownMenuItem(text = { Text(stringResource(R.string.correction_insert)) }, onClick = { menu = false; onCorrect(CorrectionKind.INSERT) })</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$DropdownMenuItem(text = { Text(stringResource(R.string.correction_remove)) }, onClick = { menu = false; onCorrect(CorrectionKind.REMOVE) })</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$DropdownMenuItem(text = { Text(stringResource(R.string.stopwatch_note_and_tags)) }, onClick = { menu = false; onClick() })</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.Edit, stringResource(R.string.correction_menu), Modifier.size(18.dp)) }</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$IconButton(onClick = { onDialog(Dialog.Chart(id)) }) { Icon(Icons.Outlined.BarChart, stringResource(R.string.stopwatch_chart_title)) }</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$OutlinedButton(onClick = { viewModel.lap(id, listOf(tag)) }) { Text(stringResource(R.string.stopwatch_lap_tagged, tag)) }</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$Text(DurationText.signedStopwatch(view.elapsed(now)), fontSize = 44.sp, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace)</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$Text(stringResource(R.string.lap_col_lap), style = MaterialTheme.typography.labelSmall, color = faint, modifier = Modifier.width(NUMBER_WIDTH))</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$Text(stringResource(R.string.lap_col_time), style = MaterialTheme.typography.labelSmall, color = faint, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$Text(stringResource(R.string.pane_stopwatch), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$Text(stringResource(R.string.stopwatch_started_at, DurationText.signedStopwatch(s.t0Millis)), style = MaterialTheme.typography.labelSmall)</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$if (view.canRedo) IconButton(onClick = { viewModel.redo(id) }) { Icon(Icons.AutoMirrored.Outlined.Redo, stringResource(R.string.action_redo)) }</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$if (view.canUndo) IconButton(onClick = { viewModel.undo(id) }) { Icon(Icons.AutoMirrored.Outlined.Undo, stringResource(R.string.action_undo)) }</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$is Dialog.LapDetails -&gt; LapDetailsDialog(d.lap, d.view.tags, close) { note, tags -&gt; viewModel.setLapDetails(d.lap.lap.id, note, tags); close() }</ID>
+    <ID>MaxLineLength:StopwatchScreen.kt$view.laps</ID>
+    <ID>MaxLineLength:TargetSpec.kt$TargetSpec.Companion$fun decode(text: String?): TargetSpec</ID>
+    <ID>MaxLineLength:Theme.kt$secondary = secondary</ID>
+    <ID>MaxLineLength:TimerEditScreen.kt$Button</ID>
+    <ID>MaxLineLength:TimerEditScreen.kt$OutlinedButton(onClick = { viewModel.start(onDone) }, enabled = state.seconds != null) { Text(stringResource(R.string.action_start)) }</ID>
+    <ID>MaxLineLength:TimerEditScreen.kt$Text(stringResource(R.string.timer_warn_too_long), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)</ID>
+    <ID>MaxLineLength:TimerEditScreen.kt$Text(stringResource(if (state.label.isNotBlank() &amp;&amp; !ChainLang.isReferenceableLabel(state.label.trim())) R.string.save_label_invalid else R.string.block_label_hint))</ID>
+    <ID>MaxLineLength:TimerEditViewModel.kt$TimerEditViewModel$library.startTimerSpec(TimerSpec(s.label.trim(), s.durationExpr, s.sound, s.warnSeconds, s.warnTone), sourceId = if (s.isNew) null else s.id)</ID>
+    <ID>MaxLineLength:TimerEditViewModel.kt$TimerEditViewModel$val result = library.saveTimer(TimerDefEntity(s.id, s.label.trim(), s.durationExpr.trim(), s.sound, s.headerId, s.sortOrder, s.warnSeconds, s.warnTone))</ID>
+    <ID>MaxLineLength:TimersScreen.kt$DropdownMenuItem(text = { Text(stringResource(R.string.timers_new_header)) }, onClick = { menuOpen = false; addingHeader = true })</ID>
+    <ID>MaxLineLength:TimersScreen.kt$DropdownMenuItem(text = { Text(stringResource(R.string.timers_new_relay)) }, onClick = { menuOpen = false; onOpenRelay(null) })</ID>
+    <ID>MaxLineLength:TimersScreen.kt$DropdownMenuItem(text = { Text(stringResource(R.string.timers_new_timer)) }, onClick = { menuOpen = false; onOpenTimer(null) })</ID>
+    <ID>MaxLineLength:TimersScreen.kt$IconButton</ID>
+    <ID>MaxLineLength:TimersScreen.kt$IconButton(onClick = onMoveDown, enabled = canMoveDown) { Icon(Icons.Outlined.KeyboardArrowDown, stringResource(R.string.action_move_down)) }</ID>
+    <ID>MaxLineLength:TimersScreen.kt$IconButton(onClick = onMoveUp, enabled = canMoveUp) { Icon(Icons.Outlined.KeyboardArrowUp, stringResource(R.string.action_move_up)) }</ID>
+    <ID>MaxLineLength:TimersScreen.kt$Text(stringResource(R.string.pane_timers), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))</ID>
+    <ID>MaxLineLength:TimersScreen.kt$color = if (item.totalSeconds == null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)</ID>
+    <ID>MaxLineLength:TimersScreen.kt$confirmButton = { TextButton(enabled = allowBlank || text.isNotBlank(), onClick = { onConfirm(text) }) { Text(stringResource(R.string.action_ok)) } }</ID>
+    <ID>MaxLineLength:TimersScreen.kt$viewModel.moveHeader(row.header, sortOrderBetween(headers.getOrNull(index - 2)?.sortOrder, headers[index - 1].sortOrder))</ID>
+    <ID>MaxLineLength:TimersScreen.kt$viewModel.moveHeader(row.header, sortOrderBetween(headers[index + 1].sortOrder, headers.getOrNull(index + 2)?.sortOrder))</ID>
+    <ID>MaxLineLength:WidgetConfigActivity.kt$OutlinedButton(onClick = { onChange(spec.copy(zoneId = null, city = null)) }) { Text(stringResource(R.string.widget_location_local)) }</ID>
+    <ID>MaxLineLength:WidgetRenderer.kt$WidgetRenderer$if (caption != null) drawCentred(canvas, caption, w / 2f, h - pad - captionH * 0.2f, captionH * 0.7f, colors.secondary, typeface, w - 2 * pad)</ID>
+    <ID>MaxLineLength:WidgetRenderer.kt$WidgetRenderer$if (caption != null) drawCentred(canvas, caption, w / 2f, top + timeSize + captionSize * 1.15f, captionSize, colors.secondary, typeface, w - 2 * pad)</ID>
+    <ID>MaxLineLength:WidgetRenderer.kt$WidgetRenderer$private</ID>
+    <ID>MaxLineLength:WidgetSpec.kt$WidgetSpec.Companion$fun decode(text: String?): WidgetSpec</ID>
+    <ID>NestedBlockDepth:GuideMarkdown.kt$GuideMarkdown$fun parse(text: String): List&lt;GuideBlock&gt;</ID>
+    <ID>NestedBlockDepth:ScriptRefs.kt$ScriptRefs$fun rename(script: String, old: String, new: String): String</ID>
+    <ID>NoUnusedImports:AlarmEditScreen.kt$com.relay.app.ui.alarms.AlarmEditScreen.kt</ID>
+    <ID>NoUnusedImports:LapChart.kt$com.relay.app.ui.stopwatch.LapChart.kt</ID>
+    <ID>NoUnusedImports:RelayApp.kt$com.relay.app.ui.RelayApp.kt</ID>
+    <ID>NoUnusedImports:RelayEditScreen.kt$com.relay.app.ui.timers.RelayEditScreen.kt</ID>
+    <ID>NoUnusedImports:TimerEditScreen.kt$com.relay.app.ui.timers.TimerEditScreen.kt</ID>
+    <ID>PropertyWrapping:Cities.kt$Cities$private val regions = setOf("Africa", "America", "Antarctica", "Arctic", "Asia", "Atlantic", "Australia", "Europe", "Indian", "Pacific")</ID>
+    <ID>PropertyWrapping:LapEditsTest.kt$LapEditsTest$// Laps of 10 s, 20 s, 30 s after a t0 of 0: boundaries 10, 30, 60 s. Running total 70 s. private val laps = listOf(LapSnap("a", 10_000, "warm-up", listOf("run")), LapSnap("b", 30_000, "fast"), LapSnap("c", 60_000))</ID>
+    <ID>PropertyWrapping:Pickers.kt$val state = rememberDatePickerState(initialSelectedDateMillis = initial?.toPickerMillis(), selectableDates = FromToday)</ID>
+    <ID>PropertyWrapping:ReadinessBanner.kt$val notificationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { recheck++ }</ID>
+    <ID>PropertyWrapping:RelayDatabase.kt$RelayDatabase.Companion$/** Append each migration here as the schema grows. */ val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)</ID>
+    <ID>PropertyWrapping:RelayEditViewModel.kt$RelayEditViewModel$val builder = PlanBuilder(lib, NowClock.now(), LibraryRepository.limitsFor(settings), SoundSpec(settings.defaultTimerSoundUri))</ID>
+    <ID>PropertyWrapping:SoundPickerRow.kt$val launcher = rememberLauncherForActivityResult(PickAlarmSound()) { result -&gt; result?.let { onPicked(it.getOrNull()) } }</ID>
+    <ID>PropertyWrapping:TimersScreen.kt$val kind = stringResource(if (item.kind == BlockKind.RELAY) R.string.kind_relay else R.string.kind_timer)</ID>
+    <ID>ReturnCount:LapEdits.kt$LapEdits$fun parseAmount(text: String): Long?</ID>
+    <ID>ReturnCount:NextFire.kt$NextFire$fun nextOccurrence( schedule: ScheduleEntity, exceptions: List&lt;ScheduleExceptionEntity&gt;, now: Instant, zone: ZoneId, ): ZonedDateTime?</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ClockDao.kt$ClockDao$@Query("DELETE FROM locations WHERE id = :id") suspend fun deleteLocation(id: String)</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ClockDao.kt$ClockDao$@Query("DELETE FROM widget_configs WHERE appWidgetId = :appWidgetId") suspend fun deleteWidget(appWidgetId: Int)</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ClockDao.kt$ClockDao$@Query("UPDATE locations SET sortOrder = :sortOrder WHERE id = :id") suspend fun moveLocation(id: String, sortOrder: Long)</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ClockFonts.kt$ClockFonts$/** Fraunces is a variable font: ask for real weights rather than synthesised bold. */ @OptIn(ExperimentalTextApi::class) private val Display = FontFamily( Font(R.font.fraunces, FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))), Font(R.font.fraunces, FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))), )</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:LibraryDao.kt$LibraryDao$@Query("DELETE FROM relay_defs WHERE id = :id") suspend fun deleteRelay(id: String)</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:LibraryDao.kt$LibraryDao$@Upsert suspend fun upsertRelay(relay: RelayDefEntity)</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun backspaceNormalOtherwise()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun backspaceRemovesEmptyPair()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun closeParenInsertsWhenNoneAhead()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun closeParenTypesOver()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun enterAfterNestedOpenIndentsMore()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun enterInsideEmptyParensIndents()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun enterKeepsIndent()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun hashInsideLabelIsNotAComment()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun noSuggestionsInComments()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun quoteAutoCloses()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun quoteTypesOver()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:ScriptEditingTest.kt$ScriptEditingTest$@Test fun renameSkipsComments()</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:StopwatchDao.kt$StopwatchDao$@Query("DELETE FROM lap_corrections WHERE stopwatchId = :stopwatchId AND undone = 1") suspend fun dropUndone(stopwatchId: String)</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:StopwatchDao.kt$StopwatchDao$@Query("DELETE FROM lap_corrections WHERE stopwatchId = :stopwatchId") suspend fun deleteCorrections(stopwatchId: String)</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:StopwatchDao.kt$StopwatchDao$@Query("DELETE FROM laps WHERE id = :lapId") suspend fun deleteLap(lapId: String)</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:StopwatchDao.kt$StopwatchDao$@Query("DELETE FROM laps WHERE stopwatchId = :stopwatchId") suspend fun deleteLaps(stopwatchId: String)</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:StopwatchDao.kt$StopwatchDao$@Query("UPDATE laps SET note = :note, tags = :tags WHERE id = :lapId") suspend fun setLapDetails(lapId: String, note: String, tags: String)</ID>
+    <ID>SpacingBetweenDeclarationsWithAnnotations:StopwatchDao.kt$StopwatchDao$@Upsert suspend fun upsertLap(lap: LapEntity)</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:AlarmEditScreen.kt$/** 0 = no snoozing at all ("None"), null = unlimited. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:AppLanguage.kt$AppLanguage.ENGLISH$/** British English only, by design. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:AppLanguage.kt$AppLanguage.NORWEGIAN$/** Nynorsk only, by design. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:Ast.kt$DecimalLiteral$/** Only produced for `range(...)` arguments. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:ClockFonts.kt$ClockFonts$/** Fraunces is a variable font: ask for real weights rather than synthesised bold. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:RingService.kt$RingService$/** Repository calls in flight: the service must not stop (and cancel them) mid-way. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:RingService.kt$RingService.Companion$/** Safety cap in case something never releases it; well past any ring timeout. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:RunEntity.kt$RunPhase.AWAITING$/** At an interaction-required boundary: rings until Continue / Stop relay. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:RunEntity.kt$RunPhase.DONE$/** The last step ended: rings until Stop / Restart / +1 min. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:RunRepository.kt$RunNotices$/** Stops a ring for this run if one is sounding (the user acted elsewhere). */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:RunRepository.kt$RunView$/** * Time still to come after the current step, counted into the countdown. Only a timer has * any (a warned timer's warning step): it shows one countdown to its real end. A relay's * countdown is per step. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:RunRepository.kt$RunView$/** What the countdown runs over: the step, or a whole warned timer. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:RunRepository.kt$StepDecision.Advanced$/** Seamless boundary: play the cue, the next step already runs. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:RunRepository.kt$StepDecision.Ring$/** Interaction boundary or the end: ring through the firing module. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:ScheduleRepository.kt$FireDecision.Ignore$/** A deleted/disabled schedule, or a duplicate of an occurrence already handled. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:ScheduleRepository.kt$FireDecision.Start$/** A timer / relay / stopwatch target: start it quietly. The session is already finished. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:Token.kt$Token.Decimal$/** `0.5`: only meaningful as a `range(...)` argument; the parser rejects it anywhere else. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:Token.kt$Token.DurationLiteral$/** A compound literal like `2h30m10s`, already reduced to total seconds. */</ID>
+    <ID>SpacingBetweenDeclarationsWithComments:Token.kt$Token.Str$/** `"stretch"`: a display label on an anonymous step. */</ID>
+    <ID>SpreadOperator:RelayDatabase.kt$RelayDatabase.Companion$(*MIGRATIONS)</ID>
+    <ID>ThrowsCount:Parser.kt$Parser$private fun parseElement(): ChainNode</ID>
+    <ID>ThrowsCount:PlanBuilder.kt$PlanBuilder$private fun expand(relay: RelaySpec, depth: Int, path: List&lt;String&gt;, out: MutableList&lt;RunStep&gt;)</ID>
+    <ID>TooGenericExceptionCaught:Receivers.kt$FireReceiver$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:Receivers.kt$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RingPlayer.kt$RingPlayer$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RingService.kt$RingService$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RunReceivers.kt$RunActionReceiver$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RunReceivers.kt$RunStepReceiver$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:StopwatchNotifications.kt$StopwatchActionReceiver$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:TimersViewModel.kt$TimersViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:WidgetTicker.kt$WidgetTickReceiver$e: Exception</ID>
+    <ID>TooManyFunctions:StopwatchDao.kt$StopwatchDao</ID>
+  </CurrentIssues>
+</SmellBaseline>

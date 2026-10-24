@@ -100,7 +100,9 @@ chainlang/        The relay language, plain JVM, no Android
 ## 5. Data
 
 1. **The user's device carries real data.** Every Room version bump has a real `Migration` and
-   a `MigrationTest`. Never destructive fallback. Commit the exported schema JSON.
+   a `MigrationTest`. Never destructive fallback. Commit the exported schema JSON. Before
+   merging, install the PR's dev APK over the previous build and check the data survived (CI
+   opens a review thread for it).
 2. **Additive schema changes.** Prefer a new nullable column or a new table over reshaping an
    old one. Renames are a migration, not a delete-and-add.
 3. **JSON columns are versioned by shape.** `@Serializable` types stored in a column only gain

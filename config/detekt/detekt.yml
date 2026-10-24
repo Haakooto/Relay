@@ -1,0 +1,56 @@
+# Overrides on top of detekt's defaults (buildUponDefaultConfig). Each one says why; keep the
+# list short. Rules match docs/principles.md §4 and the existing code style.
+
+naming:
+  FunctionNaming:
+    # Composables are PascalCase by Compose convention.
+    ignoreAnnotated: ["Composable"]
+  TopLevelPropertyNaming:
+    # Route and key constants are written in SCREAMING_CASE or PascalCase.
+    constantPattern: "[A-Z][A-Za-z0-9_]*"
+
+complexity:
+  LongParameterList:
+    # Composables take state and lambdas as parameters (stateless screens, principles §3.7).
+    ignoreAnnotated: ["Composable"]
+    functionThreshold: 8
+    constructorThreshold: 8
+  TooManyFunctions:
+    # Repositories are the command layer and expose one function per command.
+    thresholdInFiles: 25
+    thresholdInClasses: 25
+    thresholdInInterfaces: 15
+    thresholdInObjects: 15
+
+style:
+  MagicNumber:
+    # Layout values (dp, sp, alpha) in composables would all need names otherwise.
+    ignoreAnnotated: ["Composable", "Preview"]
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+  MaxLineLength:
+    maxLineLength: 140
+  ReturnCount:
+    max: 4
+    excludeGuardClauses: true
+
+formatting:
+  # ktlint rules. Line length is checked once, by style.MaxLineLength.
+  MaximumLineLength:
+    active: false
+  FunctionNaming:
+    ignoreWhenAnnotatedWith: ["Composable"]
+  # The code puts several short declarations on one line and lines arguments up by hand;
+  # these ktlint rules would reformat almost every file without making it clearer.
+  ArgumentListWrapping:
+    active: false
+  ParameterListWrapping:
+    active: false
+  Wrapping:
+    active: false
+  MultiLineIfElse:
+    active: false
+  TrailingCommaOnCallSite:
+    active: false
+  TrailingCommaOnDeclarationSite:
+    active: false
