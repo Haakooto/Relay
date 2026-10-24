@@ -1,7 +1,7 @@
 # Device tests
 
 What to try on the phone after each build. Tick a box when it works; write a note under it when
-it doesn't (a line starting with `>` is enough). Claude reads this file, updates the feature map
+it doesn't (a line starting with `>` is enough). Claude reads this file, updates the wiki feature map
 from it, and adds a new section after every build.
 
 Untested sections stay here until everything in them is ticked or has a note.
@@ -235,7 +235,10 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Headings, lists, the code example and the tables read well; `code` bits are monospace.
 - [ ] In Norsk, the guide is the Nynorsk one.
 
-## Uncommitted: v1.1 requests (not yet compiled)
+## v1.1 requests (PR #1, merged)
+
+> Accepted on-device as a whole ("Testing it, I am happy"), not line by line. The boxes left
+> open are worth a look when convenient; a broken one becomes a bug issue.
 
 ### Last pane
 - [ ] Open Timers, leave the app (home), swipe it away from recents, open it again: it opens on Timers.
