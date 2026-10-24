@@ -16,6 +16,8 @@ import com.relay.app.schedule.ScheduleRepository
 import com.relay.app.schedule.ScheduledStarter
 import com.relay.app.stopwatch.StopwatchNotifications
 import com.relay.app.stopwatch.StopwatchRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import java.time.LocalDate
 
 /** Manual dependency container, one per process. Held by [RelayApplication]. */
 class AppContainer(context: Context) {
@@ -36,6 +38,9 @@ class AppContainer(context: Context) {
         LibraryRepository(database.libraryDao(), database.libraryHeaderDao(), runs, settings::current)
     }
     val events: EventRepository by lazy { EventRepository(database.eventDao(), schedules) }
+
+    /** A day the Calendar pane should show next, set when a widget opens it; taken once. */
+    val calendarJump = MutableStateFlow<LocalDate?>(null)
     val reminderNotifications: ReminderNotifications by lazy { ReminderNotifications(appContext, settings, database.eventDao()) }
     val scheduledStarter: ScheduledStarter by lazy { ScheduledStarter(library, stopwatches, settings, reminderNotifications) }
 }

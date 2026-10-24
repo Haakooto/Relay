@@ -71,7 +71,8 @@ Kalender-ruta er for planlegging: **hendingar** (med start, valfri slutt og eit 
 **påminningar** (eitt tidspunkt). Trykk **+** for kva du vil; det byrjar på dagen du har valt.
 
 **Månaden.** Dagar med noko på har prikkar. Trykk på ein dag for å sjå han under rutenettet; dra
-sidelengs eller bruk pilene for å byte månad, og **I dag** for å kome tilbake. Vala øvst byter
+sidelengs eller bruk pilene for å byte månad, og **I dag** for å kome tilbake. Trykk på namnet på
+månaden for å hoppe til kva månad og år som helst. Vala øvst byter
 mellom **Hendingar og påminningar** og **Alt som er planlagt**, som òg viser alarmane dine og
 alarmar som startar tidtakarar, relé eller stoppeklokker (frå i dag og framover).
 
@@ -236,6 +237,17 @@ Hald inne på heimeskjermen → Moduler → Relay. Kvar modul får sitt eige opp
 
 Kvar modul kan sjå ulik ut. Vil du endre ein seinare, hald inne på han og vel innstillingar for
 modulen. Trykk på ein modul opnar Relay på ruta du brukte sist.
+
+**Kalendermodular.** To til, kvar med sitt eige oppsett: kva dei skal **vise** (hendingar og
+påminningar, eller alt som er planlagt) og den same bakgrunnen, hjørna og kanten som klokka.
+
+- **Kalender: neste 7 dagar** viser det som kjem, dag for dag. Trykk på ei rad for å opne ho, på
+  ein dag for å opne Kalender-ruta der, og **+** for ei ny hending.
+- **Kalender: månad** er månaden frå ruta i lite format. **‹** og **›** byter månad, og trykk på
+  ein dag vel han, rett på heimeskjermen; namnet på månaden opnar Kalender-ruta. Er han høg nok,
+  viser han planane for den valde dagen under rutenettet.
+
+Dei blir oppdaterte når du endrar noko i Relay, og ved midnatt.
 
 ---
 

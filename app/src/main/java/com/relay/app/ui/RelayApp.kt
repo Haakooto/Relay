@@ -13,8 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -43,7 +46,12 @@ import com.relay.app.ui.timers.TimersScreen
  * from the gear in each pane's header.
  */
 @Composable
-fun RelayApp(startRoute: String? = null, onPaneOpened: (String) -> Unit = {}) {
+fun RelayApp(
+    startRoute: String? = null,
+    onPaneOpened: (String) -> Unit = {},
+    launch: LaunchTarget? = null,
+    onLaunched: () -> Unit = {},
+) {
     val navController = rememberNavController()
     val start = remember { REMEMBERED_PANES.firstOrNull { it.route == startRoute } ?: Pane.ALARMS }
     val backStack by navController.currentBackStackEntryAsState()
@@ -58,28 +66,15 @@ fun RelayApp(startRoute: String? = null, onPaneOpened: (String) -> Unit = {}) {
         route == CLOCK_STYLE || route == SETTINGS || (EDITOR_ROUTES + GUIDE).any { route.startsWith("$it/") }
     } == true
 
+    HandleLaunch(navController, launch, onLaunched)
+
     val openGuide: (GuideSection?) -> Unit = { navController.navigate("$GUIDE/${it?.name ?: NEW}") }
     val openSettings: () -> Unit = { navController.navigate(SETTINGS) { launchSingleTop = true } }
 
     CompositionLocalProvider(LocalOpenGuide provides openGuide, LocalOpenSettings provides openSettings) {
     Scaffold(
         bottomBar = {
-            if (!inEditor) NavigationBar {
-                Pane.entries.forEach { pane ->
-                    NavigationBarItem(
-                        selected = current?.hierarchy?.any { it.route == pane.route } == true,
-                        onClick = {
-                            navController.navigate(pane.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(pane.icon, contentDescription = null) },
-                        label = { Text(stringResource(pane.label)) },
-                    )
-                }
-            }
+            if (!inEditor) PaneBar(navController, current)
         },
     ) { padding ->
         NavHost(
@@ -94,22 +89,7 @@ fun RelayApp(startRoute: String? = null, onPaneOpened: (String) -> Unit = {}) {
                 val id = entry.arguments?.getString("id")?.takeIf { it != NEW }
                 AlarmEditScreen(scheduleId = id, onDone = { navController.popBackStack() })
             }
-            composable(Pane.CALENDAR.route) {
-                CalendarScreen(
-                    onOpenItem = { id -> navController.navigate("$EVENT_EDIT/$id/${EventKind.EVENT.name}/0") },
-                    onNewItem = { kind, day -> navController.navigate("$EVENT_EDIT/$NEW/${kind.name}/${day.toEpochDay()}") },
-                    onOpenAlarm = { id -> navController.navigate("$ALARM_EDIT/$id") },
-                )
-            }
-            composable("$EVENT_EDIT/{id}/{kind}/{day}") { entry ->
-                val args = entry.arguments
-                EventEditScreen(
-                    eventId = args?.getString("id")?.takeIf { it != NEW },
-                    kind = EventKind.entries.firstOrNull { it.name == args?.getString("kind") } ?: EventKind.EVENT,
-                    day = args?.getString("day")?.toLongOrNull()?.let(java.time.LocalDate::ofEpochDay),
-                    onDone = { navController.popBackStack() },
-                )
-            }
+            calendarRoutes(navController)
             composable(Pane.TIMERS.route) {
                 TimersScreen(
                     onOpenTimer = { id -> navController.navigate("$TIMER_EDIT/${id ?: NEW}") },
@@ -133,6 +113,62 @@ fun RelayApp(startRoute: String? = null, onPaneOpened: (String) -> Unit = {}) {
         }
     }
     }
+}
+
+/** The Calendar pane and its item editor (spec §10b). */
+private fun NavGraphBuilder.calendarRoutes(navController: NavHostController) {
+    composable(Pane.CALENDAR.route) {
+        CalendarScreen(
+            onOpenItem = { id -> navController.navigate("$EVENT_EDIT/$id/${EventKind.EVENT.name}/0") },
+            onNewItem = { kind, day -> navController.navigate("$EVENT_EDIT/$NEW/${kind.name}/${day.toEpochDay()}") },
+            onOpenAlarm = { id -> navController.navigate("$ALARM_EDIT/$id") },
+        )
+    }
+    composable("$EVENT_EDIT/{id}/{kind}/{day}") { entry ->
+        val args = entry.arguments
+        EventEditScreen(
+            eventId = args?.getString("id")?.takeIf { it != NEW },
+            kind = EventKind.entries.firstOrNull { it.name == args?.getString("kind") } ?: EventKind.EVENT,
+            day = args?.getString("day")?.toLongOrNull()?.let(java.time.LocalDate::ofEpochDay),
+            onDone = { navController.popBackStack() },
+        )
+    }
+}
+
+/** Goes where a widget or notification asked (already checked by [LaunchTarget.from]), once. */
+@Composable
+private fun HandleLaunch(navController: NavHostController, launch: LaunchTarget?, onLaunched: () -> Unit) {
+    LaunchedEffect(launch) {
+        when (launch) {
+            null -> return@LaunchedEffect
+            is LaunchTarget.ShowPane -> navController.navigatePane(launch.route)
+            is LaunchTarget.OpenItem -> navController.navigate("$EVENT_EDIT/${launch.id}/${EventKind.EVENT.name}/0")
+            is LaunchTarget.OpenAlarm -> navController.navigate("$ALARM_EDIT/${launch.id}")
+            is LaunchTarget.NewEvent -> navController.navigate("$EVENT_EDIT/$NEW/${EventKind.EVENT.name}/${launch.day.toEpochDay()}")
+        }
+        onLaunched()
+    }
+}
+
+@Composable
+private fun PaneBar(navController: NavHostController, current: NavDestination?) {
+    NavigationBar {
+        Pane.entries.forEach { pane ->
+            NavigationBarItem(
+                selected = current?.hierarchy?.any { it.route == pane.route } == true,
+                onClick = { navController.navigatePane(pane.route) },
+                icon = { Icon(pane.icon, contentDescription = null) },
+                label = { Text(stringResource(pane.label)) },
+            )
+        }
+    }
+}
+
+/** To a main pane the way the bottom bar goes: one copy of each, its state kept. */
+private fun NavHostController.navigatePane(route: String) = navigate(route) {
+    popUpTo(graph.findStartDestination().id) { saveState = true }
+    launchSingleTop = true
+    restoreState = true
 }
 
 private const val ALARM_EDIT = "alarm"

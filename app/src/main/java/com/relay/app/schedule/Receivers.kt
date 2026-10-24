@@ -149,6 +149,8 @@ class RescheduleReceiver : BroadcastReceiver() {
                     // A clock or zone change moves every widget's time; a reboot loses the tick.
                     com.relay.app.widget.ClockWidget.refreshAll(context)
                     com.relay.app.widget.WidgetTicker.schedule(context)
+                    com.relay.app.widget.calendar.CalendarWidgets.refreshAll(context)
+                    com.relay.app.widget.calendar.CalendarWidgetTicker.schedule(context)
                 }
             }
         }

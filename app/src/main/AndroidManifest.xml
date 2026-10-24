@@ -85,6 +85,44 @@
             android:name=".widget.WidgetTickReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".widget.calendar.AgendaWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_agenda_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/agenda_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.calendar.MonthWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_month_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/month_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.calendar.CalendarWidgetTickReceiver"
+            android:exported="false" />
+
+        <activity
+            android:name=".widget.calendar.CalendarWidgetConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity="${applicationId}.widgetconfig">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".widget.WidgetConfigActivity"
             android:exported="true"

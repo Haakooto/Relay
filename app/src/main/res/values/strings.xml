@@ -443,6 +443,15 @@
     <string name="alarm_notifies">Shows a notification</string>
     <string name="channel_reminders">Reminders</string>
     <string name="reminder_default_title">Reminder</string>
+    <string name="calendar_pick_month">Pick a month</string>
+    <string name="calendar_prev_year">Previous year</string>
+    <string name="calendar_next_year">Next year</string>
+    <string name="widget_agenda_name">Calendar: next 7 days</string>
+    <string name="widget_agenda_description">What\'s coming up this week</string>
+    <string name="widget_month_name">Calendar: month</string>
+    <string name="widget_month_description">The month, with the day\'s plans</string>
+    <string name="widget_agenda_empty">Nothing in the next 7 days</string>
+    <string name="widget_calendar_show">Show</string>
     <plurals name="calendar_day_items">
         <item quantity="one">%1$s, %2$d item</item>
         <item quantity="other">%1$s, %2$d items</item>

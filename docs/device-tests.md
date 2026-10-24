@@ -317,3 +317,36 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 ### Everything scheduled
 - [ ] The "Everything scheduled" chip adds your alarms (from today on) to the grid and the list; tapping one opens the alarm editor.
 - [ ] Switch back to "Events and reminders": alarms disappear. Leave and come back: the choice is kept.
+
+## PR: Calendar widgets and month picker (#15)
+
+### Month picker (app)
+- [ ] Calendar pane: tap "October 2026": a dialog with the year and twelve months opens.
+- [ ] Arrows change the year; pick a month two years ahead: the grid shows it, on its first day.
+- [ ] "Today" in the dialog brings back this month with today selected.
+
+### Agenda widget
+- [ ] Long-press home → Widgets → Relay: "Calendar: next 7 days" and "Calendar: month" are listed next to the clock.
+- [ ] Place the agenda: its setup opens (Show, Background, Corners, Border); Back leaves no widget behind.
+- [ ] Save with Theme background: today's and the coming days' items are listed under day headings.
+- [ ] Tap an item: Relay opens on its editor. Tap a heading: the Calendar pane opens on that day.
+- [ ] Tap +: a new event opens on today.
+- [ ] Add an event in the app, go home: the widget shows it within a second or two.
+- [ ] Nothing planned this week: "Nothing in the next 7 days".
+- [ ] Long list: it scrolls inside the widget.
+- [ ] Show → Everything scheduled: your alarms appear too; tapping one opens the alarm editor.
+
+### Month widget
+- [ ] Place it (3×3): this month's grid with dots; today is bold and selected.
+- [ ] Tap › and ‹: the month changes in the widget without opening Relay.
+- [ ] Tap a day: it becomes highlighted. Tap the month name: Relay opens on that day.
+- [ ] Make it taller: the selected day's items list under the grid; tap one to open it.
+- [ ] Settings → first day of week → Sunday: the widget's grid starts on Sunday after a moment.
+
+### Looks and updates
+- [ ] Solid light colour background: the text turns dark; dark colour: light text. Gradient and border look like the clock's.
+- [ ] Transparent background: light text over the wallpaper.
+- [ ] Leave a widget overnight (or change the date in system settings): "Today" moves on.
+- [ ] Reboot: the widgets still show and update.
+- [ ] Widget settings from the launcher: changes apply when you save.
+- [ ] A clock widget placed before this build looks exactly as before.

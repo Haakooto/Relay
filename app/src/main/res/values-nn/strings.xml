@@ -431,6 +431,15 @@
     <string name="alarm_notifies">Viser eit varsel</string>
     <string name="channel_reminders">Påminningar</string>
     <string name="reminder_default_title">Påminning</string>
+    <string name="calendar_pick_month">Vel ein månad</string>
+    <string name="calendar_prev_year">Førre år</string>
+    <string name="calendar_next_year">Neste år</string>
+    <string name="widget_agenda_name">Kalender: neste 7 dagar</string>
+    <string name="widget_agenda_description">Det som skjer denne veka</string>
+    <string name="widget_month_name">Kalender: månad</string>
+    <string name="widget_month_description">Månaden, med planane for dagen</string>
+    <string name="widget_agenda_empty">Ingenting dei neste 7 dagane</string>
+    <string name="widget_calendar_show">Vis</string>
     <plurals name="calendar_day_items">
         <item quantity="one">%1$s, %2$d oppføring</item>
         <item quantity="other">%1$s, %2$d oppføringar</item>

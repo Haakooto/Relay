@@ -70,7 +70,8 @@ The Calendar pane is for planning: **events** (with a start, an optional end and
 **reminders** (a single moment). Tap **+** for either; it starts on the day you have selected.
 
 **The month.** Days with something on have dots. Tap a day to list it below the grid; swipe
-sideways or use the arrows to change month, and **Today** to come back. The chips at the top
+sideways or use the arrows to change month, and **Today** to come back. Tap the month's name to
+jump to any month and year. The chips at the top
 switch between **Events and reminders** and **Everything scheduled**, which also shows your
 alarms and alarms that start timers, relays or stopwatches (from today on).
 
@@ -232,7 +233,18 @@ Long-press the home screen → Widgets → Relay. Each widget gets its own setup
 - **corners** and a **border**.
 
 Every widget can look different. To change one later, long-press it and pick Widget settings.
-Tapping a widget opens Relay on the pane you used last.
+Tapping a clock widget opens Relay on the pane you used last.
+
+**Calendar widgets.** Two more, each with its own setup: what to **show** (events and reminders,
+or everything scheduled) and the same background, corners and border as the clock.
+
+- **Calendar: next 7 days** lists what's coming, day by day. Tap a row to open it, a day to open
+  the Calendar pane there, and **+** for a new event.
+- **Calendar: month** is the pane's month in small. **‹** and **›** change month and tapping a
+  day selects it, right on the home screen; the month's name opens the Calendar pane. Made tall
+  enough, it lists the selected day's plans under the grid.
+
+They update when you change something in Relay and at midnight.
 
 ---
 

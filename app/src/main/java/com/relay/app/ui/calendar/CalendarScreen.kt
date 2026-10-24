@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -58,6 +59,7 @@ import com.relay.app.data.event.EventKind
 import com.relay.app.data.schedule.TargetKind
 import com.relay.app.event.CalendarEntry
 import com.relay.app.event.EntryKind
+import com.relay.app.event.GRID_DAYS
 import com.relay.app.guide.GuideSection
 import com.relay.app.ui.common.PaneHeader
 import com.relay.app.util.AppLocale
@@ -140,6 +142,13 @@ private fun ShowFilter(showAll: Boolean, onChange: (Boolean) -> Unit) {
 
 @Composable
 private fun MonthBar(s: CalendarState, viewModel: CalendarViewModel) {
+    var picking by remember { mutableStateOf(false) }
+    if (picking) {
+        MonthPickerDialog(s.month, onDismiss = { picking = false }) { m ->
+            picking = false
+            viewModel.jumpTo(m)
+        }
+    }
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { viewModel.showMonth(s.month.minusMonths(1)) }) {
             Icon(Icons.AutoMirrored.Outlined.KeyboardArrowLeft, contentDescription = stringResource(R.string.calendar_prev_month))
@@ -147,7 +156,9 @@ private fun MonthBar(s: CalendarState, viewModel: CalendarViewModel) {
         Text(
             CalendarText.month(s.month),
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp)
+                .clickable(onClickLabel = stringResource(R.string.calendar_pick_month)) { picking = true }
+                .wrapContentHeight(),
         )
         if (s.selected != s.today) {
             TextButton(onClick = { viewModel.select(s.today) }) { Text(stringResource(R.string.calendar_go_today)) }
