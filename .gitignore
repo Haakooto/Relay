@@ -22,5 +22,8 @@ keystore.properties
 *.aab
 *.zip
 
-# Claude Code local state (agent worktrees, local settings).
-.claude/
+# Claude Code: skills, scripts and settings.json are shared; local state is not.
+.claude/settings.local.json
+.claude/worktrees/
+# The wiki checkout made by .claude/scripts/wiki.sh (its own repo).
+/.wiki/

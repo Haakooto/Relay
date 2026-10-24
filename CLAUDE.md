@@ -4,11 +4,25 @@ Personal Android app that rivals and replaces the stock Android Clock: alarms, t
 relay (chain), stopwatch, world clock, home-screen widgets. Built because the stock app can't
 chain timers, can't schedule anything but a ringing alarm, and can't run one timer twice at once.
 
-## Status: v1.0
+## Status
 
-v1.0 is a clean rebuild (the old v0.5 code is in git history before the `restart` branch, which
-is merged into `main`). All seven build steps in the spec are done. What comes next is the
+The current release is the newest `vX.Y` tag (`git describe --tags`); `CHANGELOG.md` says what
+each one changed. The app is a clean rebuild from v1.0 (the old v0.5 code is in git history
+before the `restart` branch). What comes next is the
 [Roadmap](https://github.com/Haakooto/Relay/wiki/Roadmap) in the wiki and the open GitHub issues.
+
+## Principles and skills
+
+- [`docs/principles.md`](docs/principles.md): the product, interaction, architecture, code, data
+  and security rules all work is held to. Read it before designing or building anything; a PR
+  that breaks a rule says why.
+- Project skills in `.claude/skills/` (shared across dev devices through git):
+  `/feature-request` and `/bug-report` turn a description into a high-level GitHub issue after
+  checking existing issues for a match; `/implement <issue>` works out a detailed spec with the
+  user (for features), plans, refactors if needed, builds, tests, updates docs and opens the PR.
+- `.claude/scripts/wiki.sh` clones or updates the wiki into `.wiki/` (git-ignored) and prints
+  the path. Commit wiki edits from inside `.wiki/`.
+- Local Claude state (`.claude/settings.local.json`, `.claude/worktrees/`) stays out of git.
 
 ## Docs
 
@@ -50,9 +64,9 @@ is merged into `main`). All seven build steps in the spec are done. What comes n
 - Package and `applicationId`: `com.relay.app`. It installs alongside the old v0.5 app
   (`applicationId` of the old build differs), so v1.0 never touches v0.5 data.
 - `app/`: the Android app. `chainlang/`: standalone Kotlin/JVM parser and evaluator for the relay
-  language (`com.relay.chainlang`), no Android dependency. `./gradlew :chainlang:test`
-  (currently 54/54 passing). The module keeps the "chain" name internally; in the app, new code
-  says "relay" (`RelayDef`, not `ChainDef`).
+  language (`com.relay.chainlang`), no Android dependency. `./gradlew :chainlang:test`. The
+  module keeps the "chain" name internally; in the app, new code says "relay" (`RelayDef`, not
+  `ChainDef`).
 - `minSdk = 33` deliberately: single code path, no legacy branches.
 - Per-app language uses the system `LocaleManager` API (`ui/settings/AppLanguage.kt`), not
   DataStore. Strings in English and Norwegian from the first screen.
@@ -66,7 +80,7 @@ is merged into `main`). All seven build steps in the spec are done. What comes n
 
 - Work happens on feature branches (`feature/<short-name>`), one commit per feature, pushed and
   opened as a PR to `main`. Never commit straight to `main`; merging a PR is the user's call.
-- `.github/workflows/build.yml` builds on GitHub (the Pi has no JDK or Android SDK):
+- `.github/workflows/build.yml` builds on GitHub, so every dev device gets the same APKs:
   - every PR push: unit tests + a "Relay Debug" APK on the rolling release page `dev-pr-<n>`
     (the PR gets a comment with the link once), deleted when the PR closes;
   - every push to `main` (a merged PR): a signed release APK on the rolling page `main-latest`;
@@ -103,9 +117,12 @@ is merged into `main`). All seven build steps in the spec are done. What comes n
 ## Working conventions
 
 - Only commit when explicitly asked. Never amend, never force-push.
-- No device or emulator in this environment, and no local build: verify through CI (see above),
-  which runs `:chainlang:test`, `:app:testDebugUnitTest`, `:app:compileDebugAndroidTestKotlin`
-  and the APK build. Real correctness comes from the user's own device testing, so say so
+- Development happens on several machines, and not all of them can build. Check at the start:
+  with `java` and an Android SDK (`ANDROID_HOME`, or `sdk.dir` in the git-ignored
+  `local.properties`), run the Gradle tasks locally before pushing; without them, verify
+  through CI. CI is the reference either way: it runs `:chainlang:test`,
+  `:app:testDebugUnitTest`, `:app:compileDebugAndroidTestKotlin` and the APK build. No
+  emulator is assumed. Real correctness comes from the user's own device testing, so say so
   explicitly rather than claiming a UI, gesture or hardware-dependent feature works.
 - Alarm firing reliability is the one thing this app cannot regress on. Everything that rings
   goes through one firing module (spec §13). Be extra careful there, and prefer narrow, additive
