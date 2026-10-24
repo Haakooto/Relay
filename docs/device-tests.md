@@ -243,6 +243,16 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Open Settings last, close and reopen: it opens on the pane you used before Settings.
 - [ ] Change language in Settings: you stay on Settings.
 
+### Timer length keypad
+- [ ] + → New timer: the length field is empty and the keypad is already showing.
+- [ ] Type `2`, `5`, `m`: the field shows `25m` and "= 25m" below it. Your phone's keyboard doesn't open.
+- [ ] Type `1`, `h`, `3`, `0`, `m`: "= 1h 30m".
+- [ ] Tap +5m on `25m`: it becomes `30m`. Tap +10m on an empty field: `10m`.
+- [ ] ⌫ deletes one character; holding ⌫ (or C) clears the field.
+- [ ] Tap the label field: the keypad hides and the keyboard opens. Tap the length field again: the keypad is back.
+- [ ] Keyboard icon on the length field: the full keyboard opens; type `RANDOM(5, 10)` and it's accepted. The dialpad icon brings the keypad back.
+- [ ] Edit an existing saved timer: the keypad stays hidden until you tap the length.
+
 ### Quick starts beside +
 - [ ] Timers pane: four small buttons (1m 5m 10m 15m) sit left of the + button.
 - [ ] One tap starts that timer. The + menu now only has New timer / New relay / New header.

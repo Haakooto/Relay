@@ -69,7 +69,10 @@ ein morgon utan slumreknapp.
 **Raske tidtakarar.** Dei små knappane til venstre for **+** startar ein tidtakar på 1, 5, 10
 eller 15 minutt med eitt trykk. Dei fire tidene kan du endre i Innstillingar.
 
-**Ny tidtakar.** Han har **etikett**, **varigheit** og **lyd**.
+**Ny tidtakar.** Han har **varigheit**, **etikett** og **lyd**.
+Varigheita kjem først, på eit taltastatur: siffer, `h`, `m`, `s`, og **+1m**, **+5m**, **+10m**.
+Hald inne ⌫ for å tømme. Tastatur-ikonet byter til heile tastaturet for alt anna relé-språket
+kan uttrykkje.
 - **Start** køyrer han éin gong utan å lagre. Etiketten blir likevel vist på nedteljinga og når
   han ringjer.
 - **Lagre** legg han i biblioteket. Lagra etikettar kan berre ha bokstavar, tal og `_` (til

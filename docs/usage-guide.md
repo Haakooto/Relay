@@ -68,7 +68,10 @@ snooze-less wake-up routine.
 **Quick timers.** The small buttons left of **+** start a 1, 5, 10 or 15 minute timer in one
 tap. You can change the four durations in Settings.
 
-**New timer.** It has a **label**, a **duration** and a **sound**.
+**New timer.** It has a **duration**, a **label** and a **sound**.
+The duration comes first, on a keypad: digits, `h`, `m`, `s`, and **+1m**, **+5m**, **+10m**.
+Long-press ⌫ to clear. The keyboard icon switches to the full keyboard for anything else the
+relay language can say.
 - **Start** runs it once without saving. The label still shows on the countdown and when it
   rings.
 - **Save** puts it in the library. Saved labels must be letters, digits and `_` only (for example

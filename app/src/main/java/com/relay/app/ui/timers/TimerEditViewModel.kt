@@ -11,6 +11,7 @@ import com.relay.app.data.library.TimerDefEntity
 import com.relay.app.library.SaveError
 import com.relay.app.library.SaveResult
 import com.relay.app.run.TimerSpec
+import com.relay.app.util.DurationText
 import com.relay.chainlang.ChainLang
 import com.relay.chainlang.ChainLangException
 import com.relay.chainlang.NowClock
@@ -26,11 +27,12 @@ data class TimerEditState(
     val isNew: Boolean = true,
     val id: String = UUID.randomUUID().toString(),
     val label: String = "",
-    val durationExpr: String = "5m",
+    /** Empty for a new timer: the keypad starts from nothing, like the stock clock's. */
+    val durationExpr: String = "",
     val sound: SoundSpec = SoundSpec(),
     val headerId: String? = null,
     val sortOrder: Long = System.currentTimeMillis(),
-    val seconds: Long? = 300,
+    val seconds: Long? = null,
     val durationError: String? = null,
     /** The expression parsed but is more than one step, e.g. "5, 10". */
     val notSingle: Boolean = false,
@@ -68,8 +70,25 @@ class TimerEditViewModel(application: Application, private val timerId: String?)
     fun setDuration(v: String) { _state.update { it.copy(durationExpr = v) }; reevaluate() }
     fun setSound(v: SoundSpec) { _state.update { it.copy(sound = v) } }
 
+    /** +1m/+5m/+10m: a plain duration is rewritten ("5m" + 1m = "6m"); anything else gets "+ 1m". */
+    fun addToDuration(seconds: Long) {
+        val s = _state.value
+        val expr = s.durationExpr.trim()
+        setDuration(
+            when {
+                expr.isEmpty() -> DurationText.expr(seconds)
+                s.seconds != null && DurationText.isPlain(expr) -> DurationText.expr(s.seconds + seconds)
+                else -> "$expr + ${DurationText.expr(seconds)}"
+            },
+        )
+    }
+
     private fun reevaluate() {
         val expr = _state.value.durationExpr
+        if (expr.isBlank()) {
+            _state.update { it.copy(seconds = null, durationError = null, notSingle = false) }
+            return
+        }
         val (seconds, error) = try {
             val steps = ChainLang.run("($expr)", NowClock.now())
             if (steps.size != 1) null to null else steps.single().durationSeconds to null

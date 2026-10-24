@@ -158,6 +158,9 @@
     <string name="timer_duration">Duration</string>
     <string name="timer_duration_is">= %1$s</string>
     <string name="timer_one_duration">A timer is one duration, like 25m or 1h30m</string>
+    <string name="keypad_backspace">Delete</string>
+    <string name="keypad_use_keyboard">Use the keyboard</string>
+    <string name="keypad_use_keypad">Use the keypad</string>
     <string name="block_label">Label</string>
     <string name="block_label_hint">Needed to save. Letters, digits and _ only, so relays can use it</string>
     <string name="save_label_required">Give it a label to save it. To run it once, tap Start.</string>

@@ -421,6 +421,7 @@
       <h3>Timer</h3>
       <ul class="plain">
         <li>Fields: optional label, duration (one duration in the relay language: <code>25m</code>, <code>1h30m</code>, <code>90</code>), sound (tune, vibration).</li>
+        <li><strong>Length keypad (v1.1):</strong> the duration comes first and is typed on the app's own keypad: digits, <code>h</code> <code>m</code> <code>s</code>, backspace (long-press clears), and <code>+1m</code> <code>+5m</code> <code>+10m</code>. Android can't restrict the system keyboard to those keys, hence a drawn keypad, as in the stock app. It writes the same relay-language text; a keyboard icon swaps to the full keyboard for anything else (<code>RANDOM(5, 10)</code>). A new timer opens with an empty length and the keypad up.</li>
         <li><strong>Saved labels are script names:</strong> letters, digits and <code>_</code>, starting with a letter, not a keyword, and unique across timers and relays. Renaming a saved block updates every relay that uses it. Unsaved labels are free text.</li>
         <li>The config screen has <strong>Start</strong> (an unsaved run, keeping its label) and <strong>Save</strong> (to the library, requires a unique label). Saving doesn't start it. Start it from the library card.</li>
         <li><strong>Editing works on a draft:</strong> the editor opens a copy, and the definition only changes on Save. Anything started in the meantime (by hand or by a schedule) uses the saved version.</li>
@@ -821,7 +822,7 @@
         <li><strong>Scheduled targets:</strong> Timer, Relay and Stopwatch on the Alarms pane.</li>
         <li><strong>Stopwatch</strong> (persisted).</li>
         <li><strong>Clock pane + ClockStyle renderer + widgets.</strong></li>
-        <li><strong>v1.1:</strong> open on the last pane, quick starts beside the +.</li>
+        <li><strong>v1.1:</strong> open on the last pane, quick starts beside the +, the length keypad.</li>
         <li><strong>After 1.0:</strong> automation (standard clock intents, then batch import, then AppFunctions after a spike), Bedtime (after a feasibility spike), extra widgets.</li>
       </ol>
       <p><strong>Status:</strong> steps 1 to 7 are done; "After 1.0" is what's left.</p>

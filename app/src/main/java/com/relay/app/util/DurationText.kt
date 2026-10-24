@@ -23,6 +23,16 @@ object DurationText {
         }.joinToString(" ")
     }
 
+    /** The relay language's own spelling, no spaces: "1h5m30s", "25m", "45s", "0s". */
+    fun expr(totalSeconds: Long): String {
+        val s = totalSeconds.coerceAtLeast(0)
+        if (s == 0L) return "0s"
+        return listOf(s / 3600 to "h", (s % 3600) / 60 to "m", s % 60 to "s").filter { it.first > 0 }.joinToString("") { "${it.first}${it.second}" }
+    }
+
+    /** Only digits and units, what the keypad can type: "25", "1h30m". Not "RANDOM(5, 10)". */
+    fun isPlain(expr: String): Boolean = expr.isNotEmpty() && expr.all { it.isDigit() || it in "hms" }
+
     /** Stopwatch style with hundredths: "1:02:03.45", "02:03.45". */
     fun stopwatch(millis: Long): String {
         val ms = millis.coerceAtLeast(0)
