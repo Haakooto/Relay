@@ -69,7 +69,7 @@ ein morgon utan slumreknapp.
 **Raske tidtakarar.** Dei små knappane til venstre for **+** startar ein tidtakar på 1, 5, 10
 eller 15 minutt med eitt trykk. Dei fire tidene kan du endre i Innstillingar.
 
-**Ny tidtakar.** Han har **varigheit**, **etikett** og **lyd**.
+**Ny tidtakar.** Han har **varigheit**, **etikett**, eit valfritt **varsel** og **lyd**.
 Varigheita kjem først, på eit taltastatur: siffer, `h`, `m`, `s`, og **+1m**, **+5m**, **+10m**.
 Hald inne ⌫ for å tømme. Tastatur-ikonet byter til heile tastaturet for alt anna relé-språket
 kan uttrykkje.
@@ -79,6 +79,10 @@ kan uttrykkje.
   dømes `Te`, `Arbeid_25`), fordi relé viser til tidtakarar med etiketten.
 
 Varigheiter skriv du som `25m`, `1h30m`, `45s` eller `90`. Eit tal åleine er minutt.
+
+**Varsel.** «Varsle før slutten» spelar eit kort signal så lenge før tidtakaren ringjer: ein
+tidtakar på 20 minutt med 1 minutts varsel gir signal etter 19 minutt. Nedteljinga går likevel
+heilt til slutten. Inne i eit relé blir varselet til ein tidtakar ikkje brukt.
 
 **Når han går.** Kvar start får sitt eige kort øvst i ruta og sitt eige varsel med nedteljing.
 Same tidtakar kan gå fleire gonger samstundes. Kontrollane er **Pause** / **Hald fram**,

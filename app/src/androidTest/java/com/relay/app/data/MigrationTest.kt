@@ -137,8 +137,28 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun migrate6To7KeepsTimersWithoutWarning() {
+        helper.createDatabase(TEST_DB, 6).apply {
+            execSQL(
+                "INSERT INTO timer_defs (id, label, durationExpr, sound_uri, sound_vibrate, headerId, sortOrder) " +
+                    "VALUES ('t1', 'Tea', '4m', NULL, 1, NULL, 1)",
+            )
+            close()
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 7, true, *RelayDatabase.MIGRATIONS).apply {
+            query("SELECT durationExpr, warnSeconds, warnTone FROM timer_defs WHERE id = 't1'").use {
+                assertTrue(it.moveToFirst())
+                assertEquals("4m", it.getString(0))
+                assertEquals(0L, it.getLong(1))
+                assertEquals("BEEP", it.getString(2))
+            }
+            close()
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test"
-        const val LATEST_VERSION = 6
+        const val LATEST_VERSION = 7
     }
 }

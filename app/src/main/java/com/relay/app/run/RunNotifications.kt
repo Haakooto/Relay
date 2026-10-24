@@ -43,7 +43,7 @@ class RunNotifications(private val context: Context) : RunNotices {
             .setSortKey(run.startedAtMillis.toString())
         when (run.phase) {
             RunPhase.RUNNING -> {
-                builder.setUsesChronometer(true).setChronometerCountDown(true).setWhen(run.stepEndsAtMillis ?: 0)
+                builder.setUsesChronometer(true).setChronometerCountDown(true).setWhen((run.stepEndsAtMillis ?: 0) + view.afterStepMillis)
                     .setShowWhen(true)
                     .setContentText(detailFor(context, view))
                     .addAction(0, context.getString(R.string.run_pause), action(RunActionReceiver.ACTION_PAUSE, run.id))
@@ -52,7 +52,7 @@ class RunNotifications(private val context: Context) : RunNotices {
             }
             RunPhase.PAUSED -> {
                 builder.setShowWhen(false)
-                    .setContentText(context.getString(R.string.run_paused_left, DurationText.clock((run.remainingMillis ?: 0) / 1000)))
+                    .setContentText(context.getString(R.string.run_paused_left, DurationText.clock(((run.remainingMillis ?: 0) + view.afterStepMillis) / 1000)))
                     .addAction(0, context.getString(R.string.run_resume), action(RunActionReceiver.ACTION_RESUME, run.id))
                     .addAction(0, context.getString(R.string.run_add_minute), action(RunActionReceiver.ACTION_ADD_MINUTE, run.id))
                     .addAction(0, context.getString(R.string.run_stop), action(RunActionReceiver.ACTION_STOP, run.id))

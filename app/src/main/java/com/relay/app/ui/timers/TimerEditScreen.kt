@@ -46,6 +46,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.relay.app.data.library.TransitionTone
+import com.relay.app.ui.common.NumberOptionChips
+import com.relay.app.ui.common.OptionChips
 import com.relay.app.R
 import com.relay.app.ui.common.SoundPickerRow
 import com.relay.app.ui.common.rememberDiscardGuard
@@ -152,6 +155,26 @@ fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
             singleLine = true,
             modifier = Modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) showKeypad = false },
         )
+        NumberOptionChips(
+            title = stringResource(R.string.timer_warn),
+            presets = WARN_PRESETS,
+            value = state.warnSeconds.toInt(),
+            range = 1..3600,
+            label = { if (it == 0) stringResource(R.string.timer_warn_off) else DurationText.short(it.toLong()) },
+            onChange = { viewModel.setWarnSeconds(it.toLong()) },
+        )
+        if (state.warnSeconds > 0) {
+            state.seconds?.takeIf { state.warnSeconds >= it }?.let {
+                Text(stringResource(R.string.timer_warn_too_long), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+            }
+            OptionChips(
+                title = stringResource(R.string.timer_warn_tone),
+                options = TransitionTone.entries.filter { it != TransitionTone.SILENT },
+                selected = state.warnTone,
+                label = { stringResource(toneLabel(it)) },
+                onSelect = viewModel::setWarnTone,
+            )
+        }
         SoundPickerRow(stringResource(R.string.alarm_sound), state.sound.uri) { viewModel.setSound(state.sound.copy(uri = it)) }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.alarm_vibrate), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
@@ -161,6 +184,9 @@ fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
         if (!state.isNew) TextButton(onClick = viewModel::askDelete) { Text(stringResource(R.string.action_delete)) }
     }
 }
+
+/** Off, then the common ones; Custom takes any number of seconds. */
+private val WARN_PRESETS = listOf(0, 30, 60, 120, 300)
 
 /** Deleting a block other relays use: say which ones will break. */
 @Composable

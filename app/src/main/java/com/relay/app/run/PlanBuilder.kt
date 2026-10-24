@@ -17,8 +17,14 @@ import com.relay.chainlang.SafetyLimits
 import com.relay.chainlang.UnknownReferenceException
 import kotlin.random.Random
 
-/** What the plan builder needs from a saved or draft timer. */
-data class TimerSpec(val label: String, val durationExpr: String, val sound: SoundSpec)
+/** What the plan builder needs from a saved or draft timer. [warnSeconds] 0 = no warning. */
+data class TimerSpec(
+    val label: String,
+    val durationExpr: String,
+    val sound: SoundSpec,
+    val warnSeconds: Long = 0,
+    val warnTone: TransitionTone = TransitionTone.BEEP,
+)
 
 /** What the plan builder needs from a saved or draft relay. */
 data class RelaySpec(
@@ -59,16 +65,25 @@ class PlanBuilder(
 ) {
     private val totals = mutableMapOf<String, Long>()
 
-    fun forTimer(timer: TimerSpec): List<RunStep> = listOf(
-        RunStep(
+    /**
+     * One step, or two when the timer warns: the time until the warning, then the warning itself,
+     * with a seamless cue between them (the same boundary relays use). A warning as long as the
+     * timer, or longer, is skipped.
+     */
+    fun forTimer(timer: TimerSpec): List<RunStep> {
+        val total = timerSeconds(timer)
+        val step = RunStep(
             label = timer.label.ifBlank { null },
-            seconds = timerSeconds(timer),
+            seconds = total,
             soundUri = timer.sound.uri ?: defaultSound.uri,
             vibrate = timer.sound.vibrate,
             transitionAfter = TransitionMode.SEAMLESS,
             toneAfter = TransitionTone.SILENT,
-        ),
-    )
+        )
+        val warn = timer.warnSeconds
+        if (warn <= 0 || warn >= total) return listOf(step)
+        return listOf(step.copy(seconds = total - warn, toneAfter = timer.warnTone), step.copy(seconds = warn))
+    }
 
     fun forRelay(relay: RelaySpec): List<RunStep> {
         val out = mutableListOf<RunStep>()

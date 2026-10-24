@@ -37,11 +37,11 @@ fun RunCard(view: RunView, now: Long, actions: RunActions) {
     val context = LocalContext.current
     val run = view.run
     val remainingMillis = when (run.phase) {
-        RunPhase.RUNNING -> ((run.stepEndsAtMillis ?: now) - now).coerceAtLeast(0)
-        RunPhase.PAUSED -> run.remainingMillis ?: 0
+        RunPhase.RUNNING -> ((run.stepEndsAtMillis ?: now) - now).coerceAtLeast(0) + view.afterStepMillis
+        RunPhase.PAUSED -> (run.remainingMillis ?: 0) + view.afterStepMillis
         else -> 0
     }
-    val stepMillis = view.step.seconds * 1000
+    val stepMillis = view.countdownMillis
     val alerting = run.phase == RunPhase.AWAITING || run.phase == RunPhase.DONE
 
     Card(

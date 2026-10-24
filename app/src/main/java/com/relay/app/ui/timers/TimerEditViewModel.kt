@@ -8,13 +8,16 @@ import androidx.lifecycle.viewModelScope
 import com.relay.app.appContainer
 import com.relay.app.data.library.SoundSpec
 import com.relay.app.data.library.TimerDefEntity
+import com.relay.app.data.library.TransitionTone
 import com.relay.app.library.SaveError
 import com.relay.app.library.SaveResult
 import com.relay.app.run.TimerSpec
+import com.relay.app.run.TransitionBeep
 import com.relay.app.util.DurationText
 import com.relay.chainlang.ChainLang
 import com.relay.chainlang.ChainLangException
 import com.relay.chainlang.NowClock
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +33,8 @@ data class TimerEditState(
     /** Empty for a new timer: the keypad starts from nothing, like the stock clock's. */
     val durationExpr: String = "",
     val sound: SoundSpec = SoundSpec(),
+    val warnSeconds: Long = 0,
+    val warnTone: TransitionTone = TransitionTone.BEEP,
     val headerId: String? = null,
     val sortOrder: Long = System.currentTimeMillis(),
     val seconds: Long? = null,
@@ -56,6 +61,7 @@ class TimerEditViewModel(application: Application, private val timerId: String?)
             _state.value = if (existing == null) TimerEditState(loaded = true) else TimerEditState(
                 loaded = true, isNew = false, id = existing.id, label = existing.label, durationExpr = existing.durationExpr,
                 sound = existing.sound, headerId = existing.headerId, sortOrder = existing.sortOrder,
+                warnSeconds = existing.warnSeconds, warnTone = existing.warnTone,
             )
             baseline = _state.value.editable()
             reevaluate()
@@ -63,12 +69,17 @@ class TimerEditViewModel(application: Application, private val timerId: String?)
     }
 
     private var baseline: List<Any?>? = null
-    private fun TimerEditState.editable() = listOf(label, durationExpr, sound)
+    private fun TimerEditState.editable() = listOf(label, durationExpr, sound, warnSeconds, warnTone)
     fun isDirty(): Boolean = baseline != null && baseline != _state.value.editable()
 
     fun setLabel(v: String) { _state.update { it.copy(label = v, saveError = null) } }
     fun setDuration(v: String) { _state.update { it.copy(durationExpr = v) }; reevaluate() }
     fun setSound(v: SoundSpec) { _state.update { it.copy(sound = v) } }
+    fun setWarnSeconds(v: Long) { _state.update { it.copy(warnSeconds = v) } }
+    fun setWarnTone(v: TransitionTone) {
+        _state.update { it.copy(warnTone = v) }
+        viewModelScope.launch(Dispatchers.Default) { TransitionBeep.play(v) }
+    }
 
     /** +1m/+5m/+10m: a plain duration is rewritten ("5m" + 1m = "6m"); anything else gets "+ 1m". */
     fun addToDuration(seconds: Long) {
@@ -102,13 +113,13 @@ class TimerEditViewModel(application: Application, private val timerId: String?)
     fun start(onStarted: () -> Unit) = viewModelScope.launch {
         val s = _state.value
         if (s.seconds == null) return@launch
-        library.startTimerSpec(TimerSpec(s.label.trim(), s.durationExpr, s.sound), sourceId = if (s.isNew) null else s.id)
+        library.startTimerSpec(TimerSpec(s.label.trim(), s.durationExpr, s.sound, s.warnSeconds, s.warnTone), sourceId = if (s.isNew) null else s.id)
         onStarted()
     }
 
     fun save(onSaved: () -> Unit) = viewModelScope.launch {
         val s = _state.value
-        val result = library.saveTimer(TimerDefEntity(s.id, s.label.trim(), s.durationExpr.trim(), s.sound, s.headerId, s.sortOrder))
+        val result = library.saveTimer(TimerDefEntity(s.id, s.label.trim(), s.durationExpr.trim(), s.sound, s.headerId, s.sortOrder, s.warnSeconds, s.warnTone))
         when (result) {
             is SaveResult.Saved -> onSaved()
             is SaveResult.Refused -> _state.update { it.copy(saveError = result.error) }

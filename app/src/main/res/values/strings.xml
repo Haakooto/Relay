@@ -158,6 +158,10 @@
     <string name="timer_duration">Duration</string>
     <string name="timer_duration_is">= %1$s</string>
     <string name="timer_one_duration">A timer is one duration, like 25m or 1h30m</string>
+    <string name="timer_warn">Warn before the end</string>
+    <string name="timer_warn_off">Off</string>
+    <string name="timer_warn_tone">Warning cue</string>
+    <string name="timer_warn_too_long">The warning is as long as the timer, so it won\'t sound</string>
     <string name="keypad_backspace">Delete</string>
     <string name="keypad_use_keyboard">Use the keyboard</string>
     <string name="keypad_use_keypad">Use the keypad</string>

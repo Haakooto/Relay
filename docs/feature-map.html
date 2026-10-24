@@ -124,13 +124,13 @@
     <p>v1.0. A ledger, not a roadmap, grouped by the build order in the <a href="spec.html">Relay spec</a> (§16). The v0.5 ledger is in git history.</p>
     <div class="meta">
       <span>2026-10-24, rev 9 (v1.1 in progress)</span>
-      <span>56 tracked items</span>
+      <span>57 tracked items</span>
       <span>chainlang: 54/54 tests passing</span>
     </div>
 
     <div class="stats">
       <div class="stat approved"><div class="n">45</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">3</div><div class="l">WIP</div></div>
+      <div class="stat wip"><div class="n">4</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">3</div><div class="l">Lacking</div></div>
       <div class="stat"><div class="n">0</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">4</div><div class="l">Deferred</div></div>
@@ -276,6 +276,7 @@
         <tbody>
           <tr><td class="feature">Open on the last pane</td><td><span class="chip wip">◐ WIP</span></td><td class="note">App icon and widget tap open the last of Alarms / Timers / Stopwatch / Clock (Settings isn't remembered). Stored in DataStore <code>last_pane</code></td></tr>
           <tr><td class="feature">Timer length keypad</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Own keypad: digits, h/m/s, backspace (long-press clears), +1m/+5m/+10m. Keyboard icon swaps to full text. New timers open empty with the keypad up, length first</td></tr>
+          <tr><td class="feature">Warned timer</td><td><span class="chip wip">◐ WIP</span></td><td class="note">"Warn before the end" + cue on a timer: runs as two seamless steps, one countdown to the real end. DB v7 (<code>warnSeconds</code>, <code>warnTone</code>) with migration and test. 3 PlanBuilder tests</td></tr>
         </tbody>
       </table></div>
     </section>

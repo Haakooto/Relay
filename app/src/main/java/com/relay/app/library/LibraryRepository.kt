@@ -235,6 +235,6 @@ class LibraryRepository(
     }
 }
 
-fun TimerDefEntity.spec() = TimerSpec(label, durationExpr, sound)
+fun TimerDefEntity.spec() = TimerSpec(label, durationExpr, sound, warnSeconds, warnTone)
 
 fun RelayDefEntity.spec() = RelaySpec(label, script, defaultSound, transitionMode, transitionTone, StepOverrides.decode(stepOverrides))

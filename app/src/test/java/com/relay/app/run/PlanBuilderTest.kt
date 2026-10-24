@@ -104,4 +104,24 @@ class PlanBuilderTest {
         assertEquals("global", plan[0].soundUri)
         assertEquals(false, plan[0].vibrate)
     }
+
+    @Test fun warnedTimerSplitsBeforeTheEnd() {
+        val plan = builder().forTimer(TimerSpec("Pasta", "20m", SoundSpec(null), warnSeconds = 60, warnTone = TransitionTone.CHIME))
+        assertEquals(listOf(19 * 60L, 60L), plan.map { it.seconds })
+        assertEquals(TransitionMode.SEAMLESS, plan[0].transitionAfter)
+        assertEquals(TransitionTone.CHIME, plan[0].toneAfter)
+        assertEquals(listOf("Pasta", "Pasta"), plan.map { it.label })
+        assertEquals(listOf("global", "global"), plan.map { it.soundUri })
+    }
+
+    @Test fun warningAsLongAsTheTimerIsSkipped() {
+        assertEquals(1, builder().forTimer(TimerSpec("Egg", "1m", SoundSpec(null), warnSeconds = 60)).size)
+        assertEquals(1, builder().forTimer(TimerSpec("Egg", "1m", SoundSpec(null), warnSeconds = 0)).size)
+    }
+
+    @Test fun warnedTimerInsideARelayIsOneStep() {
+        timers["Warned"] = TimerSpec("Warned", "10m", SoundSpec(null), warnSeconds = 60)
+        val plan = builder().forRelay(relay("Uses", "(Warned, 5m)"))
+        assertEquals(listOf(600L, 300L), plan.map { it.seconds })
+    }
 }

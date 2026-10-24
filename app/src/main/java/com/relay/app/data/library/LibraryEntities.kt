@@ -1,5 +1,6 @@
 package com.relay.app.data.library
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
@@ -37,6 +38,12 @@ data class TimerDefEntity(
     @Embedded(prefix = "sound_") val sound: SoundSpec,
     val headerId: String?,
     val sortOrder: Long,
+    /**
+     * A cue this many seconds before the end (0 = none): the "warned timer", a 20 min timer that
+     * beeps at 19. Only when the timer runs on its own; inside a relay, the relay's boundaries rule.
+     */
+    @ColumnInfo(defaultValue = "0") val warnSeconds: Long = 0,
+    @ColumnInfo(defaultValue = "BEEP") val warnTone: TransitionTone = TransitionTone.BEEP,
 )
 
 /** A saved Relay (spec §14 RelayDef). */

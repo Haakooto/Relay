@@ -68,7 +68,7 @@ snooze-less wake-up routine.
 **Quick timers.** The small buttons left of **+** start a 1, 5, 10 or 15 minute timer in one
 tap. You can change the four durations in Settings.
 
-**New timer.** It has a **duration**, a **label** and a **sound**.
+**New timer.** It has a **duration**, a **label**, an optional **warning** and a **sound**.
 The duration comes first, on a keypad: digits, `h`, `m`, `s`, and **+1m**, **+5m**, **+10m**.
 Long-press ⌫ to clear. The keyboard icon switches to the full keyboard for anything else the
 relay language can say.
@@ -78,6 +78,10 @@ relay language can say.
   `Tea`, `Work_25`), because relays refer to timers by that label.
 
 Durations are written like `25m`, `1h30m`, `45s` or `90`. A plain number means minutes.
+
+**Warning.** "Warn before the end" plays a short cue that long before the timer rings: a
+20 minute timer with a 1 minute warning cues at 19 minutes. The countdown still runs to the
+real end. Inside a relay, a timer's warning is ignored.
 
 **Running.** Every start gets its own card at the top of the pane and its own notification with
 a live countdown. You can run the same timer several times at once. The controls are **Pause**

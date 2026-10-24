@@ -253,6 +253,16 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Keyboard icon on the length field: the full keyboard opens; type `RANDOM(5, 10)` and it's accepted. The dialpad icon brings the keypad back.
 - [ ] Edit an existing saved timer: the keypad stays hidden until you tap the length.
 
+### Warned timer
+- [ ] New timer `20m`, Warn before the end → 1m, cue Chime: at 19:00 the cue plays and the countdown keeps going (it doesn't restart at 1:00); at 0:00 it rings as usual.
+- [ ] Short test: `2m` with a 1m warning: cue at 1:00 left, ring at 0:00.
+- [ ] Pause during the last minute, then resume: the countdown carries on from where it was.
+- [ ] Warning 5m on a `3m` timer: a red note says the warning won't sound; it just rings at the end.
+- [ ] Custom → `90`: the chip shows "1m 30s".
+- [ ] Save it, reopen: warning and cue are kept. Start from the library: same behaviour.
+- [ ] Use the warned timer inside a relay: no warning cue there, just the relay's own boundaries.
+- [ ] Installing this build over v1.0 keeps all your saved timers (database v6 → v7).
+
 ### Quick starts beside +
 - [ ] Timers pane: four small buttons (1m 5m 10m 15m) sit left of the + button.
 - [ ] One tap starts that timer. The + menu now only has New timer / New relay / New header.
