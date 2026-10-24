@@ -55,8 +55,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
-import com.relay.app.guide.GuideButton
 import com.relay.app.guide.GuideSection
+import com.relay.app.ui.common.PaneHeader
 import com.relay.app.stopwatch.CorrectionKind
 import com.relay.app.stopwatch.LapView
 import com.relay.app.stopwatch.StopwatchView
@@ -91,10 +91,7 @@ fun StopwatchScreen(viewModel: StopwatchViewModel = viewModel()) {
     Box(Modifier.fillMaxSize()) {
         LazyColumn(contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.pane_stopwatch), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
-                    GuideButton(GuideSection.STOPWATCH)
-                }
+                PaneHeader(R.string.pane_stopwatch, GuideSection.STOPWATCH)
             }
             val list = watches
             if (list != null && list.isEmpty()) {

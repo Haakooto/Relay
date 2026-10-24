@@ -74,6 +74,7 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
         factory = AlarmEditViewModel.factory(context.applicationContext as Application, scheduleId),
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val fires by viewModel.fires.state.collectAsStateWithLifecycle()
     if (!state.loaded) return
     val close = rememberDiscardGuard(viewModel::isDirty, onDone)
 
@@ -139,7 +140,7 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
                 fontSize = 64.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f).clickable { pickingTime = true },
             )
-            Button(onClick = onSave, enabled = viewModel.canSave(state)) { Text(stringResource(R.string.action_save)) }
+            Button(onClick = onSave, enabled = viewModel.fires.canSave(fires)) { Text(stringResource(R.string.action_save)) }
         }
         OutlinedTextField(
             value = state.label,
@@ -203,10 +204,10 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
         }
 
         HorizontalDivider()
-        AlarmTargetSection(state, viewModel)
+        AlarmTargetSection(fires, viewModel.fires)
 
         // Sound and snooze only matter when it rings.
-        if (state.target == TargetKind.RING) {
+        if (fires.target == TargetKind.RING) {
         HorizontalDivider()
         SoundPickerRow(stringResource(R.string.alarm_sound), state.soundUri) { uri -> viewModel.update { it.copy(soundUri = uri) } }
         Row(verticalAlignment = Alignment.CenterVertically) {
