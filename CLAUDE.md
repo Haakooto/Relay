@@ -7,13 +7,21 @@ chain timers, can't schedule anything but a ringing alarm, and can't run one tim
 ## Status: v1.0
 
 v1.0 is a clean rebuild (the old v0.5 code is in git history before the `restart` branch, which
-is merged into `main`). All seven build steps in the spec are done. Next is the post-1.0 list in
-the feature map: bedtime, assistant automation, more widget types, CSV export of laps.
+is merged into `main`). All seven build steps in the spec are done. What comes next is the
+[Roadmap](https://github.com/Haakooto/Relay/wiki/Roadmap) in the wiki and the open GitHub issues.
 
 ## Docs
 
-- [`docs/spec.html`](docs/spec.html): the v1.0 design baseline (core model, panes, relay
-  language, firing module, data model, build order). Update it when a design decision changes.
+- **The wiki holds the design docs and the roadmap**: <https://github.com/Haakooto/Relay/wiki>
+  (clone it with `git clone git@github.com:Haakooto/Relay.wiki.git`; it is a separate repo with
+  Markdown pages, so edit and push there, not in this repo). Pages: `Home`, `Roadmap`,
+  `Feature-Map`, and the design spec split into `Design-Spec` (§01 to §03), `Panes-Spec` (§04,
+  §05, §07 to §12), `Relay-Language` (§06), `Firing-Module` (§13), `Data-Model` (§14) and
+  `Visual-Direction-and-Build-Order` (§15 to §17). Section numbers such as "spec §13" in code
+  comments refer to those spec sections. **Update the spec page when a design decision changes.**
+- **Features and bugs are GitHub issues**: <https://github.com/Haakooto/Relay/issues> (issue
+  forms for bug reports and feature requests). The Roadmap page links each planned item to its
+  issue.
 - [`docs/usage-guide.md`](docs/usage-guide.md) and its Nynorsk twin `docs/usage-guide.nn.md`:
   the user-facing guide, one `##` section per pane. **Update both when a feature's behaviour
   changes** (keep it short: main ideas, not every option). The build copies them into the app
@@ -21,13 +29,17 @@ the feature map: bedtime, assistant automation, more widget types, CSV export of
   the order of `GuideSection`; `GuideMarkdownTest` checks it. Markdown is limited to what
   `GuideMarkdown` parses: headings, paragraphs, `- ` lists, pipe tables, fenced code, `---`,
   `**bold**`, `*italic*` and `` `code` ``.
-- [`docs/feature-map.html`](docs/feature-map.html): source of truth for what's actually built.
-  **Update it whenever you build, fix or retest a feature**: one row per feature, a status chip
-  (Approved/WIP/Lacking/Planned/Deferred/Declined) and a one-line note. Keep the header counts in
-  sync with the rows.
+- **Feature Map (wiki page `Feature-Map`)**: source of truth for what's actually built.
+  **Update it whenever you build, fix or retest a feature**: one row per feature, a status
+  (Approved/WIP/Lacking/Planned/Deferred/Declined) and a one-line note. Keep the header counts
+  in sync with the rows. Also keep the `Roadmap` page in step (anything not Approved lives
+  there). In the PR that builds or fixes a feature, reference its issue and close it with
+  "Closes #n" in the PR description. Create an issue first if the work has none. Because the wiki
+  is its own repo, a feature-map change is a separate commit and push there (the user publishes
+  it unless told otherwise).
 - [`docs/device-tests.md`](docs/device-tests.md): the user's on-device checklist. **After every
   build, add a section** with specific things to try (short, one action and one expected result
-  per line). When the user reports results, tick them there and update the feature map to match.
+  per line). When the user reports results, tick them there and update the wiki Feature-Map page to match.
 - [`CHANGELOG.md`](CHANGELOG.md): human-readable notes per tagged release. Update only when
   tagging, and write what changed for the user, not how.
 

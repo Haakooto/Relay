@@ -1,7 +1,7 @@
 # Device tests
 
 What to try on the phone after each build. Tick a box when it works; write a note under it when
-it doesn't (a line starting with `>` is enough). Claude reads this file, updates the feature map
+it doesn't (a line starting with `>` is enough). Claude reads this file, updates the wiki feature map
 from it, and adds a new section after every build.
 
 Untested sections stay here until everything in them is ticked or has a note.

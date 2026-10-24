@@ -5,15 +5,25 @@ A personal Android clock app that replaces the stock one: alarms, timers that ch
 home-screen widgets. Alarms can also start a timer, relay or stopwatch instead of ringing.
 
 - **How to use it:** [`docs/usage-guide.md`](docs/usage-guide.md) (also in the app: Settings → How to use Relay, or the ? on each pane)
-- **Design spec:** [`docs/spec.html`](docs/spec.html) (open in a browser)
-- **What's built and tested:** [`docs/feature-map.html`](docs/feature-map.html)
+- **Design spec, feature map and roadmap:** the [wiki](https://github.com/Haakooto/Relay/wiki)
 - **On-device test checklist:** [`docs/device-tests.md`](docs/device-tests.md)
 - **Release notes:** [`CHANGELOG.md`](CHANGELOG.md)
 
 ## Status
 
 v1.0: every pane is built and has been through on-device testing. Planned after 1.0: bedtime,
-assistant automation, more widget types, lap export. See the feature map.
+assistant automation, more widget types, lap export. See the [roadmap](https://github.com/Haakooto/Relay/wiki/Roadmap).
+
+## Docs, issues and roadmap
+
+- **Wiki:** the [design spec](https://github.com/Haakooto/Relay/wiki/Design-Spec), the
+  [feature map](https://github.com/Haakooto/Relay/wiki/Feature-Map) (what is built and tested)
+  and the [roadmap](https://github.com/Haakooto/Relay/wiki/Roadmap) (what is planned).
+- **Issues:** features and bugs are tracked as
+  [GitHub issues](https://github.com/Haakooto/Relay/issues). To ask for a feature or report a
+  bug, [open an issue](https://github.com/Haakooto/Relay/issues/new/choose).
+- **In this repo:** the user guide (`docs/usage-guide.md`, `docs/usage-guide.nn.md`), the
+  on-device checklist (`docs/device-tests.md`) and `CHANGELOG.md`.
 
 ## Modules
 

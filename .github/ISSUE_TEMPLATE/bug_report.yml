@@ -1,0 +1,65 @@
+name: Bug report
+description: Something in Relay does not work as it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. An alarm that does not ring is the most serious kind of bug, so say so in the title if that is what happened.
+  - type: input
+    id: version
+    attributes:
+      label: Relay version
+      description: Settings, at the bottom (for example `v1.0` or `v1.1-alpha.2+abc1234`). Say if it is the debug build.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Android version and phone
+      description: For example Android 15, Pixel 8.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where does it happen?
+      options:
+        - Alarms
+        - Timers and relays
+        - Stopwatch
+        - Clock
+        - Widgets
+        - Settings
+        - Ringing screen or notifications
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the Timers pane
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: What you thought would happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: What happened instead. Screenshots are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Battery optimisation settings, whether the phone rebooted, relay scripts involved, and so on.
