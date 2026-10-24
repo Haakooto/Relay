@@ -100,8 +100,8 @@ new dependency. Otherwise continue.
 
 ## 5. Verify and hand over
 
-If this machine can build (`java` and an Android SDK, see CLAUDE.md), run
-`./gradlew :chainlang:test :app:testDebugUnitTest` first and fix failures locally. There is no
+If this machine can build (`javac` and an Android SDK, see CLAUDE.md), run
+`./gradlew :chainlang:test :app:testDebugUnitTest detekt` first and fix failures locally. There is no
 emulator either way. Before pushing, ask the user to confirm the commit, push and PR (one
 question covering all three). Then:
 
@@ -112,7 +112,9 @@ gh pr create --title "..." --body-file <tmpfile>   # body ends with "Closes #n"
 gh run watch                          # then gh run view --log-failed on failure
 ```
 
-Fix CI failures and push again. When green, report: the PR link, the dev APK page
+Fix CI failures (build, Checks and CodeQL) and push again. Don't add new findings to the lint
+or detekt baselines; fix them, or suppress one with a comment saying why. If the schema changed,
+the PR gets a migration review thread: point the user at it. When green, report: the PR link, the dev APK page
 (`dev-pr-<n>`), what the user should test on the device (point at the new `device-tests.md`
 section), and what you could not verify. Say explicitly that UI, gestures, sound and anything
 hardware-dependent are untested until the user tries them. Never merge the PR, tag a release

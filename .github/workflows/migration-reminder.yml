@@ -1,0 +1,50 @@
+# Room migrations can only run on a device (MigrationTest is an instrumented test, and an
+# emulator would more than double CI time). So when a PR touches the schema, this opens one
+# review thread asking for the real check: install the PR's dev APK over the previous build and
+# see that the data survived. Resolving the thread is the sign-off.
+
+name: Migration reminder
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+    paths:
+      - "app/schemas/**"
+      - "app/src/main/java/com/relay/app/data/RelayDatabase.kt"
+
+permissions:
+  pull-requests: write
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Open the review thread (once per PR)
+        run: |
+          marker="<!-- relay-migration-reminder -->"
+          if gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/comments" \
+              --jq '.[].body' | grep -qF "$marker"; then
+            echo "Reminder already on the PR."; exit 0
+          fi
+          # Anchor it on the database class if the PR changes it, else on the first schema file.
+          path=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[].filename' \
+            | grep -E '^app/(src/main/java/com/relay/app/data/RelayDatabase\.kt|schemas/)' | sort | tail -1)
+          body="$marker
+          **The Room schema changed: check the update on the phone before merging.**
+
+          Migrations only run on a device, so this is the test:
+
+          1. Relay Debug on the phone is the previous build (from \`main\` or an earlier PR) and has data in it: an alarm with an exception, a saved timer and relay, a stopwatch with laps, a world clock.
+          2. Install this PR's dev APK over it (link in the dev build comment). Don't uninstall first.
+          3. Open the app: it starts, and everything from step 1 is still there and still works.
+
+          Resolve this thread when it passes. If it fails, reply here with what broke."
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/comments" \
+            -f body="$body" \
+            -f commit_id="$SHA" -f path="$path" -f subject_type=file >/dev/null
+          echo "Opened the migration review thread on $path."

@@ -120,6 +120,12 @@ android {
         // values-nb deliberately mirrors values-nn (Nynorsk) for bokmål phones, without listing
         // bokmål as a choice in the system language picker. See NorwegianStringsTest.
         disable += "UnusedTranslation"
+        // Findings from before lint ran in CI. Only new ones fail; `./gradlew :app:updateLintBaseline`
+        // rewrites it, which should only happen when fixing old findings.
+        baseline = file("lint-baseline.xml")
+        abortOnError = true
+        checkDependencies = false
+        sarifReport = true
     }
 
     buildFeatures {

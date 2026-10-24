@@ -1,0 +1,89 @@
+# Code quality: Android Lint (including its security checks) and detekt (Kotlin smells and ktlint
+# formatting rules). A separate workflow from the build, so the dev APK isn't delayed. Findings
+# show as PR annotations and under the repo's Security tab; a new one fails the check. Old
+# findings are in the baselines (app/lint-baseline.xml, config/detekt/baseline.xml).
+
+name: Checks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "**"
+      - "!**.md"
+      - "!.gitignore"
+      - "!.github/ISSUE_TEMPLATE/**"
+      - "!.github/pull_request_template.md"
+      - "!.claude/**"
+  push:
+    branches: [main]
+    paths:
+      - "**"
+      - "!**.md"
+      - "!.gitignore"
+      - "!.github/ISSUE_TEMPLATE/**"
+      - "!.github/pull_request_template.md"
+      - "!.claude/**"
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # A missing baseline is made here and handed over as the 'quality-baselines' artifact to
+      # commit, like the Room schemas. Until then everything found counts as old.
+      - name: Make missing baselines
+        run: |
+          made=0
+          [ -f app/lint-baseline.xml ] || { ./gradlew :app:updateLintBaseline; made=1; }
+          [ -f config/detekt/baseline.xml ] || { ./gradlew detektBaseline; made=1; }
+          if [ "$made" = 1 ]; then
+            echo "::warning::Baselines made: download the 'quality-baselines' artifact and commit it"
+            echo "BASELINES_MADE=1" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: env.BASELINES_MADE == '1'
+        with:
+          name: quality-baselines
+          path: |
+            app/lint-baseline.xml
+            config/detekt/baseline.xml
+
+      - name: Android Lint
+        run: ./gradlew :app:lintDebug
+
+      - name: detekt
+        if: success() || failure()
+        run: ./gradlew detekt
+
+      - uses: github/codeql-action/upload-sarif@v4
+        if: (success() || failure()) && hashFiles('app/build/reports/lint-results-debug.sarif') != ''
+        with:
+          sarif_file: app/build/reports/lint-results-debug.sarif
+          category: android-lint
+
+      - uses: github/codeql-action/upload-sarif@v4
+        if: (success() || failure()) && hashFiles('build/reports/detekt/detekt.sarif') != ''
+        with:
+          sarif_file: build/reports/detekt/detekt.sarif
+          category: detekt

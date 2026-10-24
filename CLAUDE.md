@@ -86,6 +86,15 @@ before the `restart` branch). What comes next is the
   - every push to `main` (a merged PR): a signed release APK on the rolling page `main-latest`;
   - a pushed `vX.Y` / `vX.Y-alpha.N` tag: a signed release APK on a GitHub release for that tag,
     with its `CHANGELOG.md` section as notes.
+- Alongside the build, on every PR and merge: `checks.yml` runs Android Lint and detekt (new
+  findings fail; old ones are in `app/lint-baseline.xml` and `config/detekt/baseline.xml`),
+  `codeql.yml` runs CodeQL security analysis (also weekly), and findings show on the PR and in
+  the Security tab. Dependabot opens monthly grouped update PRs; `dependency-graph.yml` feeds it
+  the Gradle dependencies.
+- A PR that changes the Room schema gets a review thread from `migration-reminder.yml`: install
+  the PR's dev APK over the previous build and check the data survived, then resolve the thread.
+  There is no emulator in CI (it would more than double the run time), so this is the migration
+  test.
 - So "verify with Gradle" below means: push and read the CI run (`gh run watch`, `gh run view
   --log-failed`). A new Room schema JSON comes back as the `room-schemas` artifact; commit it.
 - Signing in CI comes from two repo secrets: `RELAY_KEYSTORE_BASE64` (the .jks, base64) and
@@ -118,11 +127,11 @@ before the `restart` branch). What comes next is the
 
 - Only commit when explicitly asked. Never amend, never force-push.
 - Development happens on several machines, and not all of them can build. Check at the start:
-  with `java` and an Android SDK (`ANDROID_HOME`, or `sdk.dir` in the git-ignored
-  `local.properties`), run the Gradle tasks locally before pushing; without them, verify
-  through CI. CI is the reference either way: it runs `:chainlang:test`,
-  `:app:testDebugUnitTest`, `:app:compileDebugAndroidTestKotlin` and the APK build. No
-  emulator is assumed. Real correctness comes from the user's own device testing, so say so
+  with a full JDK (`javac`, not just `java`: a runtime alone fails) and an Android SDK
+  (`ANDROID_HOME`, or `sdk.dir` in the git-ignored `local.properties`), run the Gradle tasks
+  locally before pushing; without them, verify through CI. CI is the reference either way: it
+  runs `:chainlang:test`, `:app:testDebugUnitTest`, `:app:compileDebugAndroidTestKotlin` and the
+  APK build. No emulator is assumed. Real correctness comes from the user's own device testing, so say so
   explicitly rather than claiming a UI, gesture or hardware-dependent feature works.
 - Alarm firing reliability is the one thing this app cannot regress on. Everything that rings
   goes through one firing module (spec §13). Be extra careful there, and prefer narrow, additive

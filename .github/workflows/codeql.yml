@@ -1,0 +1,53 @@
+# CodeQL security analysis of the Kotlin code. Findings show on the PR and under the repo's
+# Security tab. Runs alongside the build, not in it, so the dev APK isn't delayed; weekly too,
+# because new queries can find old problems.
+
+name: CodeQL
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ["**.kt", "**.kts", "**/AndroidManifest.xml", "gradle/**", ".github/workflows/codeql.yml"]
+  push:
+    branches: [main]
+    paths: ["**.kt", "**.kts", "**/AndroidManifest.xml", "gradle/**", ".github/workflows/codeql.yml"]
+  schedule:
+    - cron: "17 5 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: codeql-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: java-kotlin
+          build-mode: manual
+          queries: security-extended
+
+      # CodeQL watches the compiler, so the Kotlin must really compile: no build cache.
+      - name: Compile
+        run: ./gradlew --no-build-cache :chainlang:compileKotlin :app:compileDebugKotlin
+
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:java-kotlin
