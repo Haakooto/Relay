@@ -5,6 +5,20 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v1.1 (2026-10-24)
+
+Requests from living with v1.0 for a while.
+
+- Relay opens on the pane you used last, from the app icon and from a widget tap.
+- Quick timers are one tap: small buttons left of the + on the Timers pane, no menu first.
+- A new timer opens straight on a keypad for its length: digits, h/m/s and +1m/+5m/+10m. The
+  keyboard icon still gives the full relay language.
+- Warned timers: "Warn before the end" plays a cue some time before the timer rings (say, at
+  19 of 20 minutes), with a choice of cue. The countdown keeps running to the real end.
+- Running timer and stopwatch notifications sit with the normal ones instead of under "Silent",
+  still without making a sound.
+- Signed builds now come from GitHub: every merge, and every release like this one.
+
 ## v1.0 (2026-10-03)
 
 A clean rebuild of the whole app. It installs as a new app, next to the old one (which can be
