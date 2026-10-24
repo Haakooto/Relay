@@ -246,6 +246,7 @@
       <li><a href="#clock">Clock</a></li>
       <li><a href="#widgets">Widgets</a></li>
       <li><a href="#bedtime">Bedtime</a></li>
+      <li><a href="#calendar">Calendar events</a></li>
       <li><a href="#settings">Settings</a></li>
       <li><a href="#automation">Automation &amp; assistants</a></li>
       <li><a href="#reliability">Firing &amp; reliability</a></li>
@@ -609,6 +610,29 @@
 
     <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
+    <section id="calendar">
+      <span class="eyebrow">10b · Planning</span>
+      <h2>Calendar events <span class="tag later">later</span></h2>
+      <p class="lede"><strong>Not in 1.x yet.</strong> Alarms are already used for planning. An <strong>Event</strong> is a dated, titled entry made from the Alarms pane, so every timed thing can live in one app, shown in a calendar widget, and optionally sent to Google Calendar.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Piece</th><th>Feasible?</th><th>How</th></tr></thead>
+        <tbody>
+          <tr><td>Event: title, date, start (and optional end or all-day), note</td><td>Yes</td><td>A new <code>events</code> table (Room migration). Its reminder is an ordinary schedule: a one-off on the event's date with a lead time, whose target is Ring, a notification, or a timer/relay/stopwatch. So firing stays in the one module (§13) and exceptions, snooze and boot re-arming come free</td></tr>
+          <tr><td>Repeating events</td><td>Yes</td><td>Reuse the alarm repeat model (weekdays, end date or count). Monthly and yearly repeats are new math in <code>NextFire</code></td></tr>
+          <tr><td>Alarms pane: Upcoming list with events</td><td>Yes</td><td>The Alarms pane grows an "Events" section or a day-grouped agenda; the + gains <strong>New event</strong></td></tr>
+          <tr><td>Calendar widget: agenda (next N days)</td><td>Yes</td><td>Glance <code>LazyColumn</code>: native, scrollable, tappable rows. Unlike the clock widget it shouldn't be a bitmap, so text stays crisp and rows open the event</td></tr>
+          <tr><td>Calendar widget: month grid</td><td>Probably</td><td>Glance rows and columns of day cells with dots; no canvas in Glance, so either that or a rendered bitmap (as the clock widget does). Second step</td></tr>
+          <tr><td>One way, Relay → Google Calendar</td><td>Yes</td><td>Android's <code>CalendarContract</code> provider, not the Google REST API: insert into a calendar the user picks (their Google account, already synced on the phone) and Google syncs it. No OAuth, no Cloud project, no network code. Needs <code>WRITE_CALENDAR</code>; Relay keeps the provider's event id to update or delete its copy</td></tr>
+          <tr><td>One way, Google Calendar → Relay (show in widget/agenda)</td><td>Yes</td><td><code>READ_CALENDAR</code> and a query on <code>CalendarContract.Instances</code> (expands repeats). Read-only overlay: shown, not stored in Relay</td></tr>
+          <tr><td>Full two-way sync</td><td>Possible, not worth it</td><td>Conflict handling for edits on both sides. Prefer: Relay events written out, Google events read in</td></tr>
+          <tr><td>Ringing for Google Calendar events</td><td>Maybe</td><td>Reading instances and arming an alarm for chosen calendars. Opt-in per calendar; re-query on <code>ACTION_PROVIDER_CHANGED</code></td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>Order:</strong> events + reminders on the Alarms pane, then the agenda widget, then write-out to a picked Google calendar, then the read-in overlay. Open question: whether an Event is its own row or a schedule with a date and a title (simpler, but a schedule has no end time or notes).</p>
+    </section>
+
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
     <section id="settings">
       <span class="eyebrow">11 · Pane 5</span>
       <h2>Settings</h2>
@@ -825,7 +849,7 @@
         <li><strong>Stopwatch</strong> (persisted).</li>
         <li><strong>Clock pane + ClockStyle renderer + widgets.</strong></li>
         <li><strong>v1.1:</strong> open on the last pane, quick starts beside the +, the length keypad, warned timers, visible running notifications.</li>
-        <li><strong>After 1.0:</strong> automation (standard clock intents, then batch import, then AppFunctions after a spike), Bedtime (after a feasibility spike), extra widgets.</li>
+        <li><strong>After 1.0:</strong> automation (standard clock intents, then batch import, then AppFunctions after a spike), Bedtime (after a feasibility spike), extra widgets, calendar events (§10b).</li>
       </ol>
       <p><strong>Status:</strong> steps 1 to 7 are done; "After 1.0" is what's left.</p>
       <h3>Worth salvaging from v0.5</h3>
