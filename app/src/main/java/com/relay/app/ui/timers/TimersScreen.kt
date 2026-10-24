@@ -6,14 +6,11 @@ import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -23,12 +20,11 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -96,7 +92,6 @@ private fun sortOrderBetween(before: Long?, after: Long?): Long = when {
     else -> System.currentTimeMillis()
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TimersScreen(onOpenTimer: (String?) -> Unit, onOpenRelay: (String?) -> Unit, viewModel: TimersViewModel = viewModel()) {
     val context = LocalContext.current
@@ -227,31 +222,33 @@ fun TimersScreen(onOpenTimer: (String?) -> Unit, onOpenRelay: (String?) -> Unit,
             }
         }
 
-        Box(Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
-            FloatingActionButton(onClick = { menuOpen = true }) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.timers_add))
-            }
-            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                Text(
-                    stringResource(R.string.timers_quick_start),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                )
-                FlowRow(
-                    modifier = Modifier.padding(horizontal = 12.dp).widthIn(max = 280.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+        // Quick starts sit left of the + so a common timer is one tap (spec §05).
+        Row(
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            (settings?.quickTimerSeconds ?: emptyList()).forEach { seconds ->
+                SmallFloatingActionButton(
+                    onClick = { viewModel.quickStart(seconds) },
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 ) {
-                    (settings?.quickTimerSeconds ?: emptyList()).forEach { seconds ->
-                        AssistChip(
-                            onClick = { menuOpen = false; viewModel.quickStart(seconds) },
-                            label = { Text(DurationText.short(seconds)) },
-                        )
-                    }
+                    Text(
+                        DurationText.short(seconds),
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(horizontal = 10.dp),
+                    )
                 }
-                HorizontalDivider()
-                DropdownMenuItem(text = { Text(stringResource(R.string.timers_new_timer)) }, onClick = { menuOpen = false; onOpenTimer(null) })
-                DropdownMenuItem(text = { Text(stringResource(R.string.timers_new_relay)) }, onClick = { menuOpen = false; onOpenRelay(null) })
-                DropdownMenuItem(text = { Text(stringResource(R.string.timers_new_header)) }, onClick = { menuOpen = false; addingHeader = true })
+            }
+            Box {
+                FloatingActionButton(onClick = { menuOpen = true }) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.timers_add))
+                }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(text = { Text(stringResource(R.string.timers_new_timer)) }, onClick = { menuOpen = false; onOpenTimer(null) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.timers_new_relay)) }, onClick = { menuOpen = false; onOpenRelay(null) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.timers_new_header)) }, onClick = { menuOpen = false; addingHeader = true })
+                }
             }
         }
     }

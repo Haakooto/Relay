@@ -242,3 +242,8 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Same with Stopwatch, then tap a clock widget: it opens on Stopwatch.
 - [ ] Open Settings last, close and reopen: it opens on the pane you used before Settings.
 - [ ] Change language in Settings: you stay on Settings.
+
+### Quick starts beside +
+- [ ] Timers pane: four small buttons (1m 5m 10m 15m) sit left of the + button.
+- [ ] One tap starts that timer. The + menu now only has New timer / New relay / New header.
+- [ ] Change a quick duration in Settings (e.g. to 1h30m): the button shows it and the row still fits.

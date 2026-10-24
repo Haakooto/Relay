@@ -148,7 +148,6 @@
     <string name="timers_library">Library</string>
     <string name="timers_empty">Nothing saved yet. Tap + for a quick timer, or to build a timer or relay.</string>
     <string name="timers_add">Add</string>
-    <string name="timers_quick_start">Quick start</string>
     <string name="timers_new_timer">New timer</string>
     <string name="timers_new_relay">New relay</string>
     <string name="timers_new_header">New header</string>

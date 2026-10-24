@@ -65,8 +65,8 @@ snooze-less wake-up routine.
 
 ## Timers
 
-**Quick timers.** Tap **+** on the Timers pane: the top row starts a 1, 5, 10 or 15 minute timer
-in one tap. You can change the four durations in Settings.
+**Quick timers.** The small buttons left of **+** start a 1, 5, 10 or 15 minute timer in one
+tap. You can change the four durations in Settings.
 
 **New timer.** It has a **label**, a **duration** and a **sound**.
 - **Start** runs it once without saving. The label still shows on the countdown and when it

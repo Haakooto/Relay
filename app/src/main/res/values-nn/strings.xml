@@ -128,7 +128,6 @@
     <string name="timers_library">Bibliotek</string>
     <string name="timers_empty">Ingenting lagra enno. Trykk + for ein rask tidtakar, eller for å lage ein tidtakar eller eit relé.</string>
     <string name="timers_add">Legg til</string>
-    <string name="timers_quick_start">Hurtigstart</string>
     <string name="timers_new_timer">Ny tidtakar</string>
     <string name="timers_new_relay">Nytt relé</string>
     <string name="timers_new_header">Ny overskrift</string>

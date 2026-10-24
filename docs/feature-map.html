@@ -129,8 +129,8 @@
     </div>
 
     <div class="stats">
-      <div class="stat approved"><div class="n">46</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">1</div><div class="l">WIP</div></div>
+      <div class="stat approved"><div class="n">45</div><div class="l">Approved</div></div>
+      <div class="stat wip"><div class="n">2</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">3</div><div class="l">Lacking</div></div>
       <div class="stat"><div class="n">0</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">4</div><div class="l">Deferred</div></div>
@@ -194,7 +194,7 @@
           <tr><td class="feature">Persisted run engine, driven by exact alarms</td><td><span class="chip approved">✓ Approved</span></td><td class="note">One exact alarm (setAlarmClock) per run for the current step end; state in Room. Seamless steps advance from the scheduled end, so late alarms don't stretch a relay. 11 unit tests</td></tr>
           <tr><td class="feature">Timer: Start (unsaved, with label) / Save (library)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Start keeps the label on an unsaved run; Save needs a unique, script-safe label. Labels on unsaved runs are free text</td></tr>
           <tr><td class="feature">Parallel runs of one definition</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Each start is its own run with its own card and notification</td></tr>
-          <tr><td class="feature">Quick-start chips (4, configurable)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">In the + menu, above New timer / relay / header. Durations editable in Settings</td></tr>
+          <tr><td class="feature">Quick-start buttons (4, configurable)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">v1.1: moved out of the + menu to small buttons left of the +, one tap. Durations editable in Settings. Not yet built or device-tested</td></tr>
           <tr><td class="feature">Run controls and Stop / Restart / +1 min at completion</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Pause, resume, reset (to the start, paused), +1 min, stop. At the end: Stop / Restart / +1 min through the ringing screen</td></tr>
           <tr><td class="feature">A run left waiting at a boundary or the end, after a reboot</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">Shows on the Timers pane and in its notification, but doesn't ring again</td></tr>
           <tr><td class="feature">Library with headers and drag-to-reorder</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Drag-to-reorder and header up/down reused from v0.5</td></tr>

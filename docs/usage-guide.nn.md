@@ -66,7 +66,7 @@ ein morgon utan slumreknapp.
 
 ## Tidtakarar
 
-**Raske tidtakarar.** Trykk **+** i Tidtakarar: øvste rad startar ein tidtakar på 1, 5, 10
+**Raske tidtakarar.** Dei små knappane til venstre for **+** startar ein tidtakar på 1, 5, 10
 eller 15 minutt med eitt trykk. Dei fire tidene kan du endre i Innstillingar.
 
 **Ny tidtakar.** Han har **etikett**, **varigheit** og **lyd**.
