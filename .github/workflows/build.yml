@@ -1,4 +1,4 @@
-# Builds Relay on GitHub, since the Pi it's developed on can't.
+# Builds Relay on GitHub, so every dev machine (with or without an Android SDK) gets the same APKs.
 #
 #   pull request to main  -> tests + "Relay Debug" APK, on the release page `dev-pr-<n>`
 #   push to main (merge)  -> tests + signed release APK, on the release page `main-latest`
@@ -14,8 +14,9 @@
 
 name: Build
 
-# Changes that can't affect the APK (docs, issue forms) skip the build. The usage guides are
-# bundled into the app, so they still build. Tag pushes ignore path filters and always build.
+# Changes that can't affect the APK (docs, issue and PR templates, Claude skills) skip the
+# build. The usage guides are bundled into the app, so they still build. Tag pushes ignore path
+# filters and always build.
 on:
   pull_request:
     branches: [main]
@@ -26,6 +27,8 @@ on:
       - "docs/usage-guide*.md"
       - "!.gitignore"
       - "!.github/ISSUE_TEMPLATE/**"
+      - "!.github/pull_request_template.md"
+      - "!.claude/**"
   push:
     branches: [main]
     tags: ["v[0-9]*"]
@@ -35,6 +38,8 @@ on:
       - "docs/usage-guide*.md"
       - "!.gitignore"
       - "!.github/ISSUE_TEMPLATE/**"
+      - "!.github/pull_request_template.md"
+      - "!.claude/**"
 
 permissions:
   contents: write
