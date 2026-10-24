@@ -49,8 +49,6 @@ import com.relay.app.appContainer
 import com.relay.app.data.clock.WidgetConfigEntity
 import com.relay.app.ui.clock.CityPickerDialog
 import com.relay.app.ui.clock.ClockStyleEditor
-import com.relay.app.ui.clock.ColorChoice
-import com.relay.app.ui.common.OptionChips
 import com.relay.app.ui.theme.RelayTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -133,47 +131,7 @@ private fun WidgetConfigScreen(spec: WidgetSpec, is24h: Boolean, onChange: (Widg
         ClockStyleEditor(spec.style) { onChange(spec.copy(style = it)) }
 
         HorizontalDivider()
-        OptionChips(
-            stringResource(R.string.widget_background), WidgetBackground.entries, spec.background,
-            label = {
-                stringResource(
-                    when (it) {
-                        WidgetBackground.FOLLOW_THEME -> R.string.widget_bg_theme
-                        WidgetBackground.TRANSPARENT -> R.string.widget_bg_transparent
-                        WidgetBackground.SOLID -> R.string.widget_bg_solid
-                        WidgetBackground.GRADIENT -> R.string.widget_bg_gradient
-                    },
-                )
-            },
-            onSelect = { onChange(spec.copy(background = it)) },
-        )
-        if (spec.background == WidgetBackground.SOLID || spec.background == WidgetBackground.GRADIENT) {
-            ColorChoice(stringResource(R.string.widget_bg_color), spec.backgroundColor) { onChange(spec.copy(backgroundColor = it)) }
-        }
-        if (spec.background == WidgetBackground.GRADIENT) {
-            ColorChoice(stringResource(R.string.widget_bg_color2), spec.backgroundColor2) { onChange(spec.copy(backgroundColor2 = it)) }
-        }
-        OptionChips(
-            stringResource(R.string.widget_corners), WidgetCorners.entries, spec.corners,
-            label = {
-                stringResource(
-                    when (it) {
-                        WidgetCorners.SHARP -> R.string.widget_corners_sharp
-                        WidgetCorners.ROUNDED -> R.string.widget_corners_rounded
-                        WidgetCorners.PILL -> R.string.widget_corners_pill
-                    },
-                )
-            },
-            onSelect = { onChange(spec.copy(corners = it)) },
-        )
-        OptionChips(
-            stringResource(R.string.widget_border), listOf(0, 1, 2, 4), spec.borderWidthDp,
-            label = { if (it == 0) stringResource(R.string.option_off) else "$it dp" },
-            onSelect = { onChange(spec.copy(borderWidthDp = it)) },
-        )
-        if (spec.borderWidthDp > 0) {
-            ColorChoice(stringResource(R.string.widget_border_color), spec.borderColor) { onChange(spec.copy(borderColor = it)) }
-        }
+        WidgetFrameEditor(spec.frame) { onChange(spec.withFrame(it)) }
     }
 
     if (pickingCity) {

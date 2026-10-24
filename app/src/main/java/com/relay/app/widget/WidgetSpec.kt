@@ -27,6 +27,13 @@ data class WidgetSpec(
     val borderWidthDp: Int = 0,
     val borderColor: Long? = null,
 ) {
+    val frame: WidgetFrame get() = WidgetFrame(background, backgroundColor, backgroundColor2, corners, borderWidthDp, borderColor)
+
+    fun withFrame(f: WidgetFrame) = copy(
+        background = f.background, backgroundColor = f.backgroundColor, backgroundColor2 = f.backgroundColor2,
+        corners = f.corners, borderWidthDp = f.borderWidthDp, borderColor = f.borderColor,
+    )
+
     companion object {
         private val json = Json { ignoreUnknownKeys = true; encodeDefaults = false }
         fun decode(text: String?): WidgetSpec = text?.let { runCatching { json.decodeFromString<WidgetSpec>(it) }.getOrNull() } ?: WidgetSpec()
