@@ -18,14 +18,19 @@ it was the debug build, and the phone/Android version. Fill in what you can from
 (`docs/device-tests.md` lines marked `[!]` have notes; `git describe --tags` gives the latest
 version). Ask only for what is missing **and** matters for reproducing it; one short message.
 
-Severity, highest first:
+Severity is a label, `severity: critical|high|medium|low`. It weighs **impact and how often it
+happens**: a missed ring is the worst impact there is, but one that needs a rare setup (a
+reboot before the first unlock) can still be `low`.
 
-1. **Something that should ring didn't, or rang late or silently.** Always `area: reliability`.
-   Put "does not ring" (or similar) in the title.
-2. Data loss or corruption (an alarm, timer or lap gone or wrong after an update or reboot).
-3. Crash or a stuck screen.
-4. Wrong behaviour with a workaround.
-5. Cosmetic, text or translation.
+| Label | Typical case |
+|---|---|
+| `severity: critical` | Something that should ring didn't, or rang late or silently, in normal use; or data lost |
+| `severity: high` | Crash, stuck screen, or wrong behaviour with no workaround |
+| `severity: medium` | Wrong behaviour with a workaround |
+| `severity: low` | Rare edge case, cosmetic, text or translation |
+
+Anything about ringing is `area: reliability` whatever its severity; put "does not ring" (or
+similar) in the title. Propose a severity with a one-line reason; the user has the last word.
 
 ## 2. Look for a duplicate
 
@@ -73,7 +78,7 @@ Body (British English), matching the bug form in `.github/ISSUE_TEMPLATE/bug_rep
 
 ## Notes
 
-Severity and why. Anything relevant: battery settings, reboot, relay script involved,
+Why this severity. Anything relevant: battery settings, reboot, relay script involved,
 how often it happens.
 
 ## Lead
@@ -85,7 +90,7 @@ Where in the code this probably lives, as a guess: `run/RunRepository.kt` `rearm
 Linked issues, device-test section, spec section.
 ```
 
-Labels: `bug` plus `area: ...`; add `area: reliability` for anything about ringing, re-arming,
+Labels: `bug`, one `severity: ...` and `area: ...`; add `area: reliability` for anything about ringing, re-arming,
 boot or Doze. Add `needs-device-test` only when a fix is built and waiting.
 
 ## 5. Confirm, then create
@@ -93,7 +98,7 @@ boot or Doze. Add `needs-device-test` only when a fix is built and waiting.
 Show the draft and the issues you checked. Create only after the user agrees:
 
 ```bash
-gh issue create --title "..." --label "bug" --label "area: ..." --body-file <tmpfile>
+gh issue create --title "..." --label "bug" --label "severity: ..." --label "area: ..." --body-file <tmpfile>
 ```
 
 Report the URL. If a device-test line was `[!]`, offer to add the issue number to its note.
