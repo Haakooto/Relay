@@ -267,3 +267,9 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Timers pane: four small buttons (1m 5m 10m 15m) sit left of the + button.
 - [ ] One tap starts that timer. The + menu now only has New timer / New relay / New header.
 - [ ] Change a quick duration in Settings (e.g. to 1h30m): the button shows it and the row still fits.
+
+### Running notifications
+- [ ] Start a timer and pull down the shade: its notification sits with the normal ones, not under "Silent", and it made no sound.
+- [ ] Its countdown and buttons (Pause, +1 min, Stop) still work.
+- [ ] Same for a running stopwatch.
+- [ ] Settings → Apps → Relay → Notifications: no old "Timers"/"Stopwatch" duplicates are left.

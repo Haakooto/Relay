@@ -24,8 +24,17 @@ class RunNotifications(private val context: Context) : RunNotices {
     private val manager = context.getSystemService(NotificationManager::class.java)
 
     fun createChannel() {
+        // Default importance, so a running countdown sits with the other notifications instead of
+        // folded away under "Silent" (as the v1.0 LOW channel was). The channel itself has no sound
+        // or vibration, and only-alert-once keeps the ticking updates quiet. Importance can't be
+        // raised on an existing channel, hence the new id.
+        manager.deleteNotificationChannel("timers")
         manager.createNotificationChannel(
-            NotificationChannel(CHANNEL, context.getString(R.string.channel_timers), NotificationManager.IMPORTANCE_LOW),
+            NotificationChannel(CHANNEL, context.getString(R.string.channel_timers), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                setSound(null, null)
+                enableVibration(false)
+                setShowBadge(false)
+            },
         )
     }
 
@@ -38,7 +47,6 @@ class RunNotifications(private val context: Context) : RunNotices {
             .setContentIntent(openApp())
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_STOPWATCH)
             .setSortKey(run.startedAtMillis.toString())
         when (run.phase) {
@@ -97,7 +105,7 @@ class RunNotifications(private val context: Context) : RunNotices {
     private fun tag(runId: String) = "run:$runId"
 
     companion object {
-        private const val CHANNEL = "timers"
+        private const val CHANNEL = "timers_running"
 
         /** "Pasta", or the kind when unlabelled. */
         fun titleFor(context: Context, view: RunView): String = view.run.label.ifBlank {

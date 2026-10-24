@@ -716,7 +716,7 @@
         <li><code>USE_EXACT_ALARM</code>. Google Play auto-grants it to apps whose core function is an alarm clock or timer, so no permission screen is needed and the user can't revoke it by accident. v0.5 used <code>SCHEDULE_EXACT_ALARM</code>, which the user must grant in system settings and can revoke.</li>
         <li><code>USE_FULL_SCREEN_INTENT</code>, gated by <code>canUseFullScreenIntent()</code> on API 34+, with a heads-up fallback.</li>
         <li><code>POST_NOTIFICATIONS</code>, requested at first alarm or timer creation. Battery-optimization exemption, prompted once.</li>
-        <li>Notification channels: ringing alarm, ringing timer, run progress (low), upcoming alarm, stopwatch, errors.</li>
+        <li>Notification channels: ringing alarm, ringing timer, run progress, upcoming alarm, stopwatch, errors. Run progress and stopwatch are default importance with no sound (v1.1): on LOW, Android hid them under "Silent".</li>
       </ul>
     </section>
 
@@ -824,7 +824,7 @@
         <li><strong>Scheduled targets:</strong> Timer, Relay and Stopwatch on the Alarms pane.</li>
         <li><strong>Stopwatch</strong> (persisted).</li>
         <li><strong>Clock pane + ClockStyle renderer + widgets.</strong></li>
-        <li><strong>v1.1:</strong> open on the last pane, quick starts beside the +, the length keypad, warned timers.</li>
+        <li><strong>v1.1:</strong> open on the last pane, quick starts beside the +, the length keypad, warned timers, visible running notifications.</li>
         <li><strong>After 1.0:</strong> automation (standard clock intents, then batch import, then AppFunctions after a spike), Bedtime (after a feasibility spike), extra widgets.</li>
       </ol>
       <p><strong>Status:</strong> steps 1 to 7 are done; "After 1.0" is what's left.</p>
