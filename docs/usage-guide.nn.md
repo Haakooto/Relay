@@ -243,9 +243,10 @@ påminningar, eller alt som er planlagt) og den same bakgrunnen, hjørna og kant
 
 - **Kalender: neste 7 dagar** viser det som kjem, dag for dag. Trykk på ei rad for å opne ho, på
   ein dag for å opne Kalender-ruta der, og **+** for ei ny hending.
-- **Kalender: månad** er månaden frå ruta i lite format. **‹** og **›** byter månad, og trykk på
-  ein dag vel han, rett på heimeskjermen; namnet på månaden opnar Kalender-ruta. Er han høg nok,
-  viser han planane for den valde dagen under rutenettet.
+- **Kalender: månad** viser månaden med planane for kvar dag som små merke, farga etter slag
+  (hendingar, påminningar, alarmar), og «+n» når ikkje alle får plass; ein høgare modul får plass
+  til fleire. **‹** og **›** byter månad rett på heimeskjermen; trykk på ein dag eller namnet på
+  månaden opnar Kalender-ruta der.
 
 Dei blir oppdaterte når du endrar noko i Relay, og ved midnatt.
 

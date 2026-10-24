@@ -8,6 +8,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
+import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -23,13 +24,18 @@ import com.relay.app.util.TimeText
 import com.relay.app.widget.WidgetFrame
 import com.relay.app.widget.WidgetFrameRenderer
 
-/** The widget's background, shape and border, drawn to fill it; content goes on top. */
+/**
+ * The widget's background, shape and border, stretched over the whole widget; content goes on
+ * top. Stretched, not fitted: Glance's default (fit) can leave the frame narrower than the widget
+ * and centred, with the content spilling past its edges.
+ */
 @Composable
 fun FrameBackground(context: Context, frame: WidgetFrame) {
     val size = LocalSize.current
     Image(
         provider = ImageProvider(WidgetFrameRenderer.render(context, frame, size.width.value, size.height.value)),
         contentDescription = null,
+        contentScale = ContentScale.FillBounds,
         modifier = GlanceModifier.fillMaxSize(),
     )
 }

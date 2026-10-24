@@ -337,11 +337,13 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Show → Everything scheduled: your alarms appear too; tapping one opens the alarm editor.
 
 ### Month widget
-- [ ] Place it (3×3): this month's grid with dots; today is bold and selected.
+- [ ] Place it (3×3): all seven weekday columns show their dates; today's number is in a filled pill.
+- [ ] Days with plans show a label per item with its title: events, reminders and alarms in three colours.
+- [ ] A day with more than fits shows "+n" in its last slot. Make the widget taller: more labels fit.
 - [ ] Tap › and ‹: the month changes in the widget without opening Relay.
-- [ ] Tap a day: it becomes highlighted. Tap the month name: Relay opens on that day.
-- [ ] Make it taller: the selected day's items list under the grid; tap one to open it.
+- [ ] Tap a day: Relay opens on that day. Tap the month name: Relay opens on that month.
 - [ ] Settings → first day of week → Sunday: the widget's grid starts on Sunday after a moment.
+- [ ] Agenda and month: the text sits inside the background, not past its left edge.
 
 ### Looks and updates
 - [ ] Solid light colour background: the text turns dark; dark colour: light text. Gradient and border look like the clock's.

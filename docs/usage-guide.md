@@ -240,9 +240,10 @@ or everything scheduled) and the same background, corners and border as the cloc
 
 - **Calendar: next 7 days** lists what's coming, day by day. Tap a row to open it, a day to open
   the Calendar pane there, and **+** for a new event.
-- **Calendar: month** is the pane's month in small. **‹** and **›** change month and tapping a
-  day selects it, right on the home screen; the month's name opens the Calendar pane. Made tall
-  enough, it lists the selected day's plans under the grid.
+- **Calendar: month** shows the month with each day's plans as small labels, coloured by kind
+  (events, reminders, alarms), and "+n" when they don't all fit; a taller widget fits more.
+  **‹** and **›** change month right on the home screen; tapping a day or the month's name opens
+  the Calendar pane there.
 
 They update when you change something in Relay and at midnight.
 
