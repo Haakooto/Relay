@@ -235,7 +235,10 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Headings, lists, the code example and the tables read well; `code` bits are monospace.
 - [ ] In Norsk, the guide is the Nynorsk one.
 
-## Uncommitted: v1.1 requests (not yet compiled)
+## v1.1 requests (PR #1, merged)
+
+> Accepted on-device as a whole ("Testing it, I am happy"), not line by line. The boxes left
+> open are worth a look when convenient; a broken one becomes a bug issue.
 
 ### Last pane
 - [ ] Open Timers, leave the app (home), swipe it away from recents, open it again: it opens on Timers.
