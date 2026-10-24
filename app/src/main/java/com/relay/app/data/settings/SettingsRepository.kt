@@ -54,6 +54,10 @@ data class AppSettings(
     /** Null = no home clock. When set and different from the phone's zone, the Clock pane shows it. */
     val homeZoneId: String? = null,
 
+    // Calendar (spec §10b).
+    /** Show alarms and scheduled starts too, not just events and reminders. */
+    val calendarShowAll: Boolean = false,
+
     // Navigation.
     /** Route of the main pane last opened; the app and its widgets open there. Null = Alarms. */
     val lastPane: String? = null,
@@ -82,6 +86,7 @@ class SettingsRepository(context: Context) {
             longRelayWarningHours = prefs[LONG_RELAY_HOURS] ?: 24,
             mainClockStyle = prefs[MAIN_CLOCK_STYLE],
             homeZoneId = prefs[HOME_ZONE],
+            calendarShowAll = prefs[CALENDAR_SHOW_ALL] ?: false,
             lastPane = prefs[LAST_PANE],
         )
     }
@@ -111,6 +116,7 @@ class SettingsRepository(context: Context) {
     suspend fun setLongRelayWarningHours(value: Int) = store.edit { it[LONG_RELAY_HOURS] = value }
     suspend fun setMainClockStyle(json: String) = store.edit { it[MAIN_CLOCK_STYLE] = json }
     suspend fun setHomeZoneId(value: String?) = store.edit { if (value == null) it.remove(HOME_ZONE) else it[HOME_ZONE] = value }
+    suspend fun setCalendarShowAll(value: Boolean) = store.edit { it[CALENDAR_SHOW_ALL] = value }
     suspend fun setLastPane(route: String) = store.edit { it[LAST_PANE] = route }
 
     private companion object {
@@ -129,6 +135,7 @@ class SettingsRepository(context: Context) {
         val LONG_RELAY_HOURS = intPreferencesKey("long_relay_warning_hours")
         val MAIN_CLOCK_STYLE = stringPreferencesKey("main_clock_style")
         val HOME_ZONE = stringPreferencesKey("home_zone_id")
+        val CALENDAR_SHOW_ALL = booleanPreferencesKey("calendar_show_all")
         val LAST_PANE = stringPreferencesKey("last_pane")
         const val MAX_PLAN_CEILING = 1000
     }

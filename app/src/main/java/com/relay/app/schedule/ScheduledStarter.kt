@@ -9,21 +9,28 @@ import com.relay.app.run.RelaySpec
 import com.relay.app.run.TimerSpec
 import com.relay.app.stopwatch.StopwatchRepository
 
+/** Posts the notification for a [TargetKind.NOTIFY] schedule. Implemented by `ReminderNotifications`. */
+fun interface ReminderPoster {
+    suspend fun post(s: ScheduleEntity)
+}
+
 /**
- * Starts a schedule's non-ringing target (spec §04): a saved or inline timer or relay, or a
- * stopwatch. A failure (deleted definition, broken script) comes back as a message, so the
- * caller can ring instead: a scheduled start must never fail silently.
+ * Starts a schedule's non-ringing target (spec §04): a notification, a saved or inline timer or
+ * relay, or a stopwatch. A failure (deleted definition, broken script) comes back as a message,
+ * so the caller can ring instead: a scheduled start must never fail silently.
  */
 class ScheduledStarter(
     private val library: LibraryRepository,
     private val stopwatches: StopwatchRepository,
     private val settings: SettingsRepository,
+    private val reminders: ReminderPoster,
 ) {
     suspend fun start(s: ScheduleEntity): Result<Unit> = runCatching {
         val spec = TargetSpec.decode(s.targetSpec)
         val startedBy = s.id
         when (s.target) {
             TargetKind.RING -> error("ring targets don't start anything")
+            TargetKind.NOTIFY -> reminders.post(s)
             TargetKind.TIMER -> {
                 if (s.targetDefId != null) {
                     library.startTimer(s.targetDefId, startedBy) ?: throw MissingTarget()

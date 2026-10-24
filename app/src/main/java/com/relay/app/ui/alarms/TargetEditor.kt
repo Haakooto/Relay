@@ -68,7 +68,7 @@ class TargetEditor(private val container: AppContainer, private val scope: Corou
 
     /** Whether Save can work: a ring or a notification always can; a target needs something valid to start. */
     fun canSave(d: TargetDraft = _state.value): Boolean = when (d.target) {
-        TargetKind.RING, TargetKind.STOPWATCH -> true
+        TargetKind.RING, TargetKind.NOTIFY, TargetKind.STOPWATCH -> true
         TargetKind.TIMER -> d.targetDefId != null || d.inlineTimerSeconds != null
         TargetKind.RELAY -> d.targetDefId != null || (d.inlineRelaySeconds != null && d.inlineError == null)
     }
@@ -104,7 +104,9 @@ class TargetEditor(private val container: AppContainer, private val scope: Corou
         val now = NowClock.now()
         val timerSeconds = runCatching { ChainLang.run("(${s.spec.durationExpr})", now).singleOrNull()?.durationSeconds }.getOrNull()
         val (relaySeconds, relayError) = try {
-            val plan = container.library.builder().forRelay(RelaySpec(s.spec.label.ifBlank { "(this relay)" }, s.spec.script, SoundSpec(), s.spec.mode, s.spec.tone))
+            val label = s.spec.label.ifBlank { "(this relay)" }
+            val relay = RelaySpec(label, s.spec.script, SoundSpec(), s.spec.mode, s.spec.tone)
+            val plan = container.library.builder().forRelay(relay)
             plan.sumOf { it.seconds } to null
         } catch (e: ChainLangException) {
             null to e.message
@@ -121,7 +123,9 @@ class TargetEditor(private val container: AppContainer, private val scope: Corou
                 TimerDefEntity(id, s.spec.label.trim(), s.spec.durationExpr.trim(), SoundSpec(), null, System.currentTimeMillis()),
             )
             TargetKind.RELAY -> container.library.saveRelay(
-                RelayDefEntity(id, s.spec.label.trim(), s.spec.script, SoundSpec(), s.spec.mode, s.spec.tone, "", null, System.currentTimeMillis()),
+                RelayDefEntity(
+                    id, s.spec.label.trim(), s.spec.script, SoundSpec(), s.spec.mode, s.spec.tone, "", null, System.currentTimeMillis(),
+                ),
             )
             else -> return@launch
         }
@@ -143,7 +147,8 @@ class TargetEditor(private val container: AppContainer, private val scope: Corou
         _state.update {
             it.copy(
                 savedTimers = items.filter { i -> i.kind == BlockKind.TIMER }.map { i -> SavedBlock(i.id, i.label, i.totalSeconds, 1) },
-                savedRelays = items.filter { i -> i.kind == BlockKind.RELAY }.map { i -> SavedBlock(i.id, i.label, i.totalSeconds, relaySteps[i.id]) },
+                savedRelays = items.filter { i -> i.kind == BlockKind.RELAY }
+                    .map { i -> SavedBlock(i.id, i.label, i.totalSeconds, relaySteps[i.id]) },
                 labelCandidates = items.map { i -> i.label }.sorted(),
             )
         }

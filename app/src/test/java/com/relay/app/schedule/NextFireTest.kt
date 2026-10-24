@@ -123,4 +123,51 @@ class NextFireTest {
         assertEquals(LocalDate.parse("2026-09-30"), NextFire.nextDateFor(7, 0, at("2026-09-30T06:00"), zone))
         assertEquals(LocalDate.parse("2026-10-01"), NextFire.nextDateFor(7, 0, at("2026-09-30T07:00"), zone))
     }
+
+    // Calendar reminders (spec §10b): monthly and yearly repeats, a start bound, a lead time.
+
+    @Test fun monthlyOn31stSkipsShortMonths() {
+        val s = schedule().copy(repeatMonthDay = 31)
+        assertEquals(at("2026-10-31T07:00"), next(s, "2026-09-30T06:00"))
+        assertEquals(at("2026-12-31T07:00"), next(s, "2026-10-31T08:00")) // no 31 November
+    }
+
+    @Test fun yearly29FebruaryOnlyInLeapYears() =
+        assertEquals(at("2028-02-29T07:00"), next(schedule().copy(repeatMonthDay = 29, repeatMonth = 2), "2026-09-30T06:00"))
+
+    @Test fun yearlyIsThatMonthOnly() =
+        assertEquals(at("2027-03-15T07:00"), next(schedule().copy(repeatMonthDay = 15, repeatMonth = 3), "2026-09-30T06:00"))
+
+    @Test fun leadCrossesMidnight() {
+        val s = schedule(hour = 0, minute = 10, oneOff = "2026-10-01").copy(leadMinutes = 15)
+        assertEquals(at("2026-09-30T23:55"), next(s, "2026-09-30T06:00"))
+    }
+
+    @Test fun monthlyLeadCrossesMonthEnd() {
+        val s = schedule(hour = 0, minute = 10).copy(repeatMonthDay = 1, leadMinutes = 15)
+        assertEquals(at("2026-09-30T23:55"), next(s, "2026-09-30T06:00"))
+    }
+
+    @Test fun leadAlreadyPassedMovesToNextOccurrence() =
+        // Today's 07:00 is ahead, but its 06:00 reminder isn't; next is Friday's.
+        assertEquals(at("2026-10-02T06:00"), next(schedule(days = setOf(WEDNESDAY, FRIDAY)).copy(leadMinutes = 60), "2026-09-30T06:30"))
+
+    @Test fun startBoundHoldsBackTheRepeat() {
+        val s = schedule(days = setOf(WEDNESDAY)).copy(startEpochDay = day("2026-10-14"))
+        assertEquals(at("2026-10-14T07:00"), next(s, "2026-09-30T06:00"))
+    }
+
+    @Test fun monthlyIsRepeating() {
+        assertEquals(true, schedule().copy(repeatMonthDay = 5).isRepeating)
+        assertEquals(false, schedule(oneOff = "2026-10-01").isRepeating)
+    }
+
+    @Test fun recurrenceRules() {
+        val d = LocalDate.parse("2026-04-30")
+        assertEquals(true, Recurrence.occursOn(d, 0, 30, null))
+        assertEquals(false, Recurrence.occursOn(d, 0, 31, null))
+        assertEquals(true, Recurrence.occursOn(d, 0, 30, 4))
+        assertEquals(false, Recurrence.occursOn(d, 0, 30, 5))
+        assertEquals(true, Recurrence.occursOn(d, WeekdayMask.of(setOf(java.time.DayOfWeek.THURSDAY)), null, null))
+    }
 }

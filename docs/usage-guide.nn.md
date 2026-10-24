@@ -5,8 +5,8 @@ moduler på heimeskjermen. Det som skil Relay ut: tidtakarar kan lenkjast saman 
 alarmar kan **starte** ein tidtakar, eit relé eller ei stoppeklokke i staden for berre å ringje,
 og stoppeklokker har **rundar med merkelappar som kan rettast**.
 
-Dei fem rutene nedst er Alarmar, Tidtakarar, Stoppeklokke, Klokke og Innstillingar. Relay opnar
-på ruta du brukte sist.
+Dei fem rutene nedst er Alarmar, Kalender, Tidtakarar, Stoppeklokke og Klokke. Relay opnar på
+ruta du brukte sist. **Innstillingar** er tannhjulet øvst til høgre i kvar rute.
 
 ---
 
@@ -50,6 +50,7 @@ Under **Når han går av** kan ein alarm gjere meir enn å ringje:
 | Val | Ved alarmtida |
 |---|---|
 | **Ring** | Ein vanleg alarm. |
+| **Varsle** | Viser eit varsel med vanleg lyd. Ingenting ringjer, og det er inga slumring. |
 | **Start ein tidtakar** | Startar ein lagra tidtakar, eller ein **Ny** du lagar der og då. |
 | **Start eit relé** | Startar eit lagra relé, eller eit **Nytt** du skriv der og då. |
 | **Start ei stoppeklokke** | Lagar ei stoppeklokke med namnet, startpunktet og merkelappane du gjev, og startar ho. |
@@ -61,6 +62,33 @@ gjer ein ny tidtakar eller eit nytt relé om til ein lagra.
 
 Døme: ein alarm kvar vekedag kl. 06:30 som startar *Vekk*-reléet ditt (sjå nedanfor), gjev deg
 ein morgon utan slumreknapp.
+
+---
+
+## Kalender
+
+Kalender-ruta er for planlegging: **hendingar** (med start, valfri slutt og eit notat) og
+**påminningar** (eitt tidspunkt). Trykk **+** for kva du vil; det byrjar på dagen du har valt.
+
+**Månaden.** Dagar med noko på har prikkar. Trykk på ein dag for å sjå han under rutenettet; dra
+sidelengs eller bruk pilene for å byte månad, og **I dag** for å kome tilbake. Vala øvst byter
+mellom **Hendingar og påminningar** og **Alt som er planlagt**, som òg viser alarmane dine og
+alarmar som startar tidtakarar, relé eller stoppeklokker (frå i dag og framover).
+
+**Ei hending** varer heile dagen eller har eit starttidspunkt, og kan slutte seinare same dagen
+eller ein seinare dag. Under **Påminning** vel du når du vil bli minna på (når ho byrjar,
+minutt eller ein dag før; for ei heildagshending kl. 09:00 same dagen eller dagen før) og kva som
+skal skje. **Varsle** er standard; Ring og å starte ein tidtakar, eit relé eller ei stoppeklokke
+verkar som for alarmar.
+
+**Ei påminning** går av på sitt eige tidspunkt og varslar deg som standard.
+
+**Gjenta**: kvar veke på valde dagar, kvar månad på same dato, eller kvart år. Ein månad utan
+den datoen blir hoppa over (den 31. kvar månad hoppar over april; 29. februar kvart år kjem
+berre i skotår), og redigeringa åtvarar deg. **Sluttar**: aldri, eller på ein dato.
+
+Ei påminning der tida alt er passert, blir lagra, men går ikkje av. Slettar du ei hending, blir
+påminninga sletta òg. Påminningar kjem ikkje i alarmlista.
 
 ---
 

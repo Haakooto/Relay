@@ -4,8 +4,8 @@ Relay replaces the stock Clock app: alarms, timers, stopwatches, a world clock a
 widgets. What sets it apart: timers can be chained into **relays**, alarms can **start** a timer,
 relay or stopwatch instead of just ringing, and stopwatches keep **tagged, correctable laps**.
 
-The five panes along the bottom are Alarms, Timers, Stopwatch, Clock and Settings. Relay opens
-on the pane you used last.
+The five panes along the bottom are Alarms, Calendar, Timers, Stopwatch and Clock. Relay opens
+on the pane you used last. **Settings** is the gear at the top right of every pane.
 
 ---
 
@@ -49,6 +49,7 @@ Under **When it goes off**, an alarm can do more than ring:
 | Choice | At the alarm time |
 |---|---|
 | **Ring** | A normal alarm. |
+| **Notify** | Shows a notification with its usual sound. Nothing rings, and there is no snooze. |
 | **Start a timer** | Starts a saved timer, or a **New** one you define right there. |
 | **Start a relay** | Starts a saved relay, or a **New** one written right there. |
 | **Start a stopwatch** | Creates a stopwatch with the name, start offset and tags you give, and starts it. |
@@ -60,6 +61,32 @@ turns a new timer or relay into a saved one.
 
 Example: a repeating weekday alarm at 06:30 that starts your *Wake* relay (below) gives you a
 snooze-less wake-up routine.
+
+---
+
+## Calendar
+
+The Calendar pane is for planning: **events** (with a start, an optional end and a note) and
+**reminders** (a single moment). Tap **+** for either; it starts on the day you have selected.
+
+**The month.** Days with something on have dots. Tap a day to list it below the grid; swipe
+sideways or use the arrows to change month, and **Today** to come back. The chips at the top
+switch between **Events and reminders** and **Everything scheduled**, which also shows your
+alarms and alarms that start timers, relays or stopwatches (from today on).
+
+**An event** is all day or has a start time, and can end later that day or on a later day.
+Under **Reminder**, pick when to be reminded (at the start, minutes or a day before; for an
+all-day event, 09:00 on the day or the day before) and what happens then. **Notify** is the
+default; Ring and starting a timer, relay or stopwatch work as for alarms.
+
+**A reminder** goes off at its own time and notifies you by default.
+
+**Repeat**: weekly on chosen days, monthly on the same date, or yearly. A month without that
+date is skipped (a monthly 31st skips April; a yearly 29 February only comes in leap years), and
+the editor warns you. **Ends**: never, or on a date.
+
+A reminder whose time has already passed is saved but won't go off. Deleting an event deletes
+its reminder too. Reminders don't appear in the Alarms list.
 
 ---
 

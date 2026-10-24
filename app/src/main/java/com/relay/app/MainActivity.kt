@@ -23,7 +23,8 @@ class MainActivity : ComponentActivity() {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
             settings?.let {
                 // Read once: the start pane must not change under the NavHost when it's saved.
-                val startPane = remember { it.lastPane }
+                // A reminder notification asks for its pane; RelayApp ignores anything unknown.
+                val startPane = remember { intent?.getStringExtra(EXTRA_PANE) ?: it.lastPane }
                 RelayTheme(theme = it.theme) {
                     RelayApp(
                         startRoute = startPane,
@@ -32,5 +33,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        /** Optional: the route of the main pane to open on. */
+        const val EXTRA_PANE = "pane"
     }
 }

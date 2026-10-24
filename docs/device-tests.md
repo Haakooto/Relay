@@ -276,3 +276,44 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Its countdown and buttons (Pause, +1 min, Stop) still work.
 - [ ] Same for a running stopwatch.
 - [ ] Settings → Apps → Relay → Notifications: no old "Timers"/"Stopwatch" duplicates are left.
+
+## PR: Calendar pane, events and reminders (#14)
+
+### Navigation and Settings
+- [ ] The bottom bar shows Alarms, Calendar, Timers, Stopwatch, Clock; Settings is gone from it.
+- [ ] The gear at the top right of every pane opens Settings; its back arrow returns to that pane.
+- [ ] Installing this build over the last one keeps every alarm, timer, relay and stopwatch (database v7 → v8).
+
+### Month grid
+- [ ] Calendar opens on this month with today circled. Arrows and a sideways swipe change month.
+- [ ] Tap a day: it fills in, and its items list below. "Today" brings you back.
+- [ ] With TalkBack, a day reads its date and how many items it has.
+- [ ] Settings → first day of the week → Sunday: the grid starts on Sunday.
+
+### Events
+- [ ] + → New event on a selected day: the editor opens on that day. Save with a title, 10:00 to 11:00: it shows on that day as "10:00–11:00" with a dot in the grid.
+- [ ] Set the end before the start: a red note appears and Save is disabled.
+- [ ] All day on: the times disappear; the reminder offers "09:00 on the day" and "09:00 the day before".
+- [ ] Last day two days later: the event shows on all three days, marked "Continues" after the first.
+- [ ] Back with unsaved changes asks to save or discard.
+- [ ] Delete asks first and says the reminder goes too; afterwards the day is empty.
+
+### Reminders and Notify
+- [ ] New reminder 2 minutes out (Notify, the default), lock the phone: a notification arrives with its title and time and a sound. No ringing screen.
+- [ ] Tap the notification: Relay opens on Calendar.
+- [ ] Event 20 minutes out with "15 min before": the notification comes 5 minutes from now and says "Today · HH:MM".
+- [ ] Change a reminder to Ring: it rings like an alarm, with snooze.
+- [ ] A reminder never shows in the Alarms list.
+- [ ] Save a reminder in the past: the toast says the time has passed, and nothing goes off.
+- [ ] Reboot with a reminder due in 5 minutes: it still notifies on time.
+- [ ] An alarm with "When it goes off: Notify" shows "Shows a notification" in the Alarms list and notifies instead of ringing.
+
+### Repeats
+- [ ] Monthly on the 31st: the editor warns it skips months without day 31; the grid skips 30 November.
+- [ ] Yearly on 29 February: the editor says "Only in leap years".
+- [ ] Weekly on Mon and Wed, ends on a date: dots only on those days, up to that date.
+- [ ] A monthly reminder still goes off the next month after it first notified.
+
+### Everything scheduled
+- [ ] The "Everything scheduled" chip adds your alarms (from today on) to the grid and the list; tapping one opens the alarm editor.
+- [ ] Switch back to "Events and reminders": alarms disappear. Leave and come back: the choice is kept.

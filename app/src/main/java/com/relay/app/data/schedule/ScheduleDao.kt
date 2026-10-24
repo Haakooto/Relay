@@ -16,6 +16,9 @@ interface ScheduleDao {
     @Query("SELECT * FROM schedules WHERE id = :id")
     suspend fun get(id: String): ScheduleEntity?
 
+    @Query("SELECT * FROM schedules WHERE eventId = :eventId")
+    suspend fun forEvent(eventId: String): List<ScheduleEntity>
+
     @Upsert
     suspend fun upsert(schedule: ScheduleEntity)
 

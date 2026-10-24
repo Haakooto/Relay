@@ -7,6 +7,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -18,24 +20,27 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.relay.app.R
-import com.relay.app.ui.alarms.AlarmEditScreen
-import com.relay.app.ui.alarms.AlarmsScreen
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
+import com.relay.app.data.event.EventKind
 import com.relay.app.guide.GuideScreen
 import com.relay.app.guide.GuideSection
 import com.relay.app.guide.LocalOpenGuide
+import com.relay.app.ui.alarms.AlarmEditScreen
+import com.relay.app.ui.alarms.AlarmsScreen
+import com.relay.app.ui.calendar.CalendarScreen
+import com.relay.app.ui.calendar.EventEditScreen
 import com.relay.app.ui.clock.ClockScreen
 import com.relay.app.ui.clock.ClockStyleScreen
+import com.relay.app.ui.common.LocalOpenSettings
+import com.relay.app.ui.settings.SettingsScreen
 import com.relay.app.ui.stopwatch.StopwatchScreen
 import com.relay.app.ui.timers.RelayEditScreen
 import com.relay.app.ui.timers.TimerEditScreen
 import com.relay.app.ui.timers.TimersScreen
-import com.relay.app.ui.settings.SettingsScreen
 
 /**
  * [startRoute]: the main pane last opened (saved through [onPaneOpened]), so the launcher icon
- * and the widgets open where the user left off. Settings isn't remembered: it's a detour.
+ * and the widgets open where the user left off. Settings isn't remembered: it's a detour, opened
+ * from the gear in each pane's header.
  */
 @Composable
 fun RelayApp(startRoute: String? = null, onPaneOpened: (String) -> Unit = {}) {
@@ -47,12 +52,16 @@ fun RelayApp(startRoute: String? = null, onPaneOpened: (String) -> Unit = {}) {
         current?.route?.takeIf { route -> REMEMBERED_PANES.any { it.route == route } }?.let(onPaneOpened)
     }
 
-    // Editors are modal: no bottom bar, so leaving means saving or discarding.
-    val inEditor = current?.route?.let { route -> route == CLOCK_STYLE || (EDITOR_ROUTES + GUIDE).any { route.startsWith("$it/") } } == true
+    // Editors are modal: no bottom bar, so leaving means saving or discarding. Settings and the
+    // guide are detours with a back arrow.
+    val inEditor = current?.route?.let { route ->
+        route == CLOCK_STYLE || route == SETTINGS || (EDITOR_ROUTES + GUIDE).any { route.startsWith("$it/") }
+    } == true
 
     val openGuide: (GuideSection?) -> Unit = { navController.navigate("$GUIDE/${it?.name ?: NEW}") }
+    val openSettings: () -> Unit = { navController.navigate(SETTINGS) { launchSingleTop = true } }
 
-    CompositionLocalProvider(LocalOpenGuide provides openGuide) {
+    CompositionLocalProvider(LocalOpenGuide provides openGuide, LocalOpenSettings provides openSettings) {
     Scaffold(
         bottomBar = {
             if (!inEditor) NavigationBar {
@@ -85,6 +94,22 @@ fun RelayApp(startRoute: String? = null, onPaneOpened: (String) -> Unit = {}) {
                 val id = entry.arguments?.getString("id")?.takeIf { it != NEW }
                 AlarmEditScreen(scheduleId = id, onDone = { navController.popBackStack() })
             }
+            composable(Pane.CALENDAR.route) {
+                CalendarScreen(
+                    onOpenItem = { id -> navController.navigate("$EVENT_EDIT/$id/${EventKind.EVENT.name}/0") },
+                    onNewItem = { kind, day -> navController.navigate("$EVENT_EDIT/$NEW/${kind.name}/${day.toEpochDay()}") },
+                    onOpenAlarm = { id -> navController.navigate("$ALARM_EDIT/$id") },
+                )
+            }
+            composable("$EVENT_EDIT/{id}/{kind}/{day}") { entry ->
+                val args = entry.arguments
+                EventEditScreen(
+                    eventId = args?.getString("id")?.takeIf { it != NEW },
+                    kind = EventKind.entries.firstOrNull { it.name == args?.getString("kind") } ?: EventKind.EVENT,
+                    day = args?.getString("day")?.toLongOrNull()?.let(java.time.LocalDate::ofEpochDay),
+                    onDone = { navController.popBackStack() },
+                )
+            }
             composable(Pane.TIMERS.route) {
                 TimersScreen(
                     onOpenTimer = { id -> navController.navigate("$TIMER_EDIT/${id ?: NEW}") },
@@ -104,7 +129,7 @@ fun RelayApp(startRoute: String? = null, onPaneOpened: (String) -> Unit = {}) {
                 val section = entry.arguments?.getString("section")?.let { s -> GuideSection.entries.firstOrNull { it.name == s } }
                 GuideScreen(section, onBack = { navController.popBackStack() })
             }
-            composable(Pane.SETTINGS.route) { SettingsScreen() }
+            composable(SETTINGS) { SettingsScreen(onBack = { navController.popBackStack() }) }
         }
     }
     }
@@ -116,5 +141,7 @@ private const val RELAY_EDIT = "relay"
 private const val NEW = "new"
 private const val CLOCK_STYLE = "clockstyle"
 private const val GUIDE = "guide"
-private val EDITOR_ROUTES = listOf(ALARM_EDIT, TIMER_EDIT, RELAY_EDIT)
-private val REMEMBERED_PANES = listOf(Pane.ALARMS, Pane.TIMERS, Pane.STOPWATCH, Pane.CLOCK)
+private const val EVENT_EDIT = "event"
+private const val SETTINGS = "settings"
+private val EDITOR_ROUTES = listOf(ALARM_EDIT, TIMER_EDIT, RELAY_EDIT, EVENT_EDIT)
+private val REMEMBERED_PANES = Pane.entries

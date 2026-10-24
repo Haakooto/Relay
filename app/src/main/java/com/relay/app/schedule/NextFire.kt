@@ -11,12 +11,31 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /**
+ * Which days a repeating schedule or calendar item lands on (spec §04, §10b). One rule for both,
+ * so a reminder fires on exactly the days the calendar shows.
+ */
+object Recurrence {
+    /**
+     * Monthly when only [monthDay] is set, yearly when [month] is too, else weekly on the
+     * [weekdays] mask. A month without [monthDay] (a 31st, a 29 February) has no occurrence.
+     */
+    fun occursOn(day: LocalDate, weekdays: Int, monthDay: Int?, month: Int?): Boolean = when {
+        monthDay != null && month != null -> day.monthValue == month && day.dayOfMonth == monthDay
+        monthDay != null -> day.dayOfMonth == monthDay
+        else -> WeekdayMask.contains(weekdays, day.dayOfWeek)
+    }
+}
+
+/**
  * Pure time math for schedules, no Android dependency, so it's unit-tested on the JVM.
  * Kept free of side effects: [ScheduleRepository] decides what to do with the answers.
  */
 object NextFire {
     /** Far enough to cross any realistic run of skip exceptions (a long trip). */
     private const val SEARCH_DAYS = 800L
+
+    /** A yearly 29 February can be eight years away (2096 to 2104). */
+    private const val YEARLY_SEARCH_DAYS = 8 * 366L
 
     /**
      * The next time [schedule] should fire strictly after [now], or null if it never will.
@@ -38,25 +57,29 @@ object NextFire {
         val nowZoned = now.atZone(zone)
         if (!schedule.isRepeating) {
             val day = LocalDate.ofEpochDay(schedule.oneOffEpochDay ?: return null)
-            val time = timeOn(day, schedule, exceptions) ?: return null
-            val at = ZonedDateTime.of(day, time, zone)
+            val at = fireOn(day, schedule, exceptions, zone) ?: return null
             return at.takeIf { it.isAfter(nowZoned) }
         }
         if (schedule.remainingCount != null && schedule.remainingCount <= 0) return null
 
-        var day = nowZoned.toLocalDate()
-        repeat(SEARCH_DAYS.toInt()) {
+        // A lead time only moves fires earlier, so no occurrence before today can fire after now.
+        var day = maxOf(nowZoned.toLocalDate(), schedule.startEpochDay?.let(LocalDate::ofEpochDay) ?: LocalDate.MIN)
+        val searchDays = if (schedule.repeatMonth != null) YEARLY_SEARCH_DAYS else SEARCH_DAYS
+        repeat(searchDays.toInt()) {
             if (schedule.endEpochDay != null && day.toEpochDay() > schedule.endEpochDay) return null
-            if (WeekdayMask.contains(schedule.repeatDays, day.dayOfWeek)) {
-                val time = timeOn(day, schedule, exceptions)
-                if (time != null) {
-                    val at = ZonedDateTime.of(day, time, zone)
-                    if (at.isAfter(nowZoned)) return at
-                }
+            if (Recurrence.occursOn(day, schedule.repeatDays, schedule.repeatMonthDay, schedule.repeatMonth)) {
+                val at = fireOn(day, schedule, exceptions, zone)
+                if (at != null && at.isAfter(nowZoned)) return at
             }
             day = day.plusDays(1)
         }
         return null
+    }
+
+    /** When the occurrence on [day] fires: its time less the lead, or null if an exception skips it. */
+    private fun fireOn(day: LocalDate, schedule: ScheduleEntity, exceptions: List<ScheduleExceptionEntity>, zone: ZoneId): ZonedDateTime? {
+        val time = timeOn(day, schedule, exceptions) ?: return null
+        return ZonedDateTime.of(day, time, zone).minusMinutes(schedule.leadMinutes.toLong())
     }
 
     /**

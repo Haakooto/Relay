@@ -61,6 +61,7 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
     private val container = application.appContainer
     private val _state = MutableStateFlow(AlarmEditState())
     val state: StateFlow<AlarmEditState> = _state.asStateFlow()
+
     /** What it fires (spec §04). */
     val fires = TargetEditor(container, viewModelScope)
 
@@ -168,7 +169,7 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
     private suspend fun refreshExceptions() {
         val id = _state.value.id
         val exceptions = if (_state.value.isNew) emptyList() else container.schedules.exceptionsFor(id)
-        val others = container.schedules.all().filter { it.id != id }
+        val others = container.schedules.all().filter { it.id != id && it.eventId == null }
             .sortedBy { it.hour * 60 + it.minute }
             .map { OtherAlarm(it.id, it.hour, it.minute, it.label) }
         _state.update { it.copy(exceptions = exceptions, others = others) }

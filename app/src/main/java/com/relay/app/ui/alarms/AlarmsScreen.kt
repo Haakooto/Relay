@@ -37,10 +37,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
-import com.relay.app.guide.GuideSection
-import com.relay.app.ui.common.PaneHeader
 import com.relay.app.data.schedule.WeekdayMask
+import com.relay.app.guide.GuideSection
 import com.relay.app.schedule.AlarmListItem
+import com.relay.app.ui.common.PaneHeader
 import com.relay.app.util.RelativeText
 import com.relay.app.util.TimeText
 import kotlinx.coroutines.delay
@@ -166,6 +166,7 @@ private fun targetText(s: com.relay.app.data.schedule.ScheduleEntity, blockLabel
     val saved = s.targetDefId?.let { blockLabels[it] ?: stringResource(R.string.target_missing) }
     return when (s.target) {
         com.relay.app.data.schedule.TargetKind.RING -> null
+        com.relay.app.data.schedule.TargetKind.NOTIFY -> stringResource(R.string.alarm_notifies)
         com.relay.app.data.schedule.TargetKind.TIMER ->
             saved?.let { stringResource(R.string.alarm_starts_timer, it) } ?: stringResource(R.string.alarm_starts_new_timer, spec.durationExpr)
         com.relay.app.data.schedule.TargetKind.RELAY ->

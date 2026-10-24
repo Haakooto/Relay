@@ -6,15 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.relay.app.data.library.LibraryHeaderDao
 import com.relay.app.data.clock.ClockDao
 import com.relay.app.data.clock.LocationEntity
 import com.relay.app.data.clock.WidgetConfigEntity
+import com.relay.app.data.event.EventDao
+import com.relay.app.data.event.EventEntity
 import com.relay.app.data.library.LibraryDao
-import com.relay.app.data.stopwatch.LapCorrectionEntity
-import com.relay.app.data.stopwatch.LapEntity
-import com.relay.app.data.stopwatch.StopwatchDao
-import com.relay.app.data.stopwatch.StopwatchEntity
+import com.relay.app.data.library.LibraryHeaderDao
 import com.relay.app.data.library.LibraryHeaderEntity
 import com.relay.app.data.library.RelayDefEntity
 import com.relay.app.data.library.TimerDefEntity
@@ -23,6 +21,10 @@ import com.relay.app.data.run.RunEntity
 import com.relay.app.data.schedule.ScheduleDao
 import com.relay.app.data.schedule.ScheduleEntity
 import com.relay.app.data.schedule.ScheduleExceptionEntity
+import com.relay.app.data.stopwatch.LapCorrectionEntity
+import com.relay.app.data.stopwatch.LapEntity
+import com.relay.app.data.stopwatch.StopwatchDao
+import com.relay.app.data.stopwatch.StopwatchEntity
 
 /**
  * Schema history lives in `app/schemas/` (exported, committed). Every version bump needs a real
@@ -34,9 +36,9 @@ import com.relay.app.data.schedule.ScheduleExceptionEntity
         LibraryHeaderEntity::class, ScheduleEntity::class, ScheduleExceptionEntity::class,
         TimerDefEntity::class, RelayDefEntity::class, RunEntity::class,
         StopwatchEntity::class, LapEntity::class, LocationEntity::class, WidgetConfigEntity::class,
-        LapCorrectionEntity::class,
+        LapCorrectionEntity::class, EventEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 abstract class RelayDatabase : RoomDatabase() {
@@ -46,6 +48,7 @@ abstract class RelayDatabase : RoomDatabase() {
     abstract fun runDao(): RunDao
     abstract fun stopwatchDao(): StopwatchDao
     abstract fun clockDao(): ClockDao
+    abstract fun eventDao(): EventDao
 
     companion object {
         const val FILE_NAME = "relay.db"
@@ -154,8 +157,28 @@ abstract class RelayDatabase : RoomDatabase() {
             }
         }
 
+        /** v8 (spec §10b): calendar events, and schedules that remind of them. */
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `eventId` TEXT")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `startEpochDay` INTEGER")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `repeatMonthDay` INTEGER")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `repeatMonth` INTEGER")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `leadMinutes` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_schedules_eventId` ON `schedules` (`eventId`)")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `events` (`id` TEXT NOT NULL, `kind` TEXT NOT NULL, `title` TEXT NOT NULL, " +
+                        "`note` TEXT NOT NULL, `startEpochDay` INTEGER NOT NULL, `startMinute` INTEGER, `endEpochDay` INTEGER, " +
+                        "`endMinute` INTEGER, `repeatKind` TEXT NOT NULL, `repeatDays` INTEGER NOT NULL, `untilEpochDay` INTEGER, " +
+                        "`createdAtMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                )
+            }
+        }
+
         /** Append each migration here as the schema grows. */
-        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+        val MIGRATIONS = arrayOf(
+            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8,
+        )
 
         fun build(context: Context): RelayDatabase =
             Room.databaseBuilder(context.applicationContext, RelayDatabase::class.java, FILE_NAME)

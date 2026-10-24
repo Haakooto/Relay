@@ -38,10 +38,13 @@ import com.relay.app.util.DurationText
 import com.relay.chainlang.ChainLang
 
 /**
- * What the alarm fires (spec §04): ring, or quietly start a timer, a relay or a stopwatch. A
+ * What the alarm fires (spec §04): ring, notify, or quietly start a timer, a relay or a stopwatch. A
  * timer or relay is picked from the library or built right here; "Save to library" turns a
  * built one into a saved one.
  */
+// Long and branchy since before it was shared with the calendar editor (it was in the detekt
+// baseline); splitting it is its own change.
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AlarmTargetSection(state: TargetDraft, editor: TargetEditor) {
@@ -52,6 +55,7 @@ fun AlarmTargetSection(state: TargetDraft, editor: TargetEditor) {
                 stringResource(
                     when (it) {
                         TargetKind.RING -> R.string.fires_ring
+                        TargetKind.NOTIFY -> R.string.fires_notify
                         TargetKind.TIMER -> R.string.fires_timer
                         TargetKind.RELAY -> R.string.fires_relay
                         TargetKind.STOPWATCH -> R.string.fires_stopwatch
@@ -62,11 +66,19 @@ fun AlarmTargetSection(state: TargetDraft, editor: TargetEditor) {
         )
         when (state.target) {
             TargetKind.RING -> {}
+            TargetKind.NOTIFY -> Text(
+                stringResource(R.string.target_notify_hint),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             TargetKind.TIMER, TargetKind.RELAY -> {
                 val saved = if (state.target == TargetKind.TIMER) state.savedTimers else state.savedRelays
                 Text(stringResource(R.string.target_which), style = MaterialTheme.typography.bodyLarge)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    FilterChip(selected = state.targetDefId == null, onClick = { editor.setTargetDef(null) }, label = { Text(stringResource(R.string.target_new)) })
+                    FilterChip(
+                        selected = state.targetDefId == null, onClick = { editor.setTargetDef(null) },
+                        label = { Text(stringResource(R.string.target_new)) },
+                    )
                     saved.forEach { block ->
                         FilterChip(
                             selected = state.targetDefId == block.id, onClick = { editor.setTargetDef(block.id) },
@@ -91,7 +103,9 @@ fun AlarmTargetSection(state: TargetDraft, editor: TargetEditor) {
                     val labelOk = ChainLang.isReferenceableLabel(state.spec.label.trim())
                     val valid = editor.canSave(state)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedButton(onClick = editor::promote, enabled = labelOk && valid) { Text(stringResource(R.string.target_save_to_library)) }
+                        OutlinedButton(onClick = editor::promote, enabled = labelOk && valid) {
+                            Text(stringResource(R.string.target_save_to_library))
+                        }
                     }
                     if (!labelOk) Text(stringResource(R.string.target_save_hint), style = MaterialTheme.typography.labelSmall)
                     state.promoteError?.let { Text(saveErrorText(it), color = MaterialTheme.colorScheme.error) }
@@ -99,7 +113,7 @@ fun AlarmTargetSection(state: TargetDraft, editor: TargetEditor) {
             }
             TargetKind.STOPWATCH -> InlineStopwatch(state, editor)
         }
-        if (state.target != TargetKind.RING) {
+        if (state.target != TargetKind.RING && state.target != TargetKind.NOTIFY) {
             // A quiet start still deserves a cue. Previewed as it's picked.
             OptionChips(
                 stringResource(R.string.target_start_tone), TransitionTone.entries, state.spec.startTone,

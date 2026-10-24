@@ -20,6 +20,7 @@ class RelayApplication : Application() {
         super.onCreate()
         container = AppContainer(this)
         container.firingNotifications.createChannels()
+        container.reminderNotifications.createChannel()
         container.runNotifications.createChannel()
         container.stopwatchNotifications.createChannel()
         // Safety net: a force-stop clears every pending alarm without any broadcast, so re-arm

@@ -2,7 +2,6 @@ package com.relay.app.ui.stopwatch
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Redo
 import androidx.compose.material.icons.automirrored.outlined.Undo
@@ -56,10 +56,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
 import com.relay.app.guide.GuideSection
-import com.relay.app.ui.common.PaneHeader
 import com.relay.app.stopwatch.CorrectionKind
 import com.relay.app.stopwatch.LapView
 import com.relay.app.stopwatch.StopwatchView
+import com.relay.app.ui.common.PaneHeader
 import com.relay.app.util.DurationText
 
 /** What dialog the pane is showing, if any. */

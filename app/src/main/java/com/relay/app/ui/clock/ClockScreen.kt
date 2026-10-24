@@ -50,11 +50,11 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
-import com.relay.app.guide.GuideSection
-import com.relay.app.ui.common.PaneHeader
 import com.relay.app.clock.Cities
 import com.relay.app.clock.ClockStyle
 import com.relay.app.data.clock.LocationEntity
+import com.relay.app.guide.GuideSection
+import com.relay.app.ui.common.PaneHeader
 import com.relay.app.util.TimeText
 import kotlinx.coroutines.delay
 import java.time.Instant

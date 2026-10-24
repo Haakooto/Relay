@@ -24,11 +24,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -54,12 +54,12 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
-import com.relay.app.guide.GuideSection
-import com.relay.app.ui.common.PaneHeader
 import com.relay.app.data.library.LibraryHeaderEntity
+import com.relay.app.guide.GuideSection
 import com.relay.app.library.BlockKind
 import com.relay.app.library.LibraryItem
 import com.relay.app.ui.alarms.ReadinessBanner
+import com.relay.app.ui.common.PaneHeader
 import com.relay.app.util.DurationText
 import kotlinx.coroutines.delay
 
