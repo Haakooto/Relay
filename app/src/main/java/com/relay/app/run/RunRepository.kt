@@ -31,6 +31,14 @@ data class RunView(val run: RunEntity, val plan: List<RunStep>) {
     val step: RunStep get() = plan[run.stepIndex.coerceIn(0, plan.lastIndex)]
     val isRelay: Boolean get() = run.kind == RunKind.RELAY
     val isLastStep: Boolean get() = run.stepIndex >= plan.lastIndex
+    /**
+     * Time still to come after the current step, counted into the countdown. Only a timer has
+     * any (a warned timer's warning step): it shows one countdown to its real end. A relay's
+     * countdown is per step.
+     */
+    val afterStepMillis: Long get() = if (isRelay) 0 else plan.drop(run.stepIndex + 1).sumOf { it.seconds } * 1000
+    /** What the countdown runs over: the step, or a whole warned timer. */
+    val countdownMillis: Long get() = if (isRelay) step.seconds * 1000 else plan.sumOf { it.seconds } * 1000
 }
 
 sealed interface StepDecision {

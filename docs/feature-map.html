@@ -123,16 +123,16 @@
     <h1>What's actually built, versus what's just planned.</h1>
     <p>v1.0. A ledger, not a roadmap, grouped by the build order in the <a href="spec.html">Relay spec</a> (§16). The v0.5 ledger is in git history.</p>
     <div class="meta">
-      <span>2026-10-03, rev 8 (v1.0)</span>
-      <span>54 tracked items</span>
+      <span>2026-10-24, rev 9 (v1.1 in progress)</span>
+      <span>61 tracked items</span>
       <span>chainlang: 54/54 tests passing</span>
     </div>
 
     <div class="stats">
-      <div class="stat approved"><div class="n">46</div><div class="l">Approved</div></div>
-      <div class="stat wip"><div class="n">0</div><div class="l">WIP</div></div>
+      <div class="stat approved"><div class="n">45</div><div class="l">Approved</div></div>
+      <div class="stat wip"><div class="n">5</div><div class="l">WIP</div></div>
       <div class="stat lacking"><div class="n">3</div><div class="l">Lacking</div></div>
-      <div class="stat"><div class="n">0</div><div class="l">Planned</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">Planned</div></div>
       <div class="stat"><div class="n">4</div><div class="l">Deferred</div></div>
       <div class="stat"><div class="n">1</div><div class="l">Declined</div></div>
     </div>
@@ -194,7 +194,7 @@
           <tr><td class="feature">Persisted run engine, driven by exact alarms</td><td><span class="chip approved">✓ Approved</span></td><td class="note">One exact alarm (setAlarmClock) per run for the current step end; state in Room. Seamless steps advance from the scheduled end, so late alarms don't stretch a relay. 11 unit tests</td></tr>
           <tr><td class="feature">Timer: Start (unsaved, with label) / Save (library)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Start keeps the label on an unsaved run; Save needs a unique, script-safe label. Labels on unsaved runs are free text</td></tr>
           <tr><td class="feature">Parallel runs of one definition</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Each start is its own run with its own card and notification</td></tr>
-          <tr><td class="feature">Quick-start chips (4, configurable)</td><td><span class="chip approved">✓ Approved</span></td><td class="note">In the + menu, above New timer / relay / header. Durations editable in Settings</td></tr>
+          <tr><td class="feature">Quick-start buttons (4, configurable)</td><td><span class="chip wip">◐ WIP</span></td><td class="note">v1.1: moved out of the + menu to small buttons left of the +, one tap. Durations editable in Settings. Not yet built or device-tested</td></tr>
           <tr><td class="feature">Run controls and Stop / Restart / +1 min at completion</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Pause, resume, reset (to the start, paused), +1 min, stop. At the end: Stop / Restart / +1 min through the ringing screen</td></tr>
           <tr><td class="feature">A run left waiting at a boundary or the end, after a reboot</td><td><span class="chip lacking">✕ Lacking</span></td><td class="note">Shows on the Timers pane and in its notification, but doesn't ring again</td></tr>
           <tr><td class="feature">Library with headers and drag-to-reorder</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Drag-to-reorder and header up/down reused from v0.5</td></tr>
@@ -261,9 +261,23 @@
           <tr><td class="feature">Large main clock + locations list</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Main clock in the chosen style, then cities with day and offset ("Tomorrow, +9 h"). Search the time-zone database; swipe to delete, long-press to drag</td></tr>
           <tr><td class="feature">Home clock while travelling</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Settings → Home time zone. Shown at the top of the cities when the phone is in a different zone</td></tr>
           <tr><td class="feature">ClockStyle: digital and analogue options, colors</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Fonts: system, serif, mono, 7-segment (DSEG7) and a display face (Fraunces), both bundled under the SIL OFL. Analogue: hands, marks, face, second hand. A colour per element: Auto, palette, or custom. One renderer for app and widgets</td></tr>
-          <tr><td class="feature">Per-instance widgets with style and location</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Each widget is drawn as a bitmap from its own settings, so fonts, gradients and borders match the app. Configure on placement and from "Widget settings"; tap opens the Clock pane; minute ticks via a non-wakeup alarm</td></tr>
+          <tr><td class="feature">Per-instance widgets with style and location</td><td><span class="chip approved">✓ Approved</span></td><td class="note">Each widget is drawn as a bitmap from its own settings, so fonts, gradients and borders match the app. Configure on placement and from "Widget settings"; tap opens the app on the last pane (v1.1, see below); minute ticks via a non-wakeup alarm</td></tr>
           <tr><td class="feature">World-clock list and next-alarm widgets</td><td><span class="chip deferred">Deferred</span></td><td class="note">After 1.0</td></tr>
           <tr><td class="feature">Export stopwatch laps (CSV)</td><td><span class="chip deferred">Deferred</span></td><td class="note">After 1.0</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>v1.1</h2>
+      <p class="sub">Requested after the v1.0 device test. Code written 2026-10-24, not yet compiled (no JDK/SDK on the Pi) or device-tested.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="feature">Open on the last pane</td><td><span class="chip wip">◐ WIP</span></td><td class="note">App icon and widget tap open the last of Alarms / Timers / Stopwatch / Clock (Settings isn't remembered). Stored in DataStore <code>last_pane</code></td></tr>
+          <tr><td class="feature">Timer length keypad</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Own keypad: digits, h/m/s, backspace (long-press clears), +1m/+5m/+10m. Keyboard icon swaps to full text. New timers open empty with the keypad up, length first</td></tr>
+          <tr><td class="feature">Warned timer</td><td><span class="chip wip">◐ WIP</span></td><td class="note">"Warn before the end" + cue on a timer: runs as two seamless steps, one countdown to the real end. DB v7 (<code>warnSeconds</code>, <code>warnTone</code>) with migration and test. 3 PlanBuilder tests</td></tr>
+          <tr><td class="feature">Running timer / stopwatch notifications visible</td><td><span class="chip wip">◐ WIP</span></td><td class="note">Were on a LOW channel, so Android folded them under "Silent". New default-importance channels (<code>timers_running</code>, <code>stopwatch_running</code>) with no sound or vibration; old channels deleted</td></tr>
         </tbody>
       </table></div>
     </section>
@@ -275,6 +289,9 @@
         <tbody>
           <tr><td class="feature">Bedtime</td><td><span class="chip deferred">Deferred</span></td><td class="note">Feasibility spike first</td></tr>
           <tr><td class="feature">Automation: standard clock intents, batch import, AppFunctions</td><td><span class="chip deferred">Deferred</span></td><td class="note">Spec §12</td></tr>
+          <tr><td class="feature">Calendar events from the Alarms pane</td><td><span class="chip planned">Planned</span></td><td class="note">Spec §10b. Dated, titled entries; reminders are ordinary schedules, so firing stays in one module</td></tr>
+          <tr><td class="feature">Calendar widget (agenda, then month)</td><td><span class="chip planned">Planned</span></td><td class="note">Spec §10b. Agenda as a native Glance list; month grid second</td></tr>
+          <tr><td class="feature">Google Calendar link</td><td><span class="chip planned">Planned</span></td><td class="note">Spec §10b. Through Android's CalendarContract (no OAuth): write Relay events out to a picked calendar, read Google events in as an overlay</td></tr>
         </tbody>
       </table></div>
     </section>

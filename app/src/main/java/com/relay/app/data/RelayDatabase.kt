@@ -36,7 +36,7 @@ import com.relay.app.data.schedule.ScheduleExceptionEntity
         StopwatchEntity::class, LapEntity::class, LocationEntity::class, WidgetConfigEntity::class,
         LapCorrectionEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 abstract class RelayDatabase : RoomDatabase() {
@@ -146,8 +146,16 @@ abstract class RelayDatabase : RoomDatabase() {
             }
         }
 
+        /** v7: a timer can warn before its end. */
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `timer_defs` ADD COLUMN `warnSeconds` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `timer_defs` ADD COLUMN `warnTone` TEXT NOT NULL DEFAULT 'BEEP'")
+            }
+        }
+
         /** Append each migration here as the schema grows. */
-        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
 
         fun build(context: Context): RelayDatabase =
             Room.databaseBuilder(context.applicationContext, RelayDatabase::class.java, FILE_NAME)

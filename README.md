@@ -24,6 +24,10 @@ assistant automation, more widget types, lap export. See the feature map.
 
 ## Building and testing
 
+GitHub Actions builds every PR and every merge (`.github/workflows/build.yml`): PRs get a
+"Relay Debug" APK on the `dev-pr-<n>` release page, `main` a signed release APK on `main-latest`,
+and `vX.Y` tags a proper release. Locally:
+
 ```
 ./gradlew :app:assembleDebug          # the app
 ./gradlew :app:testDebugUnitTest      # app unit tests (scheduling, runs, plans, stopwatch, editor)

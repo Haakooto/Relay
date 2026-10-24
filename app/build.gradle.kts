@@ -23,9 +23,12 @@ fun git(vararg args: String): String? = try {
     null
 }
 
+/** Only release tags count: CI's rolling download tags (`dev-pr-12`, `main-latest`) don't. */
+val VERSION_TAGS = "v[0-9]*"
+
 fun gitVersionName(): String {
-    git("describe", "--tags", "--exact-match")?.let { return it }
-    val nearestTag = git("describe", "--tags", "--abbrev=0") ?: "v0.0"
+    git("describe", "--tags", "--exact-match", "--match", VERSION_TAGS)?.let { return it }
+    val nearestTag = git("describe", "--tags", "--abbrev=0", "--match", VERSION_TAGS) ?: "v0.0"
     val shortHash = git("rev-parse", "--short", "HEAD") ?: "unknown"
     return "$nearestTag+$shortHash"
 }
@@ -36,7 +39,7 @@ fun gitVersionName(): String {
  * alpha sorts below its release (v1.0-alpha.8 = 10008, v1.0 = 10099, v1.1 = 10199).
  */
 fun gitVersionCode(): Int {
-    val tag = git("describe", "--tags", "--abbrev=0") ?: return 1
+    val tag = git("describe", "--tags", "--abbrev=0", "--match", VERSION_TAGS) ?: return 1
     val m = Regex("""v(\d+)\.(\d+)(?:-alpha\.(\d+))?""").matchEntire(tag) ?: return 1
     val (major, minor, alpha) = m.destructured
     return major.toInt() * 10000 + minor.toInt() * 100 + (alpha.toIntOrNull() ?: 99)
@@ -63,12 +66,14 @@ android {
         getByName("main").assets.srcDir(layout.buildDirectory.dir("generated/guide"))
     }
 
-    // Release signing reads keystore.properties at the repo root (git-ignored, never committed):
+    // Signing reads keystore.properties at the repo root (git-ignored, never committed):
     //   storeFile=/home/you/relay-release.jks
     //   storePassword=...
     //   keyAlias=relay
     //   keyPassword=...
-    // Without it, release builds come out unsigned. See keystore.properties.example.
+    // or, in CI, the same four as RELAY_KEYSTORE_FILE, RELAY_KEYSTORE_PASSWORD, RELAY_KEY_ALIAS and
+    // RELAY_KEY_PASSWORD (from GitHub secrets, see .github/workflows/build.yml). Without either,
+    // release builds come out unsigned and debug builds use the machine's own debug key.
     val keystoreProps = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { file ->
         Properties().apply { file.inputStream().use { load(it) } }
     }
@@ -89,6 +94,9 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             resValue("string", "app_name", "Relay Debug")
+            // Same key as release when there is one: every CI runner has a different throwaway
+            // debug key, and a dev build only installs over the last one if the signature matches.
+            if (keystoreProps != null) signingConfig = signingConfigs.getByName("release")
         }
         release {
             // R8: strips unused code (mostly the big icon library) and resources.

@@ -33,6 +33,22 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.outlined.Dialpad
+import androidx.compose.material.icons.outlined.Keyboard
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.relay.app.data.library.TransitionTone
+import com.relay.app.ui.common.NumberOptionChips
+import com.relay.app.ui.common.OptionChips
 import com.relay.app.R
 import com.relay.app.ui.common.SoundPickerRow
 import com.relay.app.ui.common.rememberDiscardGuard
@@ -49,6 +65,21 @@ fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     if (!state.loaded) return
     val close = rememberDiscardGuard(viewModel::isDirty, onDone)
+    val focusManager = LocalFocusManager.current
+    val durationFocus = remember { FocusRequester() }
+    // The keypad types only digits and units; an existing "RANDOM(5, 10)" opens on the keyboard.
+    var keypadMode by remember { mutableStateOf(state.durationExpr.isEmpty() || DurationText.isPlain(state.durationExpr)) }
+    var showKeypad by remember { mutableStateOf(state.isNew) }
+    // Set by the keyboard icon only: focus once the field is editable, so the keyboard comes up.
+    var wantKeyboard by remember { mutableStateOf(false) }
+    val keyboard = LocalSoftwareKeyboardController.current
+    LaunchedEffect(keypadMode, wantKeyboard) {
+        if (!keypadMode && wantKeyboard) {
+            durationFocus.requestFocus()
+            keyboard?.show()
+            wantKeyboard = false
+        }
+    }
 
     state.deleteReferences?.let { refs ->
         DeleteDialog(state.label, refs, onDismiss = viewModel::cancelDelete) { viewModel.delete(onDone) }
@@ -69,22 +100,14 @@ fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
                 Text(stringResource(R.string.action_save))
             }
         }
-        OutlinedTextField(
-            value = state.label,
-            onValueChange = viewModel::setLabel,
-            label = { Text(stringResource(R.string.block_label)) },
-            isError = state.label.isNotBlank() && !ChainLang.isReferenceableLabel(state.label.trim()),
-            supportingText = {
-                Text(stringResource(if (state.label.isNotBlank() && !ChainLang.isReferenceableLabel(state.label.trim())) R.string.save_label_invalid else R.string.block_label_hint))
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        // Length first, on the app's own keypad (open from the start for a new timer). The
+        // keyboard icon swaps to the full keyboard for anything else the relay language says.
         OutlinedTextField(
             value = state.durationExpr,
             onValueChange = viewModel::setDuration,
             label = { Text(stringResource(R.string.timer_duration)) },
             textStyle = TextStyle(fontFamily = FontFamily.Monospace),
+            readOnly = keypadMode,
             isError = state.durationError != null || state.notSingle,
             supportingText = {
                 Text(
@@ -95,9 +118,63 @@ fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
                     },
                 )
             },
+            trailingIcon = {
+                IconButton(onClick = {
+                    keypadMode = !keypadMode
+                    if (keypadMode) { focusManager.clearFocus(); showKeypad = true } else { showKeypad = false; wantKeyboard = true }
+                }) {
+                    Icon(
+                        if (keypadMode) Icons.Outlined.Keyboard else Icons.Outlined.Dialpad,
+                        contentDescription = stringResource(if (keypadMode) R.string.keypad_use_keyboard else R.string.keypad_use_keypad),
+                    )
+                }
+            },
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false),
             singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(durationFocus)
+                .onFocusChanged { if (it.isFocused && keypadMode) showKeypad = true },
         )
+        if (keypadMode && showKeypad) {
+            DurationKeypad(
+                onType = { focusManager.clearFocus(); viewModel.setDuration(state.durationExpr + it) },
+                onBackspace = { viewModel.setDuration(state.durationExpr.dropLast(1)) },
+                onClear = { viewModel.setDuration("") },
+                onAdd = { focusManager.clearFocus(); viewModel.addToDuration(it) },
+            )
+        }
+        OutlinedTextField(
+            value = state.label,
+            onValueChange = viewModel::setLabel,
+            label = { Text(stringResource(R.string.block_label)) },
+            isError = state.label.isNotBlank() && !ChainLang.isReferenceableLabel(state.label.trim()),
+            supportingText = {
+                Text(stringResource(if (state.label.isNotBlank() && !ChainLang.isReferenceableLabel(state.label.trim())) R.string.save_label_invalid else R.string.block_label_hint))
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) showKeypad = false },
+        )
+        NumberOptionChips(
+            title = stringResource(R.string.timer_warn),
+            presets = WARN_PRESETS,
+            value = state.warnSeconds.toInt(),
+            range = 1..3600,
+            label = { if (it == 0) stringResource(R.string.timer_warn_off) else DurationText.short(it.toLong()) },
+            onChange = { viewModel.setWarnSeconds(it.toLong()) },
+        )
+        if (state.warnSeconds > 0) {
+            state.seconds?.takeIf { state.warnSeconds >= it }?.let {
+                Text(stringResource(R.string.timer_warn_too_long), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+            }
+            OptionChips(
+                title = stringResource(R.string.timer_warn_tone),
+                options = TransitionTone.entries.filter { it != TransitionTone.SILENT },
+                selected = state.warnTone,
+                label = { stringResource(toneLabel(it)) },
+                onSelect = viewModel::setWarnTone,
+            )
+        }
         SoundPickerRow(stringResource(R.string.alarm_sound), state.sound.uri) { viewModel.setSound(state.sound.copy(uri = it)) }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.alarm_vibrate), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
@@ -107,6 +184,9 @@ fun TimerEditScreen(timerId: String?, onDone: () -> Unit) {
         if (!state.isNew) TextButton(onClick = viewModel::askDelete) { Text(stringResource(R.string.action_delete)) }
     }
 }
+
+/** Off, then the common ones; Custom takes any number of seconds. */
+private val WARN_PRESETS = listOf(0, 30, 60, 120, 300)
 
 /** Deleting a block other relays use: say which ones will break. */
 @Composable

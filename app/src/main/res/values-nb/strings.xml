@@ -128,7 +128,6 @@
     <string name="timers_library">Bibliotek</string>
     <string name="timers_empty">Ingenting lagra enno. Trykk + for ein rask tidtakar, eller for å lage ein tidtakar eller eit relé.</string>
     <string name="timers_add">Legg til</string>
-    <string name="timers_quick_start">Hurtigstart</string>
     <string name="timers_new_timer">Ny tidtakar</string>
     <string name="timers_new_relay">Nytt relé</string>
     <string name="timers_new_header">Ny overskrift</string>
@@ -139,6 +138,13 @@
     <string name="timer_duration">Varigheit</string>
     <string name="timer_duration_is">= %1$s</string>
     <string name="timer_one_duration">Ein tidtakar er éi varigheit, som 25m eller 1h30m</string>
+    <string name="timer_warn">Varsle før slutten</string>
+    <string name="timer_warn_off">Av</string>
+    <string name="timer_warn_tone">Varselsignal</string>
+    <string name="timer_warn_too_long">Varselet er like langt som tidtakaren, så det vil ikkje lyde</string>
+    <string name="keypad_backspace">Slett</string>
+    <string name="keypad_use_keyboard">Bruk tastaturet</string>
+    <string name="keypad_use_keypad">Bruk taltastaturet</string>
     <string name="block_label">Etikett</string>
     <string name="block_label_hint">Trengst for å lagre. Berre bokstavar, tal og _, så relé kan bruke den</string>
     <string name="save_label_required">Gje den ein etikett for å lagre. Trykk Start for å køyre den éin gong.</string>

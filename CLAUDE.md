@@ -50,6 +50,23 @@ the feature map: bedtime, assistant automation, more widget types, CSV export of
   `values-nb/strings.xml` (Android doesn't fall back from nb to nn; `NorwegianStringsTest` fails if
   they differ). A relay is **eit relé** (reléet, relé, relea), never "stafett".
 
+## Branches, PRs and CI
+
+- Work happens on feature branches (`feature/<short-name>`), one commit per feature, pushed and
+  opened as a PR to `main`. Never commit straight to `main`; merging a PR is the user's call.
+- `.github/workflows/build.yml` builds on GitHub (the Pi has no JDK or Android SDK):
+  - every PR push: unit tests + a "Relay Debug" APK on the rolling release page `dev-pr-<n>`
+    (the PR gets a comment with the link once), deleted when the PR closes;
+  - every push to `main` (a merged PR): a signed release APK on the rolling page `main-latest`;
+  - a pushed `vX.Y` / `vX.Y-alpha.N` tag: a signed release APK on a GitHub release for that tag,
+    with its `CHANGELOG.md` section as notes.
+- So "verify with Gradle" below means: push and read the CI run (`gh run watch`, `gh run view
+  --log-failed`). A new Room schema JSON comes back as the `room-schemas` artifact; commit it.
+- Signing in CI comes from two repo secrets: `RELAY_KEYSTORE_BASE64` (the .jks, base64) and
+  `RELAY_KEYSTORE_PROPERTIES` (the user's keystore.properties). The workflow writes them to the
+  runner and points `storeFile` at the decoded key. Debug builds use the same key so each dev APK
+  installs over the last.
+
 ## Releases and signing
 
 - `./gradlew :app:assembleRelease` builds `app/build/outputs/apk/release/app-release.apk`,
@@ -74,9 +91,9 @@ the feature map: bedtime, assistant automation, more widget types, CSV export of
 ## Working conventions
 
 - Only commit when explicitly asked. Never amend, never force-push.
-- No device or emulator in this environment. Verify with `./gradlew :app:compileDebugKotlin`
-  (plus `:chainlang:test` for language changes, `:app:compileDebugAndroidTestKotlin` for
-  instrumented tests). Real correctness comes from the user's own device testing, so say so
+- No device or emulator in this environment, and no local build: verify through CI (see above),
+  which runs `:chainlang:test`, `:app:testDebugUnitTest`, `:app:compileDebugAndroidTestKotlin`
+  and the APK build. Real correctness comes from the user's own device testing, so say so
   explicitly rather than claiming a UI, gesture or hardware-dependent feature works.
 - Alarm firing reliability is the one thing this app cannot regress on. Everything that rings
   goes through one firing module (spec §13). Be extra careful there, and prefer narrow, additive

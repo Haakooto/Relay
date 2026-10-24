@@ -5,7 +5,8 @@ moduler på heimeskjermen. Det som skil Relay ut: tidtakarar kan lenkjast saman 
 alarmar kan **starte** ein tidtakar, eit relé eller ei stoppeklokke i staden for berre å ringje,
 og stoppeklokker har **rundar med merkelappar som kan rettast**.
 
-Dei fem rutene nedst er Alarmar, Tidtakarar, Stoppeklokke, Klokke og Innstillingar.
+Dei fem rutene nedst er Alarmar, Tidtakarar, Stoppeklokke, Klokke og Innstillingar. Relay opnar
+på ruta du brukte sist.
 
 ---
 
@@ -65,16 +66,23 @@ ein morgon utan slumreknapp.
 
 ## Tidtakarar
 
-**Raske tidtakarar.** Trykk **+** i Tidtakarar: øvste rad startar ein tidtakar på 1, 5, 10
+**Raske tidtakarar.** Dei små knappane til venstre for **+** startar ein tidtakar på 1, 5, 10
 eller 15 minutt med eitt trykk. Dei fire tidene kan du endre i Innstillingar.
 
-**Ny tidtakar.** Han har **etikett**, **varigheit** og **lyd**.
+**Ny tidtakar.** Han har **varigheit**, **etikett**, eit valfritt **varsel** og **lyd**.
+Varigheita kjem først, på eit taltastatur: siffer, `h`, `m`, `s`, og **+1m**, **+5m**, **+10m**.
+Hald inne ⌫ for å tømme. Tastatur-ikonet byter til heile tastaturet for alt anna relé-språket
+kan uttrykkje.
 - **Start** køyrer han éin gong utan å lagre. Etiketten blir likevel vist på nedteljinga og når
   han ringjer.
 - **Lagre** legg han i biblioteket. Lagra etikettar kan berre ha bokstavar, tal og `_` (til
   dømes `Te`, `Arbeid_25`), fordi relé viser til tidtakarar med etiketten.
 
 Varigheiter skriv du som `25m`, `1h30m`, `45s` eller `90`. Eit tal åleine er minutt.
+
+**Varsel.** «Varsle før slutten» spelar eit kort signal så lenge før tidtakaren ringjer: ein
+tidtakar på 20 minutt med 1 minutts varsel gir signal etter 19 minutt. Nedteljinga går likevel
+heilt til slutten. Inne i eit relé blir varselet til ein tidtakar ikkje brukt.
 
 **Når han går.** Kvar start får sitt eige kort øvst i ruta og sitt eige varsel med nedteljing.
 Same tidtakar kan gå fleire gonger samstundes. Kontrollane er **Pause** / **Hald fram**,
@@ -199,7 +207,7 @@ Hald inne på heimeskjermen → Moduler → Relay. Kvar modul får sitt eige opp
 - **hjørne** og **kant**.
 
 Kvar modul kan sjå ulik ut. Vil du endre ein seinare, hald inne på han og vel innstillingar for
-modulen. Trykk på ein modul opnar Klokke-ruta.
+modulen. Trykk på ein modul opnar Relay på ruta du brukte sist.
 
 ---
 

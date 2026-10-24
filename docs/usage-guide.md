@@ -4,7 +4,8 @@ Relay replaces the stock Clock app: alarms, timers, stopwatches, a world clock a
 widgets. What sets it apart: timers can be chained into **relays**, alarms can **start** a timer,
 relay or stopwatch instead of just ringing, and stopwatches keep **tagged, correctable laps**.
 
-The five panes along the bottom are Alarms, Timers, Stopwatch, Clock and Settings.
+The five panes along the bottom are Alarms, Timers, Stopwatch, Clock and Settings. Relay opens
+on the pane you used last.
 
 ---
 
@@ -64,16 +65,23 @@ snooze-less wake-up routine.
 
 ## Timers
 
-**Quick timers.** Tap **+** on the Timers pane: the top row starts a 1, 5, 10 or 15 minute timer
-in one tap. You can change the four durations in Settings.
+**Quick timers.** The small buttons left of **+** start a 1, 5, 10 or 15 minute timer in one
+tap. You can change the four durations in Settings.
 
-**New timer.** It has a **label**, a **duration** and a **sound**.
+**New timer.** It has a **duration**, a **label**, an optional **warning** and a **sound**.
+The duration comes first, on a keypad: digits, `h`, `m`, `s`, and **+1m**, **+5m**, **+10m**.
+Long-press ⌫ to clear. The keyboard icon switches to the full keyboard for anything else the
+relay language can say.
 - **Start** runs it once without saving. The label still shows on the countdown and when it
   rings.
 - **Save** puts it in the library. Saved labels must be letters, digits and `_` only (for example
   `Tea`, `Work_25`), because relays refer to timers by that label.
 
 Durations are written like `25m`, `1h30m`, `45s` or `90`. A plain number means minutes.
+
+**Warning.** "Warn before the end" plays a short cue that long before the timer rings: a
+20 minute timer with a 1 minute warning cues at 19 minutes. The countdown still runs to the
+real end. Inside a relay, a timer's warning is ignored.
 
 **Running.** Every start gets its own card at the top of the pane and its own notification with
 a live countdown. You can run the same timer several times at once. The controls are **Pause**
@@ -197,7 +205,7 @@ Long-press the home screen → Widgets → Relay. Each widget gets its own setup
 - **corners** and a **border**.
 
 Every widget can look different. To change one later, long-press it and pick Widget settings.
-Tapping a widget opens the Clock pane.
+Tapping a widget opens Relay on the pane you used last.
 
 ---
 

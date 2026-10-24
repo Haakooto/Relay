@@ -1,0 +1,163 @@
+# Builds Relay on GitHub, since the Pi it's developed on can't.
+#
+#   pull request to main  -> tests + "Relay Debug" APK, on the release page `dev-pr-<n>`
+#   push to main (merge)  -> tests + signed release APK, on the release page `main-latest`
+#   tag vX.Y / vX.Y-alpha.N -> tests + signed release APK, on a GitHub release for that tag
+#
+# The pages for PRs and main are rolling: each build replaces the APK, so the link stays the same.
+# Their tags don't affect the app version (the Gradle build only counts tags matching v[0-9]*).
+#
+# Signing needs two repository secrets (Settings -> Secrets and variables -> Actions):
+#   RELAY_KEYSTORE_BASE64      the .jks file, base64 encoded (base64 -w0 relay-release.jks)
+#   RELAY_KEYSTORE_PROPERTIES  your keystore.properties as it is; its storeFile line is replaced
+# Debug builds are signed with the same key, so each dev APK installs over the previous one.
+
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, closed]
+  push:
+    branches: [main]
+    tags: ["v[0-9]*"]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The PR's own commit, not GitHub's merge commit, and all tags: the version comes from git.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode the signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELAY_KEYSTORE_BASE64 }}
+          KEYSTORE_PROPERTIES: ${{ secrets.RELAY_KEYSTORE_PROPERTIES }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PROPERTIES" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/relay.jks"
+            # Gradle reads keystore.properties (git-ignored), pointed at the key decoded above.
+            { printf '%s\n' "$KEYSTORE_PROPERTIES" | tr -d '\r' | grep -v '^[[:space:]]*storeFile'
+              echo "storeFile=$RUNNER_TEMP/relay.jks"; } > keystore.properties
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            echo "::error::A tagged release needs the RELAY_KEYSTORE_BASE64 and RELAY_KEYSTORE_PROPERTIES secrets"; exit 1
+          else
+            echo "::warning::No RELAY_KEYSTORE_BASE64 / RELAY_KEYSTORE_PROPERTIES secrets: the APK won't be signed with your key and may not install over your current one"
+          fi
+
+      - name: Tests (and compile the instrumented ones)
+        run: ./gradlew :chainlang:test :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin
+
+      - name: Build the APK
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            ./gradlew :app:assembleDebug
+            apk=app/build/outputs/apk/debug/app-debug.apk
+            kind=debug
+          else
+            ./gradlew :app:assembleRelease
+            apk=app/build/outputs/apk/release/app-release.apk
+            [ -f "$apk" ] || apk=app/build/outputs/apk/release/app-release-unsigned.apk
+            kind=release
+          fi
+          # Same rule as gitVersionName() in app/build.gradle.kts.
+          version=$(git describe --tags --exact-match --match 'v[0-9]*' 2>/dev/null \
+            || echo "$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || echo v0.0)+$(git rev-parse --short HEAD)")
+          name="relay-${kind}-${version//+/-}.apk"
+          mkdir -p out && cp "$apk" "out/$name"
+          echo "APK=out/$name" >> "$GITHUB_ENV"
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: relay-apk
+          path: out/*.apk
+
+      # Room writes app/schemas/<n>.json on every build. A new one must be committed (MigrationTest
+      # reads it), so hand it over if this build made one.
+      - name: Check Room schemas are committed
+        run: |
+          if [ -n "$(git status --porcelain app/schemas)" ]; then
+            git status --porcelain app/schemas
+            echo "::warning::Room schema changed: download the 'room-schemas' artifact and commit it under app/schemas/"
+            echo "SCHEMAS_CHANGED=1" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: env.SCHEMAS_CHANGED == '1'
+        with:
+          name: room-schemas
+          path: app/schemas/
+
+      - name: Publish the dev build (pull request)
+        if: github.event_name == 'pull_request'
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          tag="dev-pr-$PR"
+          existed=0; gh release view "$tag" >/dev/null 2>&1 && existed=1
+          gh release delete "$tag" --cleanup-tag --yes >/dev/null 2>&1 || true
+          gh release create "$tag" "$APK" --target "$SHA" --prerelease \
+            --title "Dev build: PR #$PR" \
+            --notes "Relay Debug ($VERSION) for PR #$PR, $PR_TITLE. Installs next to the normal app. Replaced on every push to the PR, removed when it closes."
+          url=$(gh release view "$tag" --json url -q .url)
+          echo "Dev APK: $url" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$existed" = 0 ]; then
+            gh pr comment "$PR" --body "Dev APK (Relay Debug), updated on every push: $url"
+          fi
+
+      - name: Publish the main build
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          tag="main-latest"
+          gh release delete "$tag" --cleanup-tag --yes >/dev/null 2>&1 || true
+          gh release create "$tag" "$APK" --target "$SHA" --prerelease \
+            --title "Latest main ($VERSION)" \
+            --notes "Release build of main at $VERSION, not yet a tagged release. Replaced on every merge."
+          echo "Main APK: $(gh release view "$tag" --json url -q .url)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish the tagged release
+        if: github.ref_type == 'tag'
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          # The CHANGELOG.md section headed "## <tag>" (with or without a date after it).
+          awk -v t="## $tag" 'index($0, t" ") == 1 || $0 == t { f = 1; next } /^## / { if (f) exit } f' CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "See CHANGELOG.md." > notes.md
+          pre=""; case "$tag" in *-alpha*) pre="--prerelease" ;; esac
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$APK" --clobber
+          else
+            gh release create "$tag" "$APK" $pre --title "Relay $tag" --notes-file notes.md
+          fi
+
+  cleanup:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Remove the PR's dev build
+        run: gh release delete "dev-pr-${{ github.event.pull_request.number }}" --cleanup-tag --yes --repo "$GITHUB_REPOSITORY" || true

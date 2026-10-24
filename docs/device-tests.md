@@ -234,3 +234,42 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] The ? on Alarms, Timers, Stopwatch and Clock opens the guide at that pane's section; the ? in the relay editor opens the Relays section.
 - [ ] Headings, lists, the code example and the tables read well; `code` bits are monospace.
 - [ ] In Norsk, the guide is the Nynorsk one.
+
+## Uncommitted: v1.1 requests (not yet compiled)
+
+### Last pane
+- [ ] Open Timers, leave the app (home), swipe it away from recents, open it again: it opens on Timers.
+- [ ] Same with Stopwatch, then tap a clock widget: it opens on Stopwatch.
+- [ ] Open Settings last, close and reopen: it opens on the pane you used before Settings.
+- [ ] Change language in Settings: you stay on Settings.
+
+### Timer length keypad
+- [ ] + → New timer: the length field is empty and the keypad is already showing.
+- [ ] Type `2`, `5`, `m`: the field shows `25m` and "= 25m" below it. Your phone's keyboard doesn't open.
+- [ ] Type `1`, `h`, `3`, `0`, `m`: "= 1h 30m".
+- [ ] Tap +5m on `25m`: it becomes `30m`. Tap +10m on an empty field: `10m`.
+- [ ] ⌫ deletes one character; holding ⌫ (or C) clears the field.
+- [ ] Tap the label field: the keypad hides and the keyboard opens. Tap the length field again: the keypad is back.
+- [ ] Keyboard icon on the length field: the full keyboard opens; type `RANDOM(5, 10)` and it's accepted. The dialpad icon brings the keypad back.
+- [ ] Edit an existing saved timer: the keypad stays hidden until you tap the length.
+
+### Warned timer
+- [ ] New timer `20m`, Warn before the end → 1m, cue Chime: at 19:00 the cue plays and the countdown keeps going (it doesn't restart at 1:00); at 0:00 it rings as usual.
+- [ ] Short test: `2m` with a 1m warning: cue at 1:00 left, ring at 0:00.
+- [ ] Pause during the last minute, then resume: the countdown carries on from where it was.
+- [ ] Warning 5m on a `3m` timer: a red note says the warning won't sound; it just rings at the end.
+- [ ] Custom → `90`: the chip shows "1m 30s".
+- [ ] Save it, reopen: warning and cue are kept. Start from the library: same behaviour.
+- [ ] Use the warned timer inside a relay: no warning cue there, just the relay's own boundaries.
+- [ ] Installing this build over v1.0 keeps all your saved timers (database v6 → v7).
+
+### Quick starts beside +
+- [ ] Timers pane: four small buttons (1m 5m 10m 15m) sit left of the + button.
+- [ ] One tap starts that timer. The + menu now only has New timer / New relay / New header.
+- [ ] Change a quick duration in Settings (e.g. to 1h30m): the button shows it and the row still fits.
+
+### Running notifications
+- [ ] Start a timer and pull down the shade: its notification sits with the normal ones, not under "Silent", and it made no sound.
+- [ ] Its countdown and buttons (Pause, +1 min, Stop) still work.
+- [ ] Same for a running stopwatch.
+- [ ] Settings → Apps → Relay → Notifications: no old "Timers"/"Stopwatch" duplicates are left.

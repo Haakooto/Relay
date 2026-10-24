@@ -26,8 +26,17 @@ class StopwatchNotifications(private val context: Context) : StopwatchNotices {
     private val manager = context.getSystemService(NotificationManager::class.java)
 
     fun createChannel() {
+        // Default importance, so a running countdown sits with the other notifications instead of
+        // folded away under "Silent" (as the v1.0 LOW channel was). The channel itself has no sound
+        // or vibration, and only-alert-once keeps the ticking updates quiet. Importance can't be
+        // raised on an existing channel, hence the new id.
+        manager.deleteNotificationChannel("stopwatch")
         manager.createNotificationChannel(
-            NotificationChannel(CHANNEL, context.getString(R.string.channel_stopwatch), NotificationManager.IMPORTANCE_LOW),
+            NotificationChannel(CHANNEL, context.getString(R.string.channel_stopwatch), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                setSound(null, null)
+                enableVibration(false)
+                setShowBadge(false)
+            },
         )
     }
 
@@ -43,7 +52,7 @@ class StopwatchNotifications(private val context: Context) : StopwatchNotices {
             .setWhen(base)
             .setShowWhen(true)
             .setOngoing(true)
-            .setSilent(true)
+            .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_STOPWATCH)
             .setContentIntent(PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE))
             .addAction(0, context.getString(R.string.stopwatch_lap), action(StopwatchActionReceiver.ACTION_LAP, s.id))
@@ -64,7 +73,7 @@ class StopwatchNotifications(private val context: Context) : StopwatchNotices {
     private fun tag(id: String) = "stopwatch:$id"
 
     private companion object {
-        const val CHANNEL = "stopwatch"
+        const val CHANNEL = "stopwatch_running"
     }
 }
 

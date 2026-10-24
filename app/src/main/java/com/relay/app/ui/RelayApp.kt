@@ -8,6 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -32,20 +33,19 @@ import com.relay.app.ui.timers.TimerEditScreen
 import com.relay.app.ui.timers.TimersScreen
 import com.relay.app.ui.settings.SettingsScreen
 
+/**
+ * [startRoute]: the main pane last opened (saved through [onPaneOpened]), so the launcher icon
+ * and the widgets open where the user left off. Settings isn't remembered: it's a detour.
+ */
 @Composable
-fun RelayApp(openClock: Boolean = false, onClockOpened: () -> Unit = {}) {
+fun RelayApp(startRoute: String? = null, onPaneOpened: (String) -> Unit = {}) {
     val navController = rememberNavController()
-    LaunchedEffect(openClock) {
-        if (openClock) {
-            navController.navigate(Pane.CLOCK.route) {
-                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                launchSingleTop = true
-            }
-            onClockOpened()
-        }
-    }
+    val start = remember { REMEMBERED_PANES.firstOrNull { it.route == startRoute } ?: Pane.ALARMS }
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination
+    LaunchedEffect(current?.route) {
+        current?.route?.takeIf { route -> REMEMBERED_PANES.any { it.route == route } }?.let(onPaneOpened)
+    }
 
     // Editors are modal: no bottom bar, so leaving means saving or discarding.
     val inEditor = current?.route?.let { route -> route == CLOCK_STYLE || (EDITOR_ROUTES + GUIDE).any { route.startsWith("$it/") } } == true
@@ -75,7 +75,7 @@ fun RelayApp(openClock: Boolean = false, onClockOpened: () -> Unit = {}) {
     ) { padding ->
         NavHost(
             navController = navController,
-            startDestination = Pane.ALARMS.route,
+            startDestination = start.route,
             modifier = Modifier.padding(padding),
         ) {
             composable(Pane.ALARMS.route) {
@@ -117,3 +117,4 @@ private const val NEW = "new"
 private const val CLOCK_STYLE = "clockstyle"
 private const val GUIDE = "guide"
 private val EDITOR_ROUTES = listOf(ALARM_EDIT, TIMER_EDIT, RELAY_EDIT)
+private val REMEMBERED_PANES = listOf(Pane.ALARMS, Pane.TIMERS, Pane.STOPWATCH, Pane.CLOCK)
