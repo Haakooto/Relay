@@ -32,6 +32,6 @@ class DurationTextTest {
 
     /** What +1m does to an expression the keypad can't rewrite. */
     @Test fun quickAddAppendsToAnExpression() {
-        assertEquals(25 * 60L + 60, ChainLang.evalSingleDuration("(20 + 5) + 1m", NowClock(12, 0, 0)))
+        assertEquals(21 * 60L, ChainLang.evalSingleDuration("MINUTE(NOW) + 1m", NowClock(12, 20, 0)))
     }
 }
