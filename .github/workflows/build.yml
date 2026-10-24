@@ -7,11 +7,9 @@
 # The pages for PRs and main are rolling: each build replaces the APK, so the link stays the same.
 # Their tags don't affect the app version (the Gradle build only counts tags matching v[0-9]*).
 #
-# Signing needs four repository secrets (Settings -> Secrets and variables -> Actions):
-#   RELAY_KEYSTORE_BASE64   the .jks file, base64 encoded (base64 -w0 relay-release.jks)
-#   RELAY_KEYSTORE_PASSWORD
-#   RELAY_KEY_ALIAS
-#   RELAY_KEY_PASSWORD
+# Signing needs two repository secrets (Settings -> Secrets and variables -> Actions):
+#   RELAY_KEYSTORE_BASE64      the .jks file, base64 encoded (base64 -w0 relay-release.jks)
+#   RELAY_KEYSTORE_PROPERTIES  your keystore.properties as it is; its storeFile line is replaced
 # Debug builds are signed with the same key, so each dev APK installs over the previous one.
 
 name: Build
@@ -39,9 +37,6 @@ jobs:
     timeout-minutes: 45
     env:
       GH_TOKEN: ${{ github.token }}
-      RELAY_KEYSTORE_PASSWORD: ${{ secrets.RELAY_KEYSTORE_PASSWORD }}
-      RELAY_KEY_ALIAS: ${{ secrets.RELAY_KEY_ALIAS }}
-      RELAY_KEY_PASSWORD: ${{ secrets.RELAY_KEY_PASSWORD }}
       SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
@@ -60,14 +55,17 @@ jobs:
       - name: Decode the signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.RELAY_KEYSTORE_BASE64 }}
+          KEYSTORE_PROPERTIES: ${{ secrets.RELAY_KEYSTORE_PROPERTIES }}
         run: |
-          if [ -n "$KEYSTORE_BASE64" ]; then
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PROPERTIES" ]; then
             echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/relay.jks"
-            echo "RELAY_KEYSTORE_FILE=$RUNNER_TEMP/relay.jks" >> "$GITHUB_ENV"
+            # Gradle reads keystore.properties (git-ignored), pointed at the key decoded above.
+            { printf '%s\n' "$KEYSTORE_PROPERTIES" | tr -d '\r' | grep -v '^[[:space:]]*storeFile'
+              echo "storeFile=$RUNNER_TEMP/relay.jks"; } > keystore.properties
           elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            echo "::error::A tagged release needs the RELAY_KEYSTORE_* secrets"; exit 1
+            echo "::error::A tagged release needs the RELAY_KEYSTORE_BASE64 and RELAY_KEYSTORE_PROPERTIES secrets"; exit 1
           else
-            echo "::warning::No RELAY_KEYSTORE_* secrets: the APK won't be signed with your key and may not install over your current one"
+            echo "::warning::No RELAY_KEYSTORE_BASE64 / RELAY_KEYSTORE_PROPERTIES secrets: the APK won't be signed with your key and may not install over your current one"
           fi
 
       - name: Tests (and compile the instrumented ones)

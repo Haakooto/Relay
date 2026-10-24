@@ -62,9 +62,10 @@ the feature map: bedtime, assistant automation, more widget types, CSV export of
     with its `CHANGELOG.md` section as notes.
 - So "verify with Gradle" below means: push and read the CI run (`gh run watch`, `gh run view
   --log-failed`). A new Room schema JSON comes back as the `room-schemas` artifact; commit it.
-- Signing in CI comes from four repo secrets (`RELAY_KEYSTORE_BASE64`, `RELAY_KEYSTORE_PASSWORD`,
-  `RELAY_KEY_ALIAS`, `RELAY_KEY_PASSWORD`) that Gradle reads as `RELAY_KEYSTORE_FILE` etc. Debug
-  builds use the same key so each dev APK installs over the last.
+- Signing in CI comes from two repo secrets: `RELAY_KEYSTORE_BASE64` (the .jks, base64) and
+  `RELAY_KEYSTORE_PROPERTIES` (the user's keystore.properties). The workflow writes them to the
+  runner and points `storeFile` at the decoded key. Debug builds use the same key so each dev APK
+  installs over the last.
 
 ## Releases and signing
 

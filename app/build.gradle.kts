@@ -76,13 +76,6 @@ android {
     // release builds come out unsigned and debug builds use the machine's own debug key.
     val keystoreProps = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { file ->
         Properties().apply { file.inputStream().use { load(it) } }
-    } ?: System.getenv("RELAY_KEYSTORE_FILE")?.takeIf { it.isNotBlank() }?.let { path ->
-        Properties().apply {
-            setProperty("storeFile", path)
-            setProperty("storePassword", System.getenv("RELAY_KEYSTORE_PASSWORD"))
-            setProperty("keyAlias", System.getenv("RELAY_KEY_ALIAS"))
-            setProperty("keyPassword", System.getenv("RELAY_KEY_PASSWORD"))
-        }
     }
     signingConfigs {
         if (keystoreProps != null) {
