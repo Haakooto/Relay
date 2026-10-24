@@ -58,18 +58,18 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # The PR's own commit, not GitHub's merge commit, and all tags: the version comes from git.
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Decode the signing key
         env:
@@ -110,7 +110,7 @@ jobs:
           echo "APK=out/$name" >> "$GITHUB_ENV"
           echo "VERSION=$version" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: relay-apk
           path: out/*.apk
@@ -124,7 +124,7 @@ jobs:
             echo "::warning::Room schema changed: download the 'room-schemas' artifact and commit it under app/schemas/"
             echo "SCHEMAS_CHANGED=1" >> "$GITHUB_ENV"
           fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: env.SCHEMAS_CHANGED == '1'
         with:
           name: room-schemas
