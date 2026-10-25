@@ -19,11 +19,13 @@ import com.relay.app.event.PhoneCopies
 import com.relay.app.event.PhoneEvents
 import com.relay.app.event.PhoneInstance
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.ZoneId
@@ -45,16 +47,23 @@ class PhoneCalendars(private val context: Context) : PhoneCopies {
 
     fun accessChanged() { accessChecked.value++ }
 
-    /** Emits now, after access changes, and whenever any phone calendar changes. */
-    fun changes(): Flow<Unit> = combine(providerChanges(), accessChecked) { _, _ -> }
+    /**
+     * Emits now, after access changes, and whenever any phone calendar changes. Watching the
+     * provider needs READ_CALENDAR (Android throws without it), so it only starts once granted.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun changes(): Flow<Unit> = accessChecked.flatMapLatest { if (canRead()) providerChanges() else flowOf(Unit) }
 
     private fun providerChanges(): Flow<Unit> = callbackFlow {
         trySend(Unit)
         val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
             override fun onChange(selfChange: Boolean) { trySend(Unit) }
         }
-        resolver.registerContentObserver(CalendarContract.CONTENT_URI, true, observer)
-        awaitClose { resolver.unregisterContentObserver(observer) }
+        // Access can be revoked at any moment; without it there is nothing to watch.
+        val watching = runCatching { resolver.registerContentObserver(CalendarContract.CONTENT_URI, true, observer) }
+            .onFailure { Log.w(TAG, "can't watch phone calendars", it) }
+            .isSuccess
+        awaitClose { if (watching) resolver.unregisterContentObserver(observer) }
     }
 
     /** The visible calendars on the phone, or none without access. */

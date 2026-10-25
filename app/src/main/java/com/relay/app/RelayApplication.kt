@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -61,10 +62,15 @@ class RelayApplication : Application() {
                 container.events.observeAll(), container.schedules.observeWithExceptions(),
                 container.calendars.observeAll(), container.settings.settings,
                 container.phoneCalendars.changes().runningFold(0) { n, _ -> n + 1 },
-            ) { a, b, c, d, e -> listOf(a, b, c, d, e) }.distinctUntilChanged().debounce(WIDGET_REFRESH_DEBOUNCE_MS).collect {
-                runCatching { CalendarWidgets.refreshAll(this@RelayApplication) }
-                    .onFailure { Log.e("RelayApplication", "calendar widget refresh failed", it) }
-            }
+            ) { a, b, c, d, e -> listOf(a, b, c, d, e) }
+                .distinctUntilChanged()
+                .debounce(WIDGET_REFRESH_DEBOUNCE_MS)
+                // A failing source must never take the app down with it: log and stop following.
+                .catch { Log.e("RelayApplication", "calendar widget follow failed", it) }
+                .collect {
+                    runCatching { CalendarWidgets.refreshAll(this@RelayApplication) }
+                        .onFailure { Log.e("RelayApplication", "calendar widget refresh failed", it) }
+                }
         }
     }
 }
