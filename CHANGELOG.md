@@ -5,6 +5,27 @@ One entry per tag; "Unreleased" collects what's landed since the last one.
 
 ## Unreleased
 
+## v1.2 (2026-10-25)
+
+A calendar. Relay can now plan days, not just ring at a time.
+
+- A Calendar pane: a month grid with the selected day's items below (tap the month name to jump
+  to any month or year). Add events (all day, timed, or over several days) and reminders, each
+  optionally notifying, ringing or starting a timer, relay or stopwatch ahead of time. Birthdays
+  can show the age, if you give the year.
+- Repeats go further: every N days, weeks, months or years; on the date, "the second Tuesday",
+  the last Friday or the last day of the month; ending on a date or after a number of times.
+- Calendars: sort items into your own calendars, each with a colour, a default reminder and its
+  own tick to show or hide it. Items can have their own colour.
+- Phone calendars (such as Google Calendar) can show alongside Relay's, read-only, and a Relay
+  calendar can copy its items to one. Relay asks for calendar access only when you turn this on.
+- Calendar files: open or share an .ics into Relay to import it (importing again updates rather
+  than duplicates), and export a calendar or a single item as an .ics.
+- Subscribe to a calendar's address (a holiday or fixture list, say) to keep a read-only copy,
+  refreshed when you open Relay. This is the only thing Relay goes online for.
+- Calendar widgets: an agenda of what's coming, and a month view with each day's items, both
+  with a choice of calendars and frame.
+
 ## v1.1 (2026-10-24)
 
 Requests from living with v1.0 for a while.
