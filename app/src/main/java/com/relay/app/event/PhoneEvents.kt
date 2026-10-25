@@ -97,6 +97,8 @@ object PhoneEvents {
             }
             RepeatKind.MONTHLY -> "FREQ=MONTHLY;BYMONTHDAY=${start.dayOfMonth}"
             RepeatKind.YEARLY -> "FREQ=YEARLY;BYMONTH=${start.monthValue};BYMONTHDAY=${start.dayOfMonth}"
+            // Stored without UNTIL, which is added below like the others.
+            RepeatKind.CUSTOM -> event.repeatRule ?: return null
         }
         val until = event.untilEpochDay?.let { day ->
             // The last moment of the last day, in UTC basic form, as RFC 5545 wants.

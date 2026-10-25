@@ -40,7 +40,7 @@ import com.relay.app.data.stopwatch.StopwatchEntity
         StopwatchEntity::class, LapEntity::class, LocationEntity::class, WidgetConfigEntity::class,
         LapCorrectionEntity::class, EventEntity::class, CalendarEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
 )
 abstract class RelayDatabase : RoomDatabase() {
@@ -210,10 +210,21 @@ abstract class RelayDatabase : RoomDatabase() {
             }
         }
 
+        /** v11 (#43, #33): repeat rules, calendar-file UIDs, subscribed calendars. */
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `events` ADD COLUMN `repeatRule` TEXT")
+                db.execSQL("ALTER TABLE `events` ADD COLUMN `icsUid` TEXT")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `repeatRule` TEXT")
+                db.execSQL("ALTER TABLE `calendars` ADD COLUMN `subscriptionUrl` TEXT")
+                db.execSQL("ALTER TABLE `calendars` ADD COLUMN `refreshedAtMillis` INTEGER")
+            }
+        }
+
         /** Append each migration here as the schema grows. */
         val MIGRATIONS = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
-            MIGRATION_9_10,
+            MIGRATION_9_10, MIGRATION_10_11,
         )
 
         fun build(context: Context): RelayDatabase =

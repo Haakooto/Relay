@@ -414,3 +414,16 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Set the copy to Off: the copies leave Google Calendar.
 - [ ] Revoke calendar access in system settings: Relay still saves items; the phone-calendar list asks for access again.
 
+## PR: Richer repeats (#43)
+
+- [ ] Install over the previous Relay Debug: all items, alarms and calendars are still there (database v10 → v11), and existing repeating items repeat as before.
+- [ ] New event on the 2nd Tuesday of a month → Monthly → On: "The second Tuesday": it shows on the 2nd Tuesday of the next months.
+- [ ] An event on the last Friday of a month → "The last Friday" is offered; pick it: it lands on each month's last Friday.
+- [ ] An event on the 31st → "The last day" is offered: it lands on 30 November and 28 February.
+- [ ] Weekly, every 2 weeks on Mon and Thu: dots every other week only.
+- [ ] Daily, ends after 5 times: exactly five days in the grid.
+- [ ] A reminder on "the second Tuesday" notifies on the right days, and again the next month.
+- [ ] Reopen each of these: the editor shows the same choices you saved.
+- [ ] Copy one to Google (calendar copying on): Google Calendar shows the same days.
+- [ ] Yearly on "the fourth Thursday of November": lands on 26 Nov 2026 and 25 Nov 2027.
+

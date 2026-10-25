@@ -130,4 +130,16 @@ class CalendarOccurrencesTest {
         assertEquals(ALARMS_CALENDAR, day.calendarId)
         assertEquals(0xFF7A6A4F, day.color)
     }
+
+    @Test fun ruleItemsLandOnTheRulesDays() {
+        val lastFriday = event(start = "2026-10-30").copy(repeatKind = RepeatKind.CUSTOM, repeatRule = "FREQ=MONTHLY;BYDAY=-1FR")
+        val days = between(listOf(lastFriday), "2026-10-01", "2026-12-31").keys
+        assertEquals(setOf(d("2026-10-30"), d("2026-11-27"), d("2026-12-25")), days)
+    }
+
+    @Test fun ruleItemsStopAtTheirLastDay() {
+        val daily = event(start = "2026-10-01")
+            .copy(repeatKind = RepeatKind.CUSTOM, repeatRule = "FREQ=DAILY;INTERVAL=2", untilEpochDay = d("2026-10-05").toEpochDay())
+        assertEquals(setOf(d("2026-10-01"), d("2026-10-03"), d("2026-10-05")), between(listOf(daily), "2026-10-01", "2026-10-31").keys)
+    }
 }

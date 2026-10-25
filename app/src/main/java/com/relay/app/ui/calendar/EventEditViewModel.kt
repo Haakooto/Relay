@@ -13,9 +13,12 @@ import com.relay.app.data.event.PERSONAL_CALENDAR
 import com.relay.app.data.event.RepeatKind
 import com.relay.app.data.schedule.RingOptions
 import com.relay.app.data.schedule.TargetKind
-import com.relay.app.data.schedule.WeekdayMask
 import com.relay.app.event.ALL_DAY_LEADS
 import com.relay.app.event.ReminderDraft
+import com.relay.app.event.RepeatDraft
+import com.relay.app.event.RepeatFreq
+import com.relay.app.event.RepeatOn
+import com.relay.app.event.Repeats
 import com.relay.app.event.TIMED_LEADS
 import com.relay.app.schedule.TargetSpec
 import com.relay.app.ui.alarms.TargetEditor
@@ -52,9 +55,8 @@ data class EventEditState(
     val endMinute: Int? = null,
     /** Null = ends the day it starts. */
     val endDate: LocalDate? = null,
-    val repeatKind: RepeatKind = RepeatKind.NONE,
-    val repeatDays: Set<DayOfWeek> = emptySet(),
-    val until: LocalDate? = null,
+    /** How it repeats (#43). */
+    val repeat: RepeatDraft = RepeatDraft(),
     /** Null = no reminder (events only: a reminder always has one). */
     val lead: Int? = 15,
     /** Kept from the stored reminder, or Settings defaults, for a Ring target. */
@@ -66,6 +68,8 @@ data class EventEditState(
     val calendarId: String = PERSONAL_CALENDAR,
     val color: Long? = null,
     val calendars: List<CalendarEntity> = emptyList(),
+    /** Kept from the stored row: a calendar file's UID (#33), so a re-import still finds it. */
+    val icsUid: String? = null,
 ) {
     /** The lead times offered for this item: a reminder rings at its time, an event picks. */
     val leads: List<Int> get() = when {
@@ -135,14 +139,16 @@ class EventEditViewModel(
                 startMinute = existing.startMinute ?: nextHour,
                 endMinute = existing.endMinute,
                 endDate = existing.endEpochDay?.let(LocalDate::ofEpochDay),
-                repeatKind = existing.repeatKind,
-                repeatDays = WeekdayMask.toSet(existing.repeatDays),
-                until = existing.untilEpochDay?.let(LocalDate::ofEpochDay),
+                repeat = Repeats.load(
+                    existing.repeatKind, existing.repeatDays, existing.repeatRule,
+                    existing.untilEpochDay?.let(LocalDate::ofEpochDay), LocalDate.ofEpochDay(existing.startEpochDay),
+                ),
                 lead = reminder?.leadMinutes ?: if (existing.kind == EventKind.REMINDER) 0 else null,
                 ring = reminder?.ring ?: defaults,
                 createdAtMillis = existing.createdAtMillis,
                 calendarId = existing.calendarId,
                 color = existing.color,
+                icsUid = existing.icsUid,
             )
             when {
                 reminder != null -> fires.load(reminder.target, reminder.targetDefId, TargetSpec.decode(reminder.targetSpec))
@@ -173,9 +179,13 @@ class EventEditViewModel(
         val default = calendar.defaultLeadMinutes
         // A lead this kind of item doesn't offer (a 15-minute lead on an all-day item) becomes its first.
         val lead = if (s.kind == EventKind.REMINDER) 0 else default?.let { if (it in s.leads) it else s.leads.first() }
-        val repeat = calendar.defaultRepeat
-        val days = if (repeat == RepeatKind.WEEKLY) setOf(s.date.dayOfWeek) else s.repeatDays
-        return s.copy(calendarId = calendar.id, lead = lead, repeatKind = repeat, repeatDays = days)
+        val repeat = when (calendar.defaultRepeat) {
+            RepeatKind.NONE, RepeatKind.CUSTOM -> RepeatDraft()
+            RepeatKind.WEEKLY -> RepeatDraft(RepeatFreq.WEEKLY, weekdays = setOf(s.date.dayOfWeek))
+            RepeatKind.MONTHLY -> RepeatDraft(RepeatFreq.MONTHLY)
+            RepeatKind.YEARLY -> RepeatDraft(RepeatFreq.YEARLY)
+        }
+        return s.copy(calendarId = calendar.id, lead = lead, repeat = repeat)
     }
 
     /** All-day changes which leads make sense; keep the pick if it still does. */
@@ -185,14 +195,17 @@ class EventEditViewModel(
     }
 
     /** Weekly starts on the item's own weekday, so it never repeats on nothing. */
-    fun setRepeat(kind: RepeatKind) = _state.update {
-        val days = if (kind == RepeatKind.WEEKLY && it.repeatDays.isEmpty()) setOf(it.date.dayOfWeek) else it.repeatDays
-        it.copy(repeatKind = kind, repeatDays = days)
+    fun setRepeatFreq(freq: RepeatFreq) = updateRepeat {
+        val weekdays = if (freq == RepeatFreq.WEEKLY && it.weekdays.isEmpty()) setOf(_state.value.date.dayOfWeek) else it.weekdays
+        it.copy(freq = freq, weekdays = weekdays)
     }
+
+    /** Any change to the repeat replaces a rule from a calendar file the editor couldn't show. */
+    fun updateRepeat(transform: (RepeatDraft) -> RepeatDraft) = _state.update { it.copy(repeat = transform(it.repeat).copy(custom = null)) }
 
     private var baseline: List<Any?>? = null
     private fun EventEditState.editable() = listOf(
-        title, note, date, allDay, startMinute, endMinute, endDate, repeatKind, repeatDays, until, lead, calendarId, color,
+        title, note, date, allDay, startMinute, endMinute, endDate, repeat, lead, calendarId, color,
     )
 
     fun isDirty(): Boolean = baseline != null && baseline != _state.value.editable() + fires.editable()
@@ -203,7 +216,9 @@ class EventEditViewModel(
     fun save(onSaved: (Long?, Boolean) -> Unit) = viewModelScope.launch {
         val s = _state.value
         val f = fires.state.value
-        val repeating = s.repeatKind != RepeatKind.NONE
+        // A date moved to where "the 2nd Tuesday" no longer fits falls back to the date itself.
+        val draft = s.repeat.let { if (it.on in Repeats.options(s.date)) it else it.copy(on = RepeatOn.DATE) }
+        val repeat = Repeats.store(draft, s.date)
         val event = EventEntity(
             id = s.id,
             kind = s.kind,
@@ -213,12 +228,14 @@ class EventEditViewModel(
             startMinute = if (s.allDay && s.kind == EventKind.EVENT) null else s.startMinute,
             endEpochDay = if (s.kind == EventKind.EVENT) s.endDate?.takeIf { it != s.date }?.toEpochDay() else null,
             endMinute = if (s.kind == EventKind.EVENT && !s.allDay) s.endMinute else null,
-            repeatKind = s.repeatKind,
-            repeatDays = if (s.repeatKind == RepeatKind.WEEKLY) WeekdayMask.of(s.repeatDays) else 0,
-            untilEpochDay = if (repeating) s.until?.toEpochDay() else null,
+            repeatKind = repeat.kind,
+            repeatDays = repeat.days,
+            untilEpochDay = repeat.until?.toEpochDay(),
             createdAtMillis = s.createdAtMillis,
             calendarId = s.calendarId,
             color = s.color,
+            repeatRule = repeat.rule,
+            icsUid = s.icsUid,
         )
         container.settings.setLastCalendarId(s.calendarId)
         val reminder = s.lead?.let { lead ->

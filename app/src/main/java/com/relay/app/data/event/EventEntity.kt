@@ -7,8 +7,11 @@ import androidx.room.PrimaryKey
 /** An event has a duration and a note; a reminder is a single moment (spec §10b). */
 enum class EventKind { EVENT, REMINDER }
 
-/** How a calendar item repeats. Monthly and yearly skip months that lack the start's date. */
-enum class RepeatKind { NONE, WEEKLY, MONTHLY, YEARLY }
+/**
+ * How a calendar item repeats. Monthly and yearly skip months that lack the start's date.
+ * CUSTOM: a rule in `EventEntity.repeatRule` (#43), for everything the simple kinds can't say.
+ */
+enum class RepeatKind { NONE, WEEKLY, MONTHLY, YEARLY, CUSTOM }
 
 /**
  * A calendar item (spec §10b): a dated, titled entry made from the Calendar pane. Its reminder,
@@ -40,6 +43,10 @@ data class EventEntity(
     val color: Long? = null,
     /** Its copy in a phone calendar (CalendarContract event id, #16); null = none. */
     val providerEventId: Long? = null,
+    /** [RepeatKind.CUSTOM]'s rule, without UNTIL ([untilEpochDay] holds that), as RRULE text (#43). */
+    val repeatRule: String? = null,
+    /** The UID it came with from a calendar file or subscription (#33), so a re-import updates it. */
+    val icsUid: String? = null,
 ) {
     val isAllDay: Boolean get() = startMinute == null
 

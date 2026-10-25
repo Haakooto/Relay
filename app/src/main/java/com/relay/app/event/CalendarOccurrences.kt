@@ -9,6 +9,8 @@ import com.relay.app.data.schedule.ScheduleExceptionEntity
 import com.relay.app.data.schedule.TargetKind
 import com.relay.app.schedule.NextFire
 import com.relay.app.schedule.Recurrence
+import com.relay.app.schedule.Rrule
+import com.relay.app.schedule.RruleDates
 import com.relay.app.util.MinuteOfDay
 import java.time.LocalDate
 
@@ -79,7 +81,19 @@ object CalendarOccurrences {
                 if (event.repeatDays == 0) epochDay == event.startEpochDay else Recurrence.occursOn(day, event.repeatDays, null, null)
             RepeatKind.MONTHLY -> Recurrence.occursOn(day, 0, start.dayOfMonth, null)
             RepeatKind.YEARLY -> Recurrence.occursOn(day, 0, start.dayOfMonth, start.monthValue)
+            RepeatKind.CUSTOM -> ruleStarts(event, day, day).any()
         }
+    }
+
+    /**
+     * A rule item's occurrence starts from [from] to [to] (#43). A rule that won't parse (it
+     * shouldn't: the editor and imports only store ones that do) leaves just the item's own date.
+     */
+    private fun ruleStarts(event: EventEntity, from: LocalDate, to: LocalDate): Sequence<LocalDate> {
+        val start = LocalDate.ofEpochDay(event.startEpochDay)
+        val rule = event.repeatRule?.let { Rrule.parse(it)?.first }
+            ?: return sequenceOf(start).filter { !it.isBefore(from) && !it.isAfter(to) }
+        return RruleDates.dates(rule, start, event.untilEpochDay?.let(LocalDate::ofEpochDay), to).filter { !it.isBefore(from) }
     }
 
     /**
@@ -133,8 +147,12 @@ object CalendarOccurrences {
     ): List<Pair<LocalDate, CalendarEntry>> {
         val span = event.spanDays
         val firstStart = maxOf(from.minusDays(span), LocalDate.ofEpochDay(event.startEpochDay))
-        return generateSequence(firstStart) { it.plusDays(1) }.takeWhile { !it.isAfter(to) }
-            .filter { startsOn(event, it) }
+        val starts = if (event.repeatKind == RepeatKind.CUSTOM) {
+            ruleStarts(event, firstStart, to)
+        } else {
+            generateSequence(firstStart) { it.plusDays(1) }.takeWhile { !it.isAfter(to) }.filter { startsOn(event, it) }
+        }
+        return starts
             .flatMap { start -> (0..span).asSequence().map { offset -> start.plusDays(offset) to offset } }
             .filter { (day, _) -> !day.isBefore(from) && !day.isAfter(to) }
             .map { (day, offset) ->

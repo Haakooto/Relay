@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
 import com.relay.app.data.event.EventKind
+import com.relay.app.event.RepeatEnd
 import com.relay.app.ui.alarms.AlarmTargetSection
 import com.relay.app.ui.alarms.DatePickerDialogFor
 import com.relay.app.ui.alarms.TargetDraft
@@ -191,7 +192,10 @@ private fun EventPickers(picking: Picking, state: EventEditState, viewModel: Eve
             MinutePicker(end, state.is24h, onClose) { m -> set { copy(endMinute = m) } }
         }
         Picking.END_DATE -> DatePickerDialogFor(state.endDate ?: state.date, onDismiss = onClose) { d -> set { copy(endDate = d) } }
-        Picking.UNTIL -> DatePickerDialogFor(state.until ?: state.date, onDismiss = onClose) { d -> set { copy(until = d) } }
+        Picking.UNTIL -> DatePickerDialogFor(state.repeat.until ?: state.date, onDismiss = onClose) { d ->
+            viewModel.updateRepeat { it.copy(end = RepeatEnd.DATE, until = d) }
+            onClose()
+        }
     }
 }
 

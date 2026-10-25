@@ -28,7 +28,13 @@ data class CalendarEntity(
     val defaultRepeat: RepeatKind,
     /** A phone calendar (CalendarContract id) its items are copied to (#16); null = none. */
     val exportCalendarId: Long? = null,
-)
+    /** An https .ics address it mirrors (#33): its items are read-only and replaced on each refresh. */
+    val subscriptionUrl: String? = null,
+    /** When the subscription last refreshed; null = never. */
+    val refreshedAtMillis: Long? = null,
+) {
+    val isSubscribed: Boolean get() = subscriptionUrl != null
+}
 
 const val PERSONAL_CALENDAR = "personal"
 const val BIRTHDAYS_CALENDAR = "birthdays"

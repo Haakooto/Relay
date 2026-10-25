@@ -425,8 +425,6 @@
     <string name="repeat_kind_weekly">Weekly</string>
     <string name="repeat_kind_monthly">Monthly</string>
     <string name="repeat_kind_yearly">Yearly</string>
-    <string name="repeat_monthly_on">Every month on day %1$d</string>
-    <string name="repeat_yearly_on">Every year on %1$s</string>
     <string name="repeat_skips_months">Skips months that have no day %1$d</string>
     <string name="repeat_leap_only">Only in leap years</string>
     <string name="event_delete_title">Delete this event?</string>
@@ -473,6 +471,44 @@
     <string name="calendars_phone_none">No calendars on this phone</string>
     <string name="calendar_copy_to_phone">Copy items to a phone calendar</string>
     <string name="calendar_from_phone">From a phone calendar</string>
+    <string name="repeat_kind_daily">Daily</string>
+    <string name="repeat_kind_custom">Custom</string>
+    <string name="repeat_custom_kept">From a calendar file. Kept as it is until you change the repeat here.</string>
+    <string name="repeat_every">Every</string>
+    <string name="repeat_times">Times</string>
+    <string name="repeat_on">On</string>
+    <string name="repeat_on_date_month">Day %1$d</string>
+    <string name="repeat_on_date_year">%1$s</string>
+    <string name="repeat_on_weekday_month">The %1$s %2$s</string>
+    <string name="repeat_on_weekday_year">The %1$s %2$s of %3$s</string>
+    <string name="repeat_on_last_weekday_month">The last %1$s</string>
+    <string name="repeat_on_last_weekday_year">The last %1$s of %2$s</string>
+    <string name="repeat_on_last_day_month">The last day</string>
+    <string name="repeat_on_last_day_year">The last day of %1$s</string>
+    <string name="ordinal_1">first</string>
+    <string name="ordinal_2">second</string>
+    <string name="ordinal_3">third</string>
+    <string name="ordinal_4">fourth</string>
+    <plurals name="repeat_unit_day">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="repeat_unit_week">
+        <item quantity="one">week</item>
+        <item quantity="other">weeks</item>
+    </plurals>
+    <plurals name="repeat_unit_month">
+        <item quantity="one">month</item>
+        <item quantity="other">months</item>
+    </plurals>
+    <plurals name="repeat_unit_year">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
+    <plurals name="repeat_ends_after">
+        <item quantity="one">After %1$d time</item>
+        <item quantity="other">After %1$d times</item>
+    </plurals>
     <plurals name="calendar_day_items">
         <item quantity="one">%1$s, %2$d item</item>
         <item quantity="other">%1$s, %2$d items</item>

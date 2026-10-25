@@ -188,4 +188,16 @@ class EventRepositoryTest {
         assertNull(eventDao.get("e")?.providerEventId)
         assertEquals(1, scheduleDao.forEvent("e").size)
     }
+
+    @Test fun aRuleItemsReminderCarriesTheRule() = runBlocking {
+        val rule = event(date = "2026-10-13", startMinute = 7 * 60)
+            .copy(repeatKind = RepeatKind.CUSTOM, repeatRule = "FREQ=MONTHLY;BYDAY=2TU")
+        assertEquals(at("2026-10-13T07:00"), repo.save(rule, reminder(0)))
+        val s = scheduleDao.forEvent("e").single()
+        assertEquals("FREQ=MONTHLY;BYDAY=2TU", s.repeatRule)
+        assertEquals(day("2026-10-13"), s.startEpochDay)
+        clock = at("2026-10-13T07:00")
+        schedules.onFired(s.id, ms("2026-10-13T07:00"), isSnooze = false)
+        assertEquals(ms("2026-11-10T07:00"), arming.armed[s.id]?.triggerAt)
+    }
 }

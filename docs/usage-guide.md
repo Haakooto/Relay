@@ -95,9 +95,12 @@ default; Ring and starting a timer, relay or stopwatch work as for alarms.
 
 **A reminder** goes off at its own time and notifies you by default.
 
-**Repeat**: weekly on chosen days, monthly on the same date, or yearly. A month without that
-date is skipped (a monthly 31st skips April; a yearly 29 February only comes in leap years), and
-the editor warns you. **Ends**: never, or on a date.
+**Repeat**: daily, weekly on chosen days, monthly or yearly, **every** one, two or more days,
+weeks, months or years. A monthly or yearly repeat lands on the same date, or, depending on the
+item's date, on the same weekday ("the second Tuesday"), the last such weekday ("the last
+Friday") or the last day of the month. A month without the date is skipped (a monthly 31st skips
+April; a yearly 29 February only comes in leap years), and the editor warns you. **Ends**: never,
+on a date, or after a number of times.
 
 A reminder whose time has already passed is saved but won't go off. Deleting an event deletes
 its reminder too. Reminders don't appear in the Alarms list.

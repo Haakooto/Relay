@@ -81,6 +81,8 @@ data class ScheduleEntity(
     @ColumnInfo(defaultValue = "0") val leadMinutes: Int = 0,
     /** An alarm's calendar (#34); null = the default for alarms. A reminder uses its item's. */
     val calendarId: String? = null,
+    /** A reminder's repeat rule (#43), from [startEpochDay] on; wins over the other repeat fields. */
+    val repeatRule: String? = null,
 ) {
-    val isRepeating: Boolean get() = repeatDays != 0 || repeatMonthDay != null
+    val isRepeating: Boolean get() = repeatDays != 0 || repeatMonthDay != null || repeatRule != null
 }

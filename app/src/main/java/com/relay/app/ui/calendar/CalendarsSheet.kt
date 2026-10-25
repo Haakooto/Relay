@@ -215,6 +215,7 @@ private fun CalendarDefaults(draft: CalendarEntity, onChange: (CalendarEntity) -
                     RepeatKind.WEEKLY -> R.string.repeat_kind_weekly
                     RepeatKind.MONTHLY -> R.string.repeat_kind_monthly
                     RepeatKind.YEARLY -> R.string.repeat_kind_yearly
+                    RepeatKind.CUSTOM -> R.string.repeat_kind_custom
                 },
             )
         },

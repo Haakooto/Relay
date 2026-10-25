@@ -61,6 +61,7 @@ object NextFire {
             return at.takeIf { it.isAfter(nowZoned) }
         }
         if (schedule.remainingCount != null && schedule.remainingCount <= 0) return null
+        schedule.repeatRule?.let { return nextByRule(schedule, it, exceptions, nowZoned, zone) }
 
         // A lead time only moves fires earlier, so no occurrence before today can fire after now.
         var day = maxOf(nowZoned.toLocalDate(), schedule.startEpochDay?.let(LocalDate::ofEpochDay) ?: LocalDate.MIN)
@@ -74,6 +75,27 @@ object NextFire {
             day = day.plusDays(1)
         }
         return null
+    }
+
+    /**
+     * A reminder with a repeat rule (#43): the first of the rule's dates whose fire (less the lead)
+     * is after now. The rule is walked from its start, as COUNT is counted from there.
+     */
+    private fun nextByRule(
+        schedule: ScheduleEntity,
+        text: String,
+        exceptions: List<ScheduleExceptionEntity>,
+        nowZoned: ZonedDateTime,
+        zone: ZoneId,
+    ): ZonedDateTime? {
+        val rule = Rrule.parse(text)?.first ?: return null
+        val start = LocalDate.ofEpochDay(schedule.startEpochDay ?: return null)
+        val until = schedule.endEpochDay?.let(LocalDate::ofEpochDay)
+        val today = nowZoned.toLocalDate()
+        return RruleDates.dates(rule, start, until, today.plusDays(YEARLY_SEARCH_DAYS))
+            .filter { !it.isBefore(today) }
+            .mapNotNull { fireOn(it, schedule, exceptions, zone) }
+            .firstOrNull { it.isAfter(nowZoned) }
     }
 
     /** When the occurrence on [day] fires: its time less the lead, or null if an exception skips it. */

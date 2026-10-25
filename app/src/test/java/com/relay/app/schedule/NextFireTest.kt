@@ -170,4 +170,35 @@ class NextFireTest {
         assertEquals(false, Recurrence.occursOn(d, 0, 30, 5))
         assertEquals(true, Recurrence.occursOn(d, WeekdayMask.of(setOf(java.time.DayOfWeek.THURSDAY)), null, null))
     }
+
+    // Repeat rules (#43): only schedules that carry one take this path.
+
+    private fun ruled(rule: String, start: String, lead: Int = 0, end: String? = null) =
+        schedule(hour = 10).copy(repeatRule = rule, startEpochDay = day(start), leadMinutes = lead, endEpochDay = end?.let(::day))
+
+    @Test fun ruleGivesTheNextDate() =
+        // The 2nd Tuesday: 13 October 2026, then 10 November.
+        assertEquals(at("2026-11-10T10:00"), next(ruled("FREQ=MONTHLY;BYDAY=2TU", "2026-10-13"), "2026-10-14T00:00"))
+
+    @Test fun ruleTodayIfStillAhead() =
+        assertEquals(at("2026-09-30T10:00"), next(ruled("FREQ=DAILY;INTERVAL=2", "2026-09-28"), "2026-09-30T06:00"))
+
+    @Test fun ruleIntervalKeepsItsStep() =
+        // Every 2nd day from Monday 28 Sep: 28, 30 Sep, 2 Oct. After 30 Sep 10:00, next is 2 Oct.
+        assertEquals(at("2026-10-02T10:00"), next(ruled("FREQ=DAILY;INTERVAL=2", "2026-09-28"), "2026-09-30T11:00"))
+
+    @Test fun ruleWithLeadCanFireTheDayBefore() =
+        assertEquals(at("2026-10-12T10:00"), next(ruled("FREQ=MONTHLY;BYDAY=2TU", "2026-10-13", lead = 24 * 60), "2026-10-01T00:00"))
+
+    @Test fun ruleCountIsUsedUp() =
+        // Three weekly occurrences from 16 Sep: 16, 23, 30 Sep. Once 30 Sep has gone, nothing.
+        assertNull(next(ruled("FREQ=WEEKLY;COUNT=3", "2026-09-16"), "2026-09-30T11:00"))
+
+    @Test fun ruleEndDateIsInclusive() =
+        assertNull(next(ruled("FREQ=DAILY", "2026-09-01", end = "2026-09-30"), "2026-09-30T11:00"))
+
+    @Test fun ruleExceptionsStillSkip() =
+        assertEquals(at("2026-10-02T10:00"), next(ruled("FREQ=DAILY", "2026-09-01").copy(id = "s"), "2026-09-30T11:00", skip("2026-10-01")))
+
+    @Test fun ruleMakesItRepeating() = assertEquals(true, ruled("FREQ=DAILY", "2026-09-01").isRepeating)
 }

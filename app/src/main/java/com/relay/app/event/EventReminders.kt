@@ -6,6 +6,7 @@ import com.relay.app.data.schedule.AfterFire
 import com.relay.app.data.schedule.RingOptions
 import com.relay.app.data.schedule.ScheduleEntity
 import com.relay.app.data.schedule.TargetKind
+import com.relay.app.schedule.Rrule
 import com.relay.app.util.MinuteOfDay
 import java.time.LocalDate
 
@@ -36,8 +37,7 @@ object EventReminders {
     fun scheduleFor(event: EventEntity, reminder: ReminderDraft, scheduleId: String, createdAtMillis: Long): ScheduleEntity {
         val start = LocalDate.ofEpochDay(event.startEpochDay)
         val time = MinuteOfDay.toTime(event.startMinute ?: ALL_DAY_REMINDER_MINUTE)
-        // A weekly repeat with no weekday picked has nothing to repeat on: treat it as one-off.
-        val repeat = if (event.repeatKind == RepeatKind.WEEKLY && event.repeatDays == 0) RepeatKind.NONE else event.repeatKind
+        val repeat = effectiveRepeat(event)
         return ScheduleEntity(
             id = scheduleId,
             label = event.title,
@@ -64,6 +64,14 @@ object EventReminders {
             repeatMonthDay = if (repeat == RepeatKind.MONTHLY || repeat == RepeatKind.YEARLY) start.dayOfMonth else null,
             repeatMonth = if (repeat == RepeatKind.YEARLY) start.monthValue else null,
             leadMinutes = reminder.leadMinutes,
+            repeatRule = event.repeatRule.takeIf { repeat == RepeatKind.CUSTOM },
         )
+    }
+
+    /** A weekly repeat with no weekday picked, or a rule that won't parse, has nothing to repeat on: a one-off. */
+    private fun effectiveRepeat(event: EventEntity): RepeatKind = when {
+        event.repeatKind == RepeatKind.WEEKLY && event.repeatDays == 0 -> RepeatKind.NONE
+        event.repeatKind == RepeatKind.CUSTOM && event.repeatRule?.let { Rrule.parse(it) } == null -> RepeatKind.NONE
+        else -> event.repeatKind
     }
 }

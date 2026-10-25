@@ -256,8 +256,34 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun migrate10To11KeepsItemsWithoutRules() {
+        helper.createDatabase(TEST_DB, 10).apply {
+            execSQL(
+                "INSERT INTO events (id, kind, title, note, startEpochDay, startMinute, endEpochDay, endMinute, repeatKind, " +
+                    "repeatDays, untilEpochDay, createdAtMillis, calendarId, color, providerEventId) " +
+                    "VALUES ('e1', 'EVENT', 'Dentist', '', 20000, 600, NULL, NULL, 'MONTHLY', 0, NULL, 0, 'personal', NULL, 7)",
+            )
+            close()
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 11, true, *RelayDatabase.MIGRATIONS).apply {
+            query("SELECT repeatKind, providerEventId, repeatRule, icsUid FROM events WHERE id = 'e1'").use {
+                assertTrue(it.moveToFirst())
+                assertEquals("MONTHLY", it.getString(0))
+                assertEquals(7L, it.getLong(1))
+                assertTrue(it.isNull(2))
+                assertTrue(it.isNull(3))
+            }
+            query("SELECT COUNT(*) FROM calendars WHERE subscriptionUrl IS NULL AND refreshedAtMillis IS NULL").use {
+                assertTrue(it.moveToFirst())
+                assertEquals(3L, it.getLong(0))
+            }
+            close()
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test"
-        const val LATEST_VERSION = 10
+        const val LATEST_VERSION = 11
     }
 }

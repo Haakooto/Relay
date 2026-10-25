@@ -98,9 +98,13 @@ verkar som for alarmar.
 
 **Ei påminning** går av på sitt eige tidspunkt og varslar deg som standard.
 
-**Gjenta**: kvar veke på valde dagar, kvar månad på same dato, eller kvart år. Ein månad utan
-den datoen blir hoppa over (den 31. kvar månad hoppar over april; 29. februar kvart år kjem
-berre i skotår), og redigeringa åtvarar deg. **Sluttar**: aldri, eller på ein dato.
+**Gjenta**: kvar dag, kvar veke på valde dagar, kvar månad eller kvart år, med eit
+**intervall** på ein, to eller fleire dagar, veker, månader eller år. Ei månadleg eller årleg
+gjentaking kjem på same dato, eller, alt etter datoen til oppføringa, på same vekedag («andre
+tysdag i månaden»), siste slike vekedag («siste fredag») eller siste dagen i månaden. Ein månad
+utan datoen blir hoppa over (den 31. kvar månad hoppar over april; 29. februar kvart år kjem
+berre i skotår), og redigeringa åtvarar deg. **Sluttar**: aldri, på ein dato, eller etter eit tal
+gonger.
 
 Ei påminning der tida alt er passert, blir lagra, men går ikkje av. Slettar du ei hending, blir
 påminninga sletta òg. Påminningar kjem ikkje i alarmlista.

@@ -413,8 +413,6 @@
     <string name="repeat_kind_weekly">Kvar veke</string>
     <string name="repeat_kind_monthly">Kvar månad</string>
     <string name="repeat_kind_yearly">Kvart år</string>
-    <string name="repeat_monthly_on">Kvar månad på dag %1$d</string>
-    <string name="repeat_yearly_on">Kvart år den %1$s</string>
     <string name="repeat_skips_months">Hoppar over månader utan dag %1$d</string>
     <string name="repeat_leap_only">Berre i skotår</string>
     <string name="event_delete_title">Slette denne hendinga?</string>
@@ -461,6 +459,44 @@
     <string name="calendars_phone_none">Ingen kalendrar på denne telefonen</string>
     <string name="calendar_copy_to_phone">Kopier oppføringar til ein telefonkalender</string>
     <string name="calendar_from_phone">Frå ein telefonkalender</string>
+    <string name="repeat_kind_daily">Kvar dag</string>
+    <string name="repeat_kind_custom">Eigen</string>
+    <string name="repeat_custom_kept">Frå ei kalenderfil. Blir verande som han er til du endrar gjentakinga her.</string>
+    <string name="repeat_every">Intervall:</string>
+    <string name="repeat_times">Gonger</string>
+    <string name="repeat_on">På</string>
+    <string name="repeat_on_date_month">Dag %1$d</string>
+    <string name="repeat_on_date_year">%1$s</string>
+    <string name="repeat_on_weekday_month">%1$s %2$s i månaden</string>
+    <string name="repeat_on_weekday_year">%1$s %2$s i %3$s</string>
+    <string name="repeat_on_last_weekday_month">Siste %1$s i månaden</string>
+    <string name="repeat_on_last_weekday_year">Siste %1$s i %2$s</string>
+    <string name="repeat_on_last_day_month">Siste dagen i månaden</string>
+    <string name="repeat_on_last_day_year">Siste dagen i %1$s</string>
+    <string name="ordinal_1">Første</string>
+    <string name="ordinal_2">Andre</string>
+    <string name="ordinal_3">Tredje</string>
+    <string name="ordinal_4">Fjerde</string>
+    <plurals name="repeat_unit_day">
+        <item quantity="one">dag</item>
+        <item quantity="other">dagar</item>
+    </plurals>
+    <plurals name="repeat_unit_week">
+        <item quantity="one">veke</item>
+        <item quantity="other">veker</item>
+    </plurals>
+    <plurals name="repeat_unit_month">
+        <item quantity="one">månad</item>
+        <item quantity="other">månader</item>
+    </plurals>
+    <plurals name="repeat_unit_year">
+        <item quantity="one">år</item>
+        <item quantity="other">år</item>
+    </plurals>
+    <plurals name="repeat_ends_after">
+        <item quantity="one">Etter %1$d gong</item>
+        <item quantity="other">Etter %1$d gonger</item>
+    </plurals>
     <plurals name="calendar_day_items">
         <item quantity="one">%1$s, %2$d oppføring</item>
         <item quantity="other">%1$s, %2$d oppføringar</item>
