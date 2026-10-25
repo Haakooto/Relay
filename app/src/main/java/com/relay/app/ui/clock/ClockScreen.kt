@@ -50,11 +50,11 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
-import com.relay.app.guide.GuideButton
-import com.relay.app.guide.GuideSection
 import com.relay.app.clock.Cities
 import com.relay.app.clock.ClockStyle
 import com.relay.app.data.clock.LocationEntity
+import com.relay.app.guide.GuideSection
+import com.relay.app.ui.common.PaneHeader
 import com.relay.app.util.TimeText
 import kotlinx.coroutines.delay
 import java.time.Instant
@@ -89,10 +89,8 @@ fun ClockScreen(onEditStyle: () -> Unit, viewModel: ClockViewModel = viewModel()
     Box(Modifier.fillMaxSize()) {
         LazyColumn(contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.pane_clock), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+                PaneHeader(R.string.pane_clock, GuideSection.CLOCK) {
                     IconButton(onClick = onEditStyle) { Icon(Icons.Outlined.Palette, stringResource(R.string.clock_edit_style)) }
-                    GuideButton(GuideSection.CLOCK)
                 }
             }
             item {

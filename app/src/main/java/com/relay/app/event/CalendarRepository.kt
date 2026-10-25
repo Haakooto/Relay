@@ -1,0 +1,106 @@
+package com.relay.app.event
+
+import com.relay.app.data.event.CalendarDao
+import com.relay.app.data.event.CalendarEntity
+import com.relay.app.data.event.EventDao
+import com.relay.app.schedule.ScheduleRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+/**
+ * The command layer for calendars (#34). Exactly one calendar is the default for alarms, and
+ * there is always at least one: deleting moves the calendar's items and alarms elsewhere first.
+ */
+class CalendarRepository(
+    private val dao: CalendarDao,
+    private val events: EventDao,
+    private val schedules: ScheduleRepository,
+    /** Brings a calendar's phone-calendar copies in step (#16); `EventRepository.syncCalendar`. */
+    private val syncCopies: suspend (calendarId: String) -> Unit = {},
+) {
+    private val mutex = Mutex()
+
+    fun observeAll(): Flow<List<CalendarEntity>> = dao.observeAll()
+
+    suspend fun all(): List<CalendarEntity> = dao.getAll()
+
+    suspend fun get(id: String): CalendarEntity? = dao.get(id)
+
+    /** Where new alarms go: the calendar marked for it, or the first if somehow none is. */
+    suspend fun defaultForAlarms(): CalendarEntity? {
+        val all = dao.getAll()
+        return all.firstOrNull { it.defaultForAlarms } ?: all.firstOrNull()
+    }
+
+    /** Saves [calendar]. Marking it the default for alarms takes that from the others. */
+    suspend fun save(calendar: CalendarEntity) {
+        val exportChanged = mutex.withLock { saveLocked(calendar) }
+        if (exportChanged) syncCopies(calendar.id)
+    }
+
+    /** Returns whether the phone calendar it copies to changed. */
+    private suspend fun saveLocked(calendar: CalendarEntity): Boolean {
+        val all = dao.getAll()
+        val sortOrder = all.firstOrNull { it.id == calendar.id }?.sortOrder ?: ((all.maxOfOrNull { it.sortOrder } ?: -1) + 1)
+        if (calendar.defaultForAlarms) {
+            all.filter { it.defaultForAlarms && it.id != calendar.id }.forEach { dao.upsert(it.copy(defaultForAlarms = false)) }
+        }
+        // Never leave no default: unmarking the only one is ignored.
+        val keepDefault = !calendar.defaultForAlarms && all.none { it.defaultForAlarms && it.id != calendar.id }
+        dao.upsert(calendar.copy(sortOrder = sortOrder, defaultForAlarms = calendar.defaultForAlarms || keepDefault))
+        return all.firstOrNull { it.id == calendar.id }?.exportCalendarId != calendar.exportCalendarId
+    }
+
+    suspend fun setShown(id: String, shown: Boolean) = mutex.withLock {
+        dao.get(id)?.let { dao.upsert(it.copy(shown = shown)) }
+    }
+
+    /**
+     * Deletes calendar [id] after moving its items and alarms to [moveTo] (which also inherits
+     * "default for alarms"). Refused, returning false, for the last calendar or a bad target.
+     */
+    suspend fun delete(id: String, moveTo: String): Boolean {
+        val moved = mutex.withLock {
+            val gone = dao.get(id) ?: return false
+            val target = dao.get(moveTo)?.takeIf { it.id != id } ?: return false
+            events.moveCalendar(id, target.id)
+            schedules.moveCalendar(id, target.id)
+            if (gone.defaultForAlarms) dao.upsert(target.copy(defaultForAlarms = true))
+            dao.delete(id)
+            true
+        }
+        // The moved items now copy, or don't, as their new calendar does.
+        if (moved) syncCopies(moveTo)
+        return moved
+    }
+
+    /**
+     * A new subscribed calendar (#33) for [url] (already checked by `SubscriptionUrl`), shown, in
+     * [color], with no reminders: its items are read-only.
+     */
+    suspend fun subscribe(name: String, url: String, color: Long): CalendarEntity {
+        val calendar = CalendarEntity(
+            java.util.UUID.randomUUID().toString(), name, color, sortOrder = 0, shown = true, defaultForAlarms = false,
+            defaultLeadMinutes = null, defaultTarget = com.relay.app.data.schedule.TargetKind.NOTIFY,
+            defaultRepeat = com.relay.app.data.event.RepeatKind.NONE, subscriptionUrl = url,
+        )
+        save(calendar)
+        return calendar
+    }
+
+    suspend fun markRefreshed(id: String, atMillis: Long) = mutex.withLock {
+        dao.get(id)?.let { dao.upsert(it.copy(refreshedAtMillis = atMillis)) }
+    }
+
+    /** Deletes a subscribed calendar and its items; refused for one that isn't. */
+    suspend fun unsubscribe(id: String, deleteItems: suspend (String) -> Unit): Boolean {
+        val calendar = dao.get(id)?.takeIf { it.isSubscribed && !it.defaultForAlarms } ?: return false
+        deleteItems(calendar.id)
+        mutex.withLock { dao.delete(calendar.id) }
+        return true
+    }
+
+    /** The phone calendar [calendarId]'s items copy to, if any. */
+    suspend fun exportTarget(calendarId: String): Long? = dao.get(calendarId)?.exportCalendarId
+}

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.relay.app.appContainer
 import com.relay.app.data.settings.AppSettings
+import com.relay.app.event.CalendarSelection
 import com.relay.app.schedule.AlarmListItem
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,11 @@ class AlarmsViewModel(application: Application) : AndroidViewModel(application) 
     val blockLabels: StateFlow<Map<String, String>> = application.appContainer.library.observe()
         .map { state -> state.items.associate { it.id to it.label } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    /** Calendars (#34), for each alarm's colour. */
+    val calendars: StateFlow<CalendarSelection?> = application.appContainer.calendars.observeAll()
+        .map { CalendarSelection(it, emptySet()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun setEnabled(id: String, enabled: Boolean, onArmed: (Long?) -> Unit) = viewModelScope.launch {
         val next = schedules.setEnabled(id, enabled)

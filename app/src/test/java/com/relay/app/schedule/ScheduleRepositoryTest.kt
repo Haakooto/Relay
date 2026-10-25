@@ -3,15 +3,10 @@ package com.relay.app.schedule
 import com.relay.app.data.schedule.AfterFire
 import com.relay.app.data.schedule.ExceptionKind
 import com.relay.app.data.schedule.RingOptions
-import com.relay.app.data.schedule.ScheduleDao
 import com.relay.app.data.schedule.ScheduleEntity
-import com.relay.app.data.schedule.ScheduleExceptionEntity
 import com.relay.app.data.schedule.TargetKind
 import com.relay.app.data.schedule.WeekdayMask
 import com.relay.app.data.settings.AppSettings
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -19,52 +14,8 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.DayOfWeek
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-
-private class FakeDao : ScheduleDao {
-    val schedules = MutableStateFlow<Map<String, ScheduleEntity>>(emptyMap())
-    val exceptions = MutableStateFlow<Map<String, ScheduleExceptionEntity>>(emptyMap())
-    override fun observeAll(): Flow<List<ScheduleEntity>> = schedules.map { it.values.toList() }
-    override suspend fun getAll() = schedules.value.values.toList()
-    override suspend fun get(id: String) = schedules.value[id]
-    override suspend fun upsert(schedule: ScheduleEntity) { schedules.value += schedule.id to schedule }
-    override suspend fun delete(id: String) {
-        schedules.value -= id
-        exceptions.value = exceptions.value.filterValues { it.scheduleId != id }
-    }
-    override fun observeAllExceptions(): Flow<List<ScheduleExceptionEntity>> = exceptions.map { it.values.toList() }
-    override suspend fun exceptionsFor(scheduleId: String) = exceptions.value.values.filter { it.scheduleId == scheduleId }
-    override suspend fun upsertException(exception: ScheduleExceptionEntity) { exceptions.value += exception.id to exception }
-    override suspend fun deleteException(id: String) { exceptions.value -= id }
-    override suspend fun deleteExceptionsEndingBefore(beforeEpochDay: Long) {
-        exceptions.value = exceptions.value.filterValues { it.endEpochDay >= beforeEpochDay }
-    }
-}
-
-private class FakeArming : ScheduleArming {
-    data class Armed(val triggerAt: Long, val isSnooze: Boolean, val at: Long)
-    val armed = mutableMapOf<String, Armed>()
-    val upcoming = mutableMapOf<String, Long>()
-    var lastRings = true
-    override fun arm(scheduleId: String, triggerAtMillis: Long, isSnooze: Boolean, atMillis: Long, rings: Boolean) {
-        lastRings = rings
-        armed[scheduleId] = Armed(triggerAtMillis, isSnooze, atMillis)
-    }
-    override fun cancel(scheduleId: String) { armed -= scheduleId }
-    override fun armUpcoming(scheduleId: String, atMillis: Long) { upcoming[scheduleId] = atMillis }
-    override fun cancelUpcoming(scheduleId: String) { upcoming -= scheduleId }
-}
-
-private class FakeNotices : ScheduleNotices {
-    val shown = mutableListOf<String>()
-    override suspend fun showUpcoming(s: ScheduleEntity, fireAt: Instant) { shown += "upcoming:${s.id}" }
-    override suspend fun showSnoozed(s: ScheduleEntity, until: Instant) { shown += "snoozed:${s.id}" }
-    override suspend fun showMissed(s: ScheduleEntity, at: Instant) { shown += "missed:${s.id}" }
-    override fun clearUpcoming(scheduleId: String) {}
-    override fun clearScheduleNotifications(scheduleId: String) {}
-}
 
 class ScheduleRepositoryTest {
     private val zone = ZoneId.of("Europe/Oslo")
@@ -72,9 +23,9 @@ class ScheduleRepositoryTest {
     private fun ms(text: String) = at(text).toEpochMilli()
 
     private var clock = at("2026-09-30T06:00") // a Wednesday
-    private val dao = FakeDao()
-    private val arming = FakeArming()
-    private val notices = FakeNotices()
+    private val dao = FakeScheduleDao()
+    private val arming = FakeScheduleArming()
+    private val notices = FakeScheduleNotices()
     private var settings = AppSettings(upcomingLeadMinutes = 0)
     private val repo = ScheduleRepository(dao, arming, notices, { settings }, { clock }, { zone })
 
@@ -137,7 +88,7 @@ class ScheduleRepositoryTest {
         clock = at("2026-09-30T07:00")
         repo.onFired("a", ms("2026-09-30T07:00"), isSnooze = false)
         repo.onSnoozed("a")
-        assertEquals(FakeArming.Armed(ms("2026-09-30T07:10"), true, ms("2026-09-30T07:10")), arming.armed["a"])
+        assertEquals(FakeScheduleArming.Armed(ms("2026-09-30T07:10"), true, ms("2026-09-30T07:10")), arming.armed["a"])
         clock = at("2026-09-30T07:10")
         assertTrue(repo.onFired("a", ms("2026-09-30T07:10"), isSnooze = true) is FireDecision.Ring)
         repo.onDismissed("a")
@@ -182,7 +133,7 @@ class ScheduleRepositoryTest {
         repo.save(alarm())
         clock = at("2026-09-30T07:40") // phone was off at 07:00
         repo.rescheduleAll()
-        assertEquals(FakeArming.Armed(ms("2026-09-30T07:00"), false, ms("2026-09-30T07:40")), arming.armed["a"])
+        assertEquals(FakeScheduleArming.Armed(ms("2026-09-30T07:00"), false, ms("2026-09-30T07:40")), arming.armed["a"])
         assertTrue(repo.onFired("a", ms("2026-09-30T07:00"), false) is FireDecision.Ring)
     }
 

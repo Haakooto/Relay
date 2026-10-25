@@ -1,0 +1,55 @@
+package com.relay.app.data.event
+
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+/** An event has a duration and a note; a reminder is a single moment (spec §10b). */
+enum class EventKind { EVENT, REMINDER }
+
+/**
+ * How a calendar item repeats. Monthly and yearly skip months that lack the start's date.
+ * CUSTOM: a rule in `EventEntity.repeatRule` (#43), for everything the simple kinds can't say.
+ */
+enum class RepeatKind { NONE, WEEKLY, MONTHLY, YEARLY, CUSTOM }
+
+/**
+ * A calendar item (spec §10b): a dated, titled entry made from the Calendar pane. Its reminder,
+ * if any, is an ordinary schedule pointing back here through `ScheduleEntity.eventId`, so firing
+ * stays in the one module. Times are local wall-clock times, like alarms.
+ */
+@Entity(tableName = "events")
+data class EventEntity(
+    @PrimaryKey val id: String,
+    val kind: EventKind,
+    val title: String,
+    val note: String,
+    val startEpochDay: Long,
+    /** Minutes after midnight; null = all day. A reminder always has one. */
+    val startMinute: Int?,
+    /** Last day, inclusive; null = the start day. */
+    val endEpochDay: Long?,
+    /** Minutes after midnight on the end day; null = no end time. */
+    val endMinute: Int?,
+    val repeatKind: RepeatKind,
+    /** Weekly only: a [com.relay.app.data.schedule.WeekdayMask]. */
+    val repeatDays: Int,
+    /** Repeating only: last day an occurrence may start, inclusive. */
+    val untilEpochDay: Long?,
+    val createdAtMillis: Long,
+    /** The calendar it belongs to (#34). */
+    @ColumnInfo(defaultValue = PERSONAL_CALENDAR) val calendarId: String = PERSONAL_CALENDAR,
+    /** ARGB; null = its calendar's colour. */
+    val color: Long? = null,
+    /** Its copy in a phone calendar (CalendarContract event id, #16); null = none. */
+    val providerEventId: Long? = null,
+    /** [RepeatKind.CUSTOM]'s rule, without UNTIL ([untilEpochDay] holds that), as RRULE text (#43). */
+    val repeatRule: String? = null,
+    /** The UID it came with from a calendar file or subscription (#33), so a re-import updates it. */
+    val icsUid: String? = null,
+) {
+    val isAllDay: Boolean get() = startMinute == null
+
+    /** Whole days from an occurrence's start day to its last day. */
+    val spanDays: Long get() = ((endEpochDay ?: startEpochDay) - startEpochDay).coerceAtLeast(0)
+}

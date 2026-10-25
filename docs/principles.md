@@ -16,8 +16,9 @@ Change a rule here only on purpose, in its own commit, and say why in the messag
 2. **One app, no companion needed.** Relay replaces the stock Clock. Where the stock app is good,
    copy it closely; spend novelty only where it is limited.
 3. **Local and private.** No account, no sync, no analytics, no ads, no network by default.
-   The app has no `INTERNET` permission today; a feature that needs one (webhooks, #19) makes it
-   opt-in, says so in the UI, and keeps working with it denied.
+   `INTERNET` is used only to fetch calendars the user subscribed to (#33), and only when they
+   subscribe, refresh or open the app. A feature that needs the network (webhooks, #19) makes it
+   opt-in, says so in the UI, and keeps working without it.
 4. **One primitive per idea.** Anything timed is a schedule; anything that runs is a run of a
    definition; anything that makes noise goes through the firing module (spec §13). A new
    feature reuses these before it invents a parallel path.
@@ -114,7 +115,7 @@ chainlang/        The relay language, plain JVM, no Android
 1. **Least privilege.** Add a permission only in the change that needs it, explain it in the PR,
    and degrade gracefully when it is denied or revoked.
 2. **Exported components are few and validated.** Only the launcher, widget and system
-   receivers are exported. An exported entry point (an intent, an AppFunction) validates every
+   receivers, and the calendar-file import screen (#33), are exported. An exported entry point (an intent, an AppFunction) validates every
    extra and never trusts the caller.
 3. **PendingIntents are immutable** unless a system API requires otherwise, with a comment why.
 4. **No user content in logs.** Labels, scripts and notes are not logged.

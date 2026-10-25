@@ -5,8 +5,8 @@ moduler på heimeskjermen. Det som skil Relay ut: tidtakarar kan lenkjast saman 
 alarmar kan **starte** ein tidtakar, eit relé eller ei stoppeklokke i staden for berre å ringje,
 og stoppeklokker har **rundar med merkelappar som kan rettast**.
 
-Dei fem rutene nedst er Alarmar, Tidtakarar, Stoppeklokke, Klokke og Innstillingar. Relay opnar
-på ruta du brukte sist.
+Dei fem rutene nedst er Alarmar, Kalender, Tidtakarar, Stoppeklokke og Klokke. Relay opnar på
+ruta du brukte sist. **Innstillingar** er tannhjulet øvst til høgre i kvar rute.
 
 ---
 
@@ -50,6 +50,7 @@ Under **Når han går av** kan ein alarm gjere meir enn å ringje:
 | Val | Ved alarmtida |
 |---|---|
 | **Ring** | Ein vanleg alarm. |
+| **Varsle** | Viser eit varsel med vanleg lyd. Ingenting ringjer, og det er inga slumring. |
 | **Start ein tidtakar** | Startar ein lagra tidtakar, eller ein **Ny** du lagar der og då. |
 | **Start eit relé** | Startar eit lagra relé, eller eit **Nytt** du skriv der og då. |
 | **Start ei stoppeklokke** | Lagar ei stoppeklokke med namnet, startpunktet og merkelappane du gjev, og startar ho. |
@@ -61,6 +62,67 @@ gjer ein ny tidtakar eller eit nytt relé om til ein lagra.
 
 Døme: ein alarm kvar vekedag kl. 06:30 som startar *Vekk*-reléet ditt (sjå nedanfor), gjev deg
 ein morgon utan slumreknapp.
+
+---
+
+## Kalender
+
+Kalender-ruta er for planlegging: **hendingar** (med start, valfri slutt og eit notat) og
+**påminningar** (eitt tidspunkt). Trykk **+** for kva du vil; det byrjar på dagen du har valt.
+
+**Månaden.** Dagar med noko på har ein prikk i fargen til oppføringa; noko som varer fleire dagar,
+er éin strek over dei. Trykk på ein dag for å sjå han under rutenettet; dra sidelengs eller bruk
+pilene for å byte månad, og **I dag** for å kome tilbake. Trykk på namnet på månaden for å hoppe
+til kva månad og år som helst.
+
+**Kalendrar.** Kvar oppføring, og kvar alarm, høyrer til ein kalender: Personleg, Bursdagar og
+Alarmar til å byrje med. Lag-knappen øvst viser dei: kryss av dei som skal visast (alarmar frå i
+dag og framover), trykk på blyanten for å endre namn, farge og standardvala nye oppføringar får
+(påminning, kva ho gjer, gjentaking), eller legg til ein ny. Éin kalender er der nye alarmar
+hamnar. Slettar du ein kalender, blir du spurd kvar oppføringane og alarmane skal flyttast. I
+redigeringa vel du kalenderen til ei oppføring, og kan gje ho eigen farge.
+
+**Google og andre kalendrar.** Under **På denne telefonen** i same lista lèt **Gje tilgang til
+kalendrar** Relay vise kalendrane som alt er på telefonen (Google, delte kalendrar og
+helgedagskalendrar), kvar med eigen avkryssing og farge. Hendingane deira kan berre lesast her;
+trykk på ei for å opne ho i sin eigen kalenderapp. Ein Relay-kalender kan òg **kopiere
+oppføringane sine** til ein av dei (i redigeringa av kalenderen): nye og endra oppføringar blir
+kopierte, sletta blir fjerna, og kopiane blir ikkje viste to gonger. Relay les og skriv dei på
+sjølve telefonen; kalenderappen din synkroniserer dei, Relay brukar ikkje nettet.
+
+**Kalenderfiler (.ics).** Opne eller del ei .ics-fil til Relay (frå Filer, ein e-post eller ein
+nettlesar), eller bruk **Importer fil** i kalenderlista: Relay viser kva det fann, og spør kva
+kalender det skal i. Importerer du same fila igjen, blir det som kom inn førre gongen oppdatert i
+staden for lagt til to gonger. Ei gjentaking Relay ikkje kan følgje, kjem inn som første datoen,
+med ei linje i notatet som seier det. For å sende oppføringar vidare deler **Eksporter** i
+redigeringa av ein kalender heile kalenderen, og del-knappen i redigeringa av ei oppføring deler
+berre henne.
+
+**Abonnerte kalendrar.** **Abonner** i kalenderlista tek adressa til ein kalender (https:// eller
+webcal://, til dømes ein kalender med heilagdagar eller ein kampkalender). Relay hentar han då, når
+du trykkjer **Oppdater no** i redigeringa hans, og når du opnar Relay om han er meir enn seks
+timar gammal; dette er det einaste Relay nokon gong går på nettet for. Ein abonnert kalender er
+skriveverna: trykkjer du på ei oppføring, seier Relay berre det, og slettar du abonnementet,
+forsvinn oppføringane hans.
+
+**Ei hending** varer heile dagen eller har eit starttidspunkt, og kan slutte seinare same dagen
+eller ein seinare dag. Under **Påminning** vel du når du vil bli minna på (når ho byrjar,
+minutt eller ein dag før; for ei heildagshending kl. 09:00 same dagen eller dagen før) og kva som
+skal skje. **Varsle** er standard; Ring og å starte ein tidtakar, eit relé eller ei stoppeklokke
+verkar som for alarmar.
+
+**Ei påminning** går av på sitt eige tidspunkt og varslar deg som standard.
+
+**Gjenta**: kvar dag, kvar veke på valde dagar, kvar månad eller kvart år, med eit
+**intervall** på ein, to eller fleire dagar, veker, månader eller år. Ei månadleg eller årleg
+gjentaking kjem på same dato, eller, alt etter datoen til oppføringa, på same vekedag («andre
+tysdag i månaden»), siste slike vekedag («siste fredag») eller siste dagen i månaden. Ein månad
+utan datoen blir hoppa over (den 31. kvar månad hoppar over april; 29. februar kvart år kjem
+berre i skotår), og redigeringa åtvarar deg. **Sluttar**: aldri, på ein dato, eller etter eit tal
+gonger.
+
+Ei påminning der tida alt er passert, blir lagra, men går ikkje av. Slettar du ei hending, blir
+påminninga sletta òg. Påminningar kjem ikkje i alarmlista.
 
 ---
 
@@ -208,6 +270,19 @@ Hald inne på heimeskjermen → Moduler → Relay. Kvar modul får sitt eige opp
 
 Kvar modul kan sjå ulik ut. Vil du endre ein seinare, hald inne på han og vel innstillingar for
 modulen. Trykk på ein modul opnar Relay på ruta du brukte sist.
+
+**Kalendermodular.** To til, kvar med sitt eige oppsett: kva **kalendrar** dei skal vise, og den
+same bakgrunnen, hjørna og kanten som klokka.
+
+- **Kalender: neste 7 dagar** viser det som kjem, dag for dag, i fargen til kvar oppføring; noko
+  som varer fleire dagar, står éin gong, med datoane. Trykk på ei rad for å opne ho, på
+  ein dag for å opne Kalender-ruta der, og **+** for ei ny hending.
+- **Kalender: månad** viser månaden med planane for kvar dag som små merke i fargane deira,
+  strekar over dagane for det som varer lenger, og «+n» når ikkje alle får plass; ein høgare modul
+  får plass til fleire. **‹** og **›** byter månad rett på heimeskjermen; trykk på ein dag eller namnet på
+  månaden opnar Kalender-ruta der.
+
+Dei blir oppdaterte når du endrar noko i Relay, og ved midnatt.
 
 ---
 

@@ -6,15 +6,15 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.relay.app.data.library.LibraryHeaderDao
 import com.relay.app.data.clock.ClockDao
 import com.relay.app.data.clock.LocationEntity
 import com.relay.app.data.clock.WidgetConfigEntity
+import com.relay.app.data.event.CalendarDao
+import com.relay.app.data.event.CalendarEntity
+import com.relay.app.data.event.EventDao
+import com.relay.app.data.event.EventEntity
 import com.relay.app.data.library.LibraryDao
-import com.relay.app.data.stopwatch.LapCorrectionEntity
-import com.relay.app.data.stopwatch.LapEntity
-import com.relay.app.data.stopwatch.StopwatchDao
-import com.relay.app.data.stopwatch.StopwatchEntity
+import com.relay.app.data.library.LibraryHeaderDao
 import com.relay.app.data.library.LibraryHeaderEntity
 import com.relay.app.data.library.RelayDefEntity
 import com.relay.app.data.library.TimerDefEntity
@@ -23,6 +23,10 @@ import com.relay.app.data.run.RunEntity
 import com.relay.app.data.schedule.ScheduleDao
 import com.relay.app.data.schedule.ScheduleEntity
 import com.relay.app.data.schedule.ScheduleExceptionEntity
+import com.relay.app.data.stopwatch.LapCorrectionEntity
+import com.relay.app.data.stopwatch.LapEntity
+import com.relay.app.data.stopwatch.StopwatchDao
+import com.relay.app.data.stopwatch.StopwatchEntity
 
 /**
  * Schema history lives in `app/schemas/` (exported, committed). Every version bump needs a real
@@ -34,9 +38,9 @@ import com.relay.app.data.schedule.ScheduleExceptionEntity
         LibraryHeaderEntity::class, ScheduleEntity::class, ScheduleExceptionEntity::class,
         TimerDefEntity::class, RelayDefEntity::class, RunEntity::class,
         StopwatchEntity::class, LapEntity::class, LocationEntity::class, WidgetConfigEntity::class,
-        LapCorrectionEntity::class,
+        LapCorrectionEntity::class, EventEntity::class, CalendarEntity::class,
     ],
-    version = 7,
+    version = 11,
     exportSchema = true,
 )
 abstract class RelayDatabase : RoomDatabase() {
@@ -46,6 +50,8 @@ abstract class RelayDatabase : RoomDatabase() {
     abstract fun runDao(): RunDao
     abstract fun stopwatchDao(): StopwatchDao
     abstract fun clockDao(): ClockDao
+    abstract fun eventDao(): EventDao
+    abstract fun calendarDao(): CalendarDao
 
     companion object {
         const val FILE_NAME = "relay.db"
@@ -154,8 +160,72 @@ abstract class RelayDatabase : RoomDatabase() {
             }
         }
 
+        /** v8 (spec §10b): calendar events, and schedules that remind of them. */
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `eventId` TEXT")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `startEpochDay` INTEGER")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `repeatMonthDay` INTEGER")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `repeatMonth` INTEGER")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `leadMinutes` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_schedules_eventId` ON `schedules` (`eventId`)")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `events` (`id` TEXT NOT NULL, `kind` TEXT NOT NULL, `title` TEXT NOT NULL, " +
+                        "`note` TEXT NOT NULL, `startEpochDay` INTEGER NOT NULL, `startMinute` INTEGER, `endEpochDay` INTEGER, " +
+                        "`endMinute` INTEGER, `repeatKind` TEXT NOT NULL, `repeatDays` INTEGER NOT NULL, `untilEpochDay` INTEGER, " +
+                        "`createdAtMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                )
+            }
+        }
+
+        /**
+         * v9 (#34): calendars. Three to start with; calendar items go to Personal, alarms to
+         * Alarms. Blank names show translated in the app. Colours are the first palette entries.
+         */
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `calendars` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `color` INTEGER NOT NULL, " +
+                        "`sortOrder` INTEGER NOT NULL, `shown` INTEGER NOT NULL, `defaultForAlarms` INTEGER NOT NULL, " +
+                        "`defaultLeadMinutes` INTEGER, `defaultTarget` TEXT NOT NULL, `defaultRepeat` TEXT NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL(
+                    "INSERT INTO `calendars` VALUES " +
+                        "('personal', '', ${0xFF1F6FB0}, 0, 1, 0, 15, 'NOTIFY', 'NONE'), " +
+                        "('birthdays', '', ${0xFFA0306B}, 1, 1, 0, 0, 'NOTIFY', 'YEARLY'), " +
+                        "('alarms', '', ${0xFF7A6A4F}, 2, 0, 1, NULL, 'RING', 'NONE')",
+                )
+                db.execSQL("ALTER TABLE `events` ADD COLUMN `calendarId` TEXT NOT NULL DEFAULT 'personal'")
+                db.execSQL("ALTER TABLE `events` ADD COLUMN `color` INTEGER")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `calendarId` TEXT")
+                db.execSQL("UPDATE `schedules` SET `calendarId` = 'alarms' WHERE `eventId` IS NULL")
+            }
+        }
+
+        /** v10 (#16): copies of items in a phone calendar. */
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `calendars` ADD COLUMN `exportCalendarId` INTEGER")
+                db.execSQL("ALTER TABLE `events` ADD COLUMN `providerEventId` INTEGER")
+            }
+        }
+
+        /** v11 (#43, #33): repeat rules, calendar-file UIDs, subscribed calendars. */
+        private val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `events` ADD COLUMN `repeatRule` TEXT")
+                db.execSQL("ALTER TABLE `events` ADD COLUMN `icsUid` TEXT")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `repeatRule` TEXT")
+                db.execSQL("ALTER TABLE `calendars` ADD COLUMN `subscriptionUrl` TEXT")
+                db.execSQL("ALTER TABLE `calendars` ADD COLUMN `refreshedAtMillis` INTEGER")
+            }
+        }
+
         /** Append each migration here as the schema grows. */
-        val MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+        val MIGRATIONS = arrayOf(
+            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
+            MIGRATION_9_10, MIGRATION_10_11,
+        )
 
         fun build(context: Context): RelayDatabase =
             Room.databaseBuilder(context.applicationContext, RelayDatabase::class.java, FILE_NAME)

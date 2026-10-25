@@ -16,8 +16,15 @@ interface ScheduleDao {
     @Query("SELECT * FROM schedules WHERE id = :id")
     suspend fun get(id: String): ScheduleEntity?
 
+    @Query("SELECT * FROM schedules WHERE eventId = :eventId")
+    suspend fun forEvent(eventId: String): List<ScheduleEntity>
+
     @Upsert
     suspend fun upsert(schedule: ScheduleEntity)
+
+    /** A deleted calendar's alarms move to another (#34). Doesn't touch arming. */
+    @Query("UPDATE schedules SET calendarId = :to WHERE calendarId = :from")
+    suspend fun moveCalendar(from: String, to: String)
 
     @Query("DELETE FROM schedules WHERE id = :id")
     suspend fun delete(id: String)

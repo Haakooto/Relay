@@ -276,3 +276,179 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Its countdown and buttons (Pause, +1 min, Stop) still work.
 - [ ] Same for a running stopwatch.
 - [ ] Settings → Apps → Relay → Notifications: no old "Timers"/"Stopwatch" duplicates are left.
+
+## PR: Calendar pane, events and reminders (#14)
+
+> 2026-10-25: the user liked the build; lines not ticked one by one. Reminders notify (Notify target confirmed).
+
+### Navigation and Settings
+- [ ] The bottom bar shows Alarms, Calendar, Timers, Stopwatch, Clock; Settings is gone from it.
+- [ ] The gear at the top right of every pane opens Settings; its back arrow returns to that pane.
+- [ ] Installing this build over the last one keeps every alarm, timer, relay and stopwatch (database v7 → v8).
+
+### Month grid
+- [ ] Calendar opens on this month with today circled. Arrows and a sideways swipe change month.
+- [ ] Tap a day: it fills in, and its items list below. "Today" brings you back.
+- [ ] With TalkBack, a day reads its date and how many items it has.
+- [ ] Settings → first day of the week → Sunday: the grid starts on Sunday.
+
+### Events
+- [ ] + → New event on a selected day: the editor opens on that day. Save with a title, 10:00 to 11:00: it shows on that day as "10:00–11:00" with a dot in the grid.
+- [ ] Set the end before the start: a red note appears and Save is disabled.
+- [ ] All day on: the times disappear; the reminder offers "09:00 on the day" and "09:00 the day before".
+- [ ] Last day two days later: the event shows on all three days, marked "Continues" after the first.
+- [ ] Back with unsaved changes asks to save or discard.
+- [ ] Delete asks first and says the reminder goes too; afterwards the day is empty.
+
+### Reminders and Notify
+- [ ] New reminder 2 minutes out (Notify, the default), lock the phone: a notification arrives with its title and time and a sound. No ringing screen.
+- [ ] Tap the notification: Relay opens on Calendar.
+- [ ] Event 20 minutes out with "15 min before": the notification comes 5 minutes from now and says "Today · HH:MM".
+- [ ] Change a reminder to Ring: it rings like an alarm, with snooze.
+- [ ] A reminder never shows in the Alarms list.
+- [ ] Save a reminder in the past: the toast says the time has passed, and nothing goes off.
+- [ ] Reboot with a reminder due in 5 minutes: it still notifies on time.
+- [ ] An alarm with "When it goes off: Notify" shows "Shows a notification" in the Alarms list and notifies instead of ringing.
+
+### Repeats
+- [ ] Monthly on the 31st: the editor warns it skips months without day 31; the grid skips 30 November.
+- [ ] Yearly on 29 February: the editor says "Only in leap years".
+- [ ] Weekly on Mon and Wed, ends on a date: dots only on those days, up to that date.
+- [ ] A monthly reminder still goes off the next month after it first notified.
+
+### Everything scheduled
+- [ ] The "Everything scheduled" chip adds your alarms (from today on) to the grid and the list; tapping one opens the alarm editor.
+- [ ] Switch back to "Events and reminders": alarms disappear. Leave and come back: the choice is kept.
+
+## PR: Calendar widgets and month picker (#15)
+
+> 2026-10-25: after the layout fixes, both widgets "look right now".
+
+### Month picker (app)
+- [ ] Calendar pane: tap "October 2026": a dialog with the year and twelve months opens.
+- [ ] Arrows change the year; pick a month two years ahead: the grid shows it, on its first day.
+- [ ] "Today" in the dialog brings back this month with today selected.
+
+### Agenda widget
+- [ ] Long-press home → Widgets → Relay: "Calendar: next 7 days" and "Calendar: month" are listed next to the clock.
+- [ ] Place the agenda: its setup opens (Show, Background, Corners, Border); Back leaves no widget behind.
+- [ ] Save with Theme background: today's and the coming days' items are listed under day headings.
+- [ ] Tap an item: Relay opens on its editor. Tap a heading: the Calendar pane opens on that day.
+- [ ] Tap +: a new event opens on today.
+- [ ] Add an event in the app, go home: the widget shows it within a second or two.
+- [ ] Nothing planned this week: "Nothing in the next 7 days".
+- [ ] Long list: it scrolls inside the widget.
+- [ ] Show → Everything scheduled: your alarms appear too; tapping one opens the alarm editor.
+
+### Month widget
+- [ ] Place it (3×3): all seven weekday columns show their dates; today's number is in a filled pill.
+- [ ] Days with plans show a label per item with its title: events, reminders and alarms in three colours.
+- [ ] A day with more than fits shows "+n" in its last slot. Make the widget taller: more labels fit.
+- [ ] Tap › and ‹: the month changes in the widget without opening Relay.
+- [ ] Tap a day: Relay opens on that day. Tap the month name: Relay opens on that month.
+- [ ] Settings → first day of week → Sunday: the widget's grid starts on Sunday after a moment.
+- [ ] Agenda and month: the text sits inside the background, not past its left edge.
+
+### Looks and updates
+- [ ] Solid light colour background: the text turns dark; dark colour: light text. Gradient and border look like the clock's.
+- [ ] Transparent background: light text over the wallpaper.
+- [ ] Leave a widget overnight (or change the date in system settings): "Today" moves on.
+- [ ] Reboot: the widgets still show and update.
+- [ ] Widget settings from the launcher: changes apply when you save.
+- [ ] A clock widget placed before this build looks exactly as before.
+
+## PR: Calendars and multi-day items (#34, #35)
+
+> 2026-10-25: the user reports it all works, update included.
+
+### Update
+- [ ] Install over the previous Relay Debug: every alarm and calendar item is still there (database v8 → v9).
+- [ ] Calendar pane → layers button: Personal, Birthdays and Alarms are listed. Your items are in Personal, your alarms in Alarms.
+- [ ] If you had "Everything scheduled" on before, Alarms is ticked; otherwise it isn't.
+
+### Calendars
+- [ ] Untick Personal: its items disappear from the grid and the list. Tick it again: they're back.
+- [ ] Pencil on Birthdays: change the colour; its items' dots and rows change colour.
+- [ ] + New calendar "Work", pick a colour, default reminder 1 hour: a new event in Work starts with "1 hour before".
+- [ ] New event: it starts in the calendar used last. Switching calendar in the editor applies that calendar's defaults.
+- [ ] Give one event its own colour: only that event changes colour.
+- [ ] Birthdays: a new item there defaults to yearly.
+- [ ] Mark Work as "New alarms go here": a new alarm's editor shows Work picked.
+- [ ] Alarm editor: move an alarm to Personal; the Alarms list shows Personal's colour on its row.
+- [ ] Delete Work: asked where to move its items and alarms; after picking Personal they're all there.
+- [ ] Names show in Nynorsk with the app in Norsk (Personleg, Bursdagar, Alarmar), until you rename one.
+
+### Multi-day items
+- [ ] An event Friday to Monday: one bar across Fri–Sun, continued on Monday's row of the next week.
+- [ ] Tap the bar: its editor opens. Select Saturday: the list shows it once as "Fri 30 – Mon 2".
+- [ ] Agenda widget: it's listed once, under the first day it's on in the coming week.
+- [ ] Month widget: a bar across its days; several at once stack, and any beyond two show in "+n".
+
+### Widgets
+- [ ] Widget settings: calendar checkboxes instead of Show. A widget made before keeps showing what it did.
+- [ ] Untick a calendar in one widget only: that widget hides it, the pane and other widgets don't.
+- [ ] Agenda rows have a colour bar; month labels use each item's colour.
+
+## PR: Google Calendar link (#16)
+
+> 2026-10-25: reading Google calendars into Relay and copying out both work; data survived v10. Going to the next month in the month widget takes 1 to 2 s (being looked at).
+
+### Update
+- [ ] Install over the previous Relay Debug: items, alarms and calendars are all still there (database v9 → v10).
+
+### Reading phone calendars
+- [ ] Layers button: "On this phone" explains itself and has "Allow calendar access". Deny: nothing else changes.
+- [ ] Allow: your Google calendars (and holiday calendars, if you have them) are listed with their account and colour.
+- [ ] Tick your main Google calendar: its events show in the grid and the day list in its colour, marked "From a phone calendar".
+- [ ] Tap one: it opens in Google Calendar.
+- [ ] Add an event in Google Calendar, come back: it shows in Relay without restarting.
+- [ ] A multi-day Google event is one bar, as Relay's are.
+- [ ] Widget settings: phone calendars are listed too; tick one and its events show in that widget.
+
+### Copying to a phone calendar
+- [ ] Edit Personal → "Copy items to a phone calendar" → your Google calendar: Personal's items appear in Google Calendar (on the phone, and on the web after it syncs).
+- [ ] With that Google calendar ticked in Relay too, each item shows once, not twice.
+- [ ] Change an item's time in Relay: Google Calendar follows. Delete it: it goes from Google too.
+- [ ] A weekly, a monthly-on-the-31st and a yearly item look right in Google Calendar (same days, same skips).
+- [ ] An all-day item shows as all-day in Google, on the right day.
+- [ ] Set the copy to Off: the copies leave Google Calendar.
+- [ ] Revoke calendar access in system settings: Relay still saves items; the phone-calendar list asks for access again.
+
+## PR: Richer repeats (#43)
+
+- [x] Install over the previous Relay Debug: all items, alarms and calendars are still there (database v10 → v11), and existing repeating items repeat as before.
+- [x] New event on the 2nd Tuesday of a month → Monthly → On: "The second Tuesday": it shows on the 2nd Tuesday of the next months.
+- [x] An event on the last Friday of a month → "The last Friday" is offered; pick it: it lands on each month's last Friday.
+- [x] An event on the 31st → "The last day" is offered: it lands on 30 November and 28 February.
+- [x] Weekly, every 2 weeks on Mon and Thu: dots every other week only.
+- [x] Daily, ends after 5 times: exactly five days in the grid.
+- [x] A reminder on "the second Tuesday" notifies on the right days, and again the next month.
+- [x] Reopen each of these: the editor shows the same choices you saved.
+- [x] Copy one to Google (calendar copying on): Google Calendar shows the same days.
+- [x] Yearly on "the fourth Thursday of November": lands on 26 Nov 2026 and 25 Nov 2027.
+
+## PR: Calendar files (#33, import and export)
+
+- [x] Calendars list → Import file → pick an .ics (e.g. exported from Google Calendar): the import screen lists how many events it found and the first few titles.
+- [x] Pick a calendar and Import: a toast says how many were added; they show in that calendar on the right days and times.
+- [x] Import the same file again: the toast says they were updated, and nothing shows twice.
+- [x] Open an .ics attachment from an email (or Files → Open with Relay Debug): the same import screen opens.
+- [x] An event with a reminder in the file gets a reminder in Relay (it notifies).
+- [ ] A file with an odd repeat (e.g. hourly): the event comes in on its first date, and its note says the repeat couldn't be kept.
+- [ ] A huge or non-calendar file: the screen says it can't be read; nothing is added.
+- [x] Edit a calendar → Export: the share sheet offers a .ics file; open it in Google Calendar and the items look right.
+- [x] An item's editor → share button: the share sheet offers just that item.
+
+## PR: Subscribed calendars (#33, subscription)
+
+- [x] Calendars list → Subscribe: the dialog says when Relay goes online; Subscribe stays greyed out until there's a name and an https/webcal address.
+- [x] Type an http:// address: the field says to use https or webcal.
+- [x] Subscribe to a public calendar (e.g. a holiday .ics): a toast says how many items were fetched, and they show on the right days.
+- [x] Tap one of its items: a toast says it's read-only; no editor opens.
+- [x] Tap one of its items in a calendar widget: Relay opens the Calendar pane on that day, not an editor.
+- [x] Edit the calendar: the address and "Refreshed ... ago" show; Refresh now fetches again without doubling anything.
+- [x] A new item or alarm can't pick the subscribed calendar.
+- [x] Rename it and change its colour: both stick after the next refresh.
+- [x] Turn on airplane mode, Refresh now: a toast says it couldn't fetch; the items already there stay.
+- [x] Edit → Delete → confirm: the calendar and its items go.
+

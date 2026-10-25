@@ -4,8 +4,8 @@ Relay replaces the stock Clock app: alarms, timers, stopwatches, a world clock a
 widgets. What sets it apart: timers can be chained into **relays**, alarms can **start** a timer,
 relay or stopwatch instead of just ringing, and stopwatches keep **tagged, correctable laps**.
 
-The five panes along the bottom are Alarms, Timers, Stopwatch, Clock and Settings. Relay opens
-on the pane you used last.
+The five panes along the bottom are Alarms, Calendar, Timers, Stopwatch and Clock. Relay opens
+on the pane you used last. **Settings** is the gear at the top right of every pane.
 
 ---
 
@@ -49,6 +49,7 @@ Under **When it goes off**, an alarm can do more than ring:
 | Choice | At the alarm time |
 |---|---|
 | **Ring** | A normal alarm. |
+| **Notify** | Shows a notification with its usual sound. Nothing rings, and there is no snooze. |
 | **Start a timer** | Starts a saved timer, or a **New** one you define right there. |
 | **Start a relay** | Starts a saved relay, or a **New** one written right there. |
 | **Start a stopwatch** | Creates a stopwatch with the name, start offset and tags you give, and starts it. |
@@ -60,6 +61,62 @@ turns a new timer or relay into a saved one.
 
 Example: a repeating weekday alarm at 06:30 that starts your *Wake* relay (below) gives you a
 snooze-less wake-up routine.
+
+---
+
+## Calendar
+
+The Calendar pane is for planning: **events** (with a start, an optional end and a note) and
+**reminders** (a single moment). Tap **+** for either; it starts on the day you have selected.
+
+**The month.** Days with something on have a dot in the item's colour; something that lasts
+several days is one bar across them. Tap a day to list it below the grid; swipe sideways or use
+the arrows to change month, and **Today** to come back. Tap the month's name to jump to any month
+and year.
+
+**Calendars.** Every item, and every alarm, belongs to a calendar: Personal, Birthdays and Alarms
+to start with. The layers button at the top lists them: tick the ones to show (alarms show from
+today on), tap the pencil to change a calendar's name, colour and the defaults its new items get
+(reminder, what it does, repeat), or add a new one. One calendar is where new alarms go. Deleting
+a calendar asks where its items and alarms should move. In the editor, pick an item's calendar,
+and give it its own colour if it shouldn't take the calendar's.
+
+**Google and other calendars.** Under **On this phone** in the same list, **Allow calendar access**
+lets Relay show the calendars already on your phone (Google, shared and holiday calendars), each
+with its own tick and colour. Their events are read-only here; tapping one opens it in its own
+calendar app. A Relay calendar can also **copy its items** to one of them (in its edit dialog):
+new and changed items are copied, deleted ones removed, and the copies don't show twice. Relay
+reads and writes them on the phone itself; your calendar app syncs them, Relay uses no network.
+
+**Calendar files (.ics).** Open or share an .ics file into Relay (from Files, an email or a
+browser), or use **Import file** in the calendars list: Relay shows what it found and asks which
+calendar to put it in. Importing the same file again updates what it imported before instead of
+adding it twice. A repeat Relay can't follow comes in as its first date, with a line in the note
+saying so. To send items elsewhere, **Export** in a calendar's edit dialog shares the whole
+calendar, and the share button in an item's editor shares just that item.
+
+**Subscribed calendars.** **Subscribe** in the calendars list takes a calendar's address
+(https:// or webcal://, such as a public holiday calendar or a sports fixture list). Relay fetches
+it then, when you tap **Refresh now** in its edit dialog, and when you open Relay if it's more
+than six hours old; this is the only thing Relay ever goes online for. A subscribed calendar is
+read-only: tapping an item only says so, and deleting the subscription removes its items.
+
+**An event** is all day or has a start time, and can end later that day or on a later day.
+Under **Reminder**, pick when to be reminded (at the start, minutes or a day before; for an
+all-day event, 09:00 on the day or the day before) and what happens then. **Notify** is the
+default; Ring and starting a timer, relay or stopwatch work as for alarms.
+
+**A reminder** goes off at its own time and notifies you by default.
+
+**Repeat**: daily, weekly on chosen days, monthly or yearly, **every** one, two or more days,
+weeks, months or years. A monthly or yearly repeat lands on the same date, or, depending on the
+item's date, on the same weekday ("the second Tuesday"), the last such weekday ("the last
+Friday") or the last day of the month. A month without the date is skipped (a monthly 31st skips
+April; a yearly 29 February only comes in leap years), and the editor warns you. **Ends**: never,
+on a date, or after a number of times.
+
+A reminder whose time has already passed is saved but won't go off. Deleting an event deletes
+its reminder too. Reminders don't appear in the Alarms list.
 
 ---
 
@@ -205,7 +262,22 @@ Long-press the home screen → Widgets → Relay. Each widget gets its own setup
 - **corners** and a **border**.
 
 Every widget can look different. To change one later, long-press it and pick Widget settings.
-Tapping a widget opens Relay on the pane you used last.
+Calendar widgets have their own calendar ticks, separate from the pane's, phone calendars included.
+Tapping a clock widget opens Relay on the pane you used last.
+
+**Calendar widgets.** Two more, each with its own setup: which **calendars** to show, and the
+same background, corners and border as the clock.
+
+- **Calendar: next 7 days** lists what's coming, day by day, with each item's colour; something
+  lasting several days is listed once, with its dates. Tap a row to open it, a day to open
+  the Calendar pane there, and **+** for a new event.
+- **Calendar: month** shows the month with each day's plans as small labels in their colours,
+  bars across the days for things that last longer, and "+n" when they don't all fit; a taller
+  widget fits more.
+  **‹** and **›** change month right on the home screen; tapping a day or the month's name opens
+  the Calendar pane there.
+
+They update when you change something in Relay and at midnight.
 
 ---
 

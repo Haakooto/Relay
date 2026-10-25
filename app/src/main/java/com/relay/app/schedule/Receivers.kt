@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.relay.app.appContainer
+import com.relay.app.data.schedule.TargetKind
 import com.relay.app.firing.RingService
 import com.relay.app.firing.RingSource
 import com.relay.app.run.TransitionBeep
@@ -59,7 +60,12 @@ class FireReceiver : BroadcastReceiver() {
             try {
                 when (val decision = container.schedules.onFired(scheduleId, triggerAt, isSnooze = false)) {
                     is FireDecision.Start -> container.scheduledStarter.start(decision.schedule)
-                        .onSuccess { TransitionBeep.play(TargetSpec.decode(decision.schedule.targetSpec).startTone) }
+                        .onSuccess {
+                            // A notification makes its own sound; a quiet start gets the start tone.
+                            if (decision.schedule.target != TargetKind.NOTIFY) {
+                                TransitionBeep.play(TargetSpec.decode(decision.schedule.targetSpec).startTone)
+                            }
+                        }
                         .onFailure { e ->
                             Log.e(TAG, "scheduled start of $scheduleId failed", e)
                             ringItem(context, ScheduledFailure.item(context, decision.schedule, triggerAt, e))
@@ -143,6 +149,8 @@ class RescheduleReceiver : BroadcastReceiver() {
                     // A clock or zone change moves every widget's time; a reboot loses the tick.
                     com.relay.app.widget.ClockWidget.refreshAll(context)
                     com.relay.app.widget.WidgetTicker.schedule(context)
+                    com.relay.app.widget.calendar.CalendarWidgets.refreshAll(context)
+                    com.relay.app.widget.calendar.CalendarWidgetTicker.schedule(context)
                 }
             }
         }

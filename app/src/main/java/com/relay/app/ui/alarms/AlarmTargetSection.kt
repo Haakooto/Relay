@@ -38,13 +38,16 @@ import com.relay.app.util.DurationText
 import com.relay.chainlang.ChainLang
 
 /**
- * What the alarm fires (spec §04): ring, or quietly start a timer, a relay or a stopwatch. A
+ * What the alarm fires (spec §04): ring, notify, or quietly start a timer, a relay or a stopwatch. A
  * timer or relay is picked from the library or built right here; "Save to library" turns a
  * built one into a saved one.
  */
+// Long and branchy since before it was shared with the calendar editor (it was in the detekt
+// baseline); splitting it is its own change.
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun AlarmTargetSection(state: AlarmEditState, viewModel: AlarmEditViewModel) {
+fun AlarmTargetSection(state: TargetDraft, editor: TargetEditor) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         OptionChips(
             stringResource(R.string.fires_title), TargetKind.entries, state.target,
@@ -52,24 +55,33 @@ fun AlarmTargetSection(state: AlarmEditState, viewModel: AlarmEditViewModel) {
                 stringResource(
                     when (it) {
                         TargetKind.RING -> R.string.fires_ring
+                        TargetKind.NOTIFY -> R.string.fires_notify
                         TargetKind.TIMER -> R.string.fires_timer
                         TargetKind.RELAY -> R.string.fires_relay
                         TargetKind.STOPWATCH -> R.string.fires_stopwatch
                     },
                 )
             },
-            onSelect = viewModel::setTarget,
+            onSelect = editor::setTarget,
         )
         when (state.target) {
             TargetKind.RING -> {}
+            TargetKind.NOTIFY -> Text(
+                stringResource(R.string.target_notify_hint),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             TargetKind.TIMER, TargetKind.RELAY -> {
                 val saved = if (state.target == TargetKind.TIMER) state.savedTimers else state.savedRelays
                 Text(stringResource(R.string.target_which), style = MaterialTheme.typography.bodyLarge)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    FilterChip(selected = state.targetDefId == null, onClick = { viewModel.setTargetDef(null) }, label = { Text(stringResource(R.string.target_new)) })
+                    FilterChip(
+                        selected = state.targetDefId == null, onClick = { editor.setTargetDef(null) },
+                        label = { Text(stringResource(R.string.target_new)) },
+                    )
                     saved.forEach { block ->
                         FilterChip(
-                            selected = state.targetDefId == block.id, onClick = { viewModel.setTargetDef(block.id) },
+                            selected = state.targetDefId == block.id, onClick = { editor.setTargetDef(block.id) },
                             label = { Text(block.totalSeconds?.let { "${block.label} · ${DurationText.short(it)}" } ?: block.label) },
                         )
                     }
@@ -87,37 +99,39 @@ fun AlarmTargetSection(state: AlarmEditState, viewModel: AlarmEditViewModel) {
                     )
                 }
                 if (state.targetDefId == null) {
-                    if (state.target == TargetKind.TIMER) InlineTimer(state, viewModel) else InlineRelay(state, viewModel)
+                    if (state.target == TargetKind.TIMER) InlineTimer(state, editor) else InlineRelay(state, editor)
                     val labelOk = ChainLang.isReferenceableLabel(state.spec.label.trim())
-                    val valid = viewModel.canSave(state)
+                    val valid = editor.canSave(state)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedButton(onClick = viewModel::promote, enabled = labelOk && valid) { Text(stringResource(R.string.target_save_to_library)) }
+                        OutlinedButton(onClick = editor::promote, enabled = labelOk && valid) {
+                            Text(stringResource(R.string.target_save_to_library))
+                        }
                     }
                     if (!labelOk) Text(stringResource(R.string.target_save_hint), style = MaterialTheme.typography.labelSmall)
                     state.promoteError?.let { Text(saveErrorText(it), color = MaterialTheme.colorScheme.error) }
                 }
             }
-            TargetKind.STOPWATCH -> InlineStopwatch(state, viewModel)
+            TargetKind.STOPWATCH -> InlineStopwatch(state, editor)
         }
-        if (state.target != TargetKind.RING) {
+        if (state.target != TargetKind.RING && state.target != TargetKind.NOTIFY) {
             // A quiet start still deserves a cue. Previewed as it's picked.
             OptionChips(
                 stringResource(R.string.target_start_tone), TransitionTone.entries, state.spec.startTone,
                 label = { stringResource(toneLabel(it)) },
-                onSelect = viewModel::setStartTone,
+                onSelect = editor::setStartTone,
             )
         }
     }
 }
 
 @Composable
-private fun InlineTimer(state: AlarmEditState, viewModel: AlarmEditViewModel) {
+private fun InlineTimer(state: TargetDraft, editor: TargetEditor) {
     OutlinedTextField(
-        state.spec.label, { v -> viewModel.setSpec { it.copy(label = v) } }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+        state.spec.label, { v -> editor.setSpec { it.copy(label = v) } }, singleLine = true, modifier = Modifier.fillMaxWidth(),
         label = { Text(stringResource(R.string.block_label)) },
     )
     OutlinedTextField(
-        state.spec.durationExpr, { v -> viewModel.setSpec { it.copy(durationExpr = v) } }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+        state.spec.durationExpr, { v -> editor.setSpec { it.copy(durationExpr = v) } }, singleLine = true, modifier = Modifier.fillMaxWidth(),
         label = { Text(stringResource(R.string.timer_duration)) },
         textStyle = TextStyle(fontFamily = FontFamily.Monospace),
         isError = state.inlineTimerSeconds == null,
@@ -128,14 +142,14 @@ private fun InlineTimer(state: AlarmEditState, viewModel: AlarmEditViewModel) {
 }
 
 @Composable
-private fun InlineRelay(state: AlarmEditState, viewModel: AlarmEditViewModel) {
+private fun InlineRelay(state: TargetDraft, editor: TargetEditor) {
     OutlinedTextField(
-        state.spec.label, { v -> viewModel.setSpec { it.copy(label = v) } }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+        state.spec.label, { v -> editor.setSpec { it.copy(label = v) } }, singleLine = true, modifier = Modifier.fillMaxWidth(),
         label = { Text(stringResource(R.string.block_label)) },
     )
     ScriptField(
         script = state.spec.script,
-        onScriptChange = { v -> viewModel.setSpec { it.copy(script = v) } },
+        onScriptChange = { v -> editor.setSpec { it.copy(script = v) } },
         candidates = state.labelCandidates,
         isError = state.inlineError != null,
         label = { Text(stringResource(R.string.relay_script)) },
@@ -148,12 +162,12 @@ private fun InlineRelay(state: AlarmEditState, viewModel: AlarmEditViewModel) {
     OptionChips(
         stringResource(R.string.relay_transition), TransitionMode.entries, state.spec.mode,
         label = { stringResource(if (it == TransitionMode.SEAMLESS) R.string.relay_seamless else R.string.relay_interaction) },
-        onSelect = { v -> viewModel.setSpec { it.copy(mode = v) } },
+        onSelect = { v -> editor.setSpec { it.copy(mode = v) } },
     )
 }
 
 @Composable
-private fun InlineStopwatch(state: AlarmEditState, viewModel: AlarmEditViewModel) {
+private fun InlineStopwatch(state: TargetDraft, editor: TargetEditor) {
     val spec = state.spec
     val abs = kotlin.math.abs(spec.t0Millis) / 1000
     var h by remember { mutableStateOf((abs / 3600).takeIf { it > 0 }?.toString().orEmpty()) }
@@ -162,10 +176,10 @@ private fun InlineStopwatch(state: AlarmEditState, viewModel: AlarmEditViewModel
     var negative by remember { mutableStateOf(spec.t0Millis < 0) }
     fun push() {
         val t = ((h.toLongOrNull() ?: 0) * 3600 + (m.toLongOrNull() ?: 0) * 60 + (s.toLongOrNull() ?: 0)) * 1000
-        viewModel.setSpec { it.copy(t0Millis = if (negative) -t else t) }
+        editor.setSpec { it.copy(t0Millis = if (negative) -t else t) }
     }
     OutlinedTextField(
-        spec.label, { v -> viewModel.setSpec { it.copy(label = v) } }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+        spec.label, { v -> editor.setSpec { it.copy(label = v) } }, singleLine = true, modifier = Modifier.fillMaxWidth(),
         label = { Text(stringResource(R.string.stopwatch_name)) },
     )
     Text(stringResource(R.string.stopwatch_t0), style = MaterialTheme.typography.bodyLarge)
@@ -179,5 +193,5 @@ private fun InlineStopwatch(state: AlarmEditState, viewModel: AlarmEditViewModel
                 )
             }
     }
-    TagListEditor(spec.tags) { tags -> viewModel.setSpec { it.copy(tags = tags) } }
+    TagListEditor(spec.tags) { tags -> editor.setSpec { it.copy(tags = tags) } }
 }

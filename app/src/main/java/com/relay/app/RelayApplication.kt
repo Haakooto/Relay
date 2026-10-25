@@ -4,10 +4,20 @@ import android.app.Application
 import android.util.Log
 import com.relay.app.widget.ClockWidget
 import com.relay.app.widget.WidgetTicker
+import com.relay.app.widget.calendar.CalendarWidgetTicker
+import com.relay.app.widget.calendar.CalendarWidgets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.launch
+
+private const val WIDGET_REFRESH_DEBOUNCE_MS = 500L
 
 class RelayApplication : Application() {
     lateinit var container: AppContainer
@@ -16,10 +26,12 @@ class RelayApplication : Application() {
     /** For work that must outlive any single screen. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    @OptIn(FlowPreview::class) // debounce
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
         container.firingNotifications.createChannels()
+        container.reminderNotifications.createChannel()
         container.runNotifications.createChannel()
         container.stopwatchNotifications.createChannel()
         // Safety net: a force-stop clears every pending alarm without any broadcast, so re-arm
@@ -33,6 +45,32 @@ class RelayApplication : Application() {
                 .onFailure { Log.e("RelayApplication", "stopwatch republish failed", it) }
             runCatching { ClockWidget.refreshAll(this@RelayApplication); WidgetTicker.schedule(this@RelayApplication) }
                 .onFailure { Log.e("RelayApplication", "widget refresh failed", it) }
+            runCatching { CalendarWidgetTicker.schedule(this@RelayApplication) }
+                .onFailure { Log.e("RelayApplication", "calendar tick failed", it) }
+            // Once, after the v9 update: "Everything scheduled" was on, so tick the alarms calendar.
+            runCatching {
+                if (container.settings.current().calendarShowAll) {
+                    container.calendars.defaultForAlarms()?.let { container.calendars.setShown(it.id, true) }
+                    container.settings.clearCalendarShowAll()
+                }
+            }.onFailure { Log.e("RelayApplication", "calendar setting carry-over failed", it) }
+        }
+        // Changes only happen while the app's process runs, so the calendar widgets follow them
+        // from here: one place, instead of a hook in every repository.
+        appScope.launch {
+            combine(
+                container.events.observeAll(), container.schedules.observeWithExceptions(),
+                container.calendars.observeAll(), container.settings.settings,
+                container.phoneCalendars.changes().runningFold(0) { n, _ -> n + 1 },
+            ) { a, b, c, d, e -> listOf(a, b, c, d, e) }
+                .distinctUntilChanged()
+                .debounce(WIDGET_REFRESH_DEBOUNCE_MS)
+                // A failing source must never take the app down with it: log and stop following.
+                .catch { Log.e("RelayApplication", "calendar widget follow failed", it) }
+                .collect {
+                    runCatching { CalendarWidgets.refreshAll(this@RelayApplication) }
+                        .onFailure { Log.e("RelayApplication", "calendar widget refresh failed", it) }
+                }
         }
     }
 }

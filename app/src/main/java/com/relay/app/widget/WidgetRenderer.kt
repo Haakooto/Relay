@@ -1,25 +1,15 @@
 package com.relay.app.widget
 
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.LinearGradient
 import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.RectF
-import android.graphics.Shader
-import androidx.compose.ui.graphics.toArgb
 import com.relay.app.clock.AnalogueRenderer
 import com.relay.app.clock.ClockFonts
 import com.relay.app.clock.ClockKind
 import com.relay.app.clock.ClockText
 import com.relay.app.clock.FaceStyle
 import com.relay.app.clock.resolve
-import com.relay.app.ui.theme.Accent
-import com.relay.app.ui.theme.Brass
-import com.relay.app.ui.theme.DarkTokens
-import com.relay.app.ui.theme.LightTokens
 import java.time.Instant
 import java.time.ZoneId
 import kotlin.math.min
@@ -30,59 +20,18 @@ import kotlin.math.min
  * clock. Redrawn once a minute by [WidgetTicker].
  */
 object WidgetRenderer {
-    /** Keeps memory and the RemoteViews bitmap budget in check on big widgets. */
-    private const val MAX_SIDE_PX = 1200
-
     fun render(context: Context, spec: WidgetSpec, widthDp: Float, heightDp: Float, is24hSetting: Boolean, nowMillis: Long): Bitmap {
-        val density = context.resources.displayMetrics.density
-        val scale = min(1f, MAX_SIDE_PX / (maxOf(widthDp, heightDp) * density))
-        val px = density * scale
+        val px = WidgetFrameRenderer.pxPerDp(context, widthDp, heightDp)
         val w = (widthDp * px).toInt().coerceAtLeast(1)
         val h = (heightDp * px).toInt().coerceAtLeast(1)
         val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-
-        val dark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        val surface = (if (dark) DarkTokens.surfaceContainer else LightTokens.surfaceContainerLow).toArgb()
-        val onSurface = (if (dark) DarkTokens.onSurface else LightTokens.onSurface).toArgb()
-        val muted = (if (dark) DarkTokens.onSurfaceVariant else LightTokens.onSurfaceVariant).toArgb()
-        val accent = (if (dark) DarkTokens.primary else LightTokens.primary).toArgb()
-
-        // Shape, background, border.
-        val rect = RectF(0f, 0f, w.toFloat(), h.toFloat())
-        val radius = when (spec.corners) {
-            WidgetCorners.SHARP -> 0f
-            WidgetCorners.ROUNDED -> 20f * px
-            WidgetCorners.PILL -> min(w, h) / 2f
-        }
-        val shape = Path().apply { addRoundRect(rect, radius, radius, Path.Direction.CW) }
-        canvas.save()
-        canvas.clipPath(shape)
-        val bg = Paint(Paint.ANTI_ALIAS_FLAG)
-        when (spec.background) {
-            WidgetBackground.TRANSPARENT -> {}
-            WidgetBackground.FOLLOW_THEME -> { bg.color = surface; canvas.drawRect(rect, bg) }
-            WidgetBackground.SOLID -> { bg.color = spec.backgroundColor?.toInt() ?: surface; canvas.drawRect(rect, bg) }
-            WidgetBackground.GRADIENT -> {
-                bg.shader = LinearGradient(
-                    0f, 0f, w.toFloat(), h.toFloat(),
-                    spec.backgroundColor?.toInt() ?: Accent.toArgb(), spec.backgroundColor2?.toInt() ?: Brass.toArgb(),
-                    Shader.TileMode.CLAMP,
-                )
-                canvas.drawRect(rect, bg)
-            }
-        }
-        canvas.restore()
-        if (spec.borderWidthDp > 0) {
-            val stroke = spec.borderWidthDp * px
-            val border = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.STROKE
-                strokeWidth = stroke
-                color = spec.borderColor?.toInt() ?: accent
-            }
-            val inset = RectF(stroke / 2, stroke / 2, w - stroke / 2, h - stroke / 2)
-            canvas.drawRoundRect(inset, maxOf(0f, radius - stroke / 2), maxOf(0f, radius - stroke / 2), border)
-        }
+        val theme = WidgetTheme.of(context)
+        val surface = theme.surface
+        val onSurface = theme.onSurface
+        val muted = theme.muted
+        val accent = theme.accent
+        WidgetFrameRenderer.draw(canvas, spec.frame, w, h, px, theme)
 
         // The clock.
         val style = spec.style

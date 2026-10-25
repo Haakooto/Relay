@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Calendar files Relay shares (#33): only its cache's ics folder, nothing else. -->
+<paths>
+    <cache-path name="ics" path="ics/" />
+</paths>

@@ -86,4 +86,4 @@ object GuideMarkdown {
 }
 
 /** The guide's `##` sections, in order. Must match the order in both guide files. */
-enum class GuideSection { ALARMS, TIMERS, RELAYS, STOPWATCH, CLOCK, WIDGETS, SETTINGS }
+enum class GuideSection { ALARMS, CALENDAR, TIMERS, RELAYS, STOPWATCH, CLOCK, WIDGETS, SETTINGS }

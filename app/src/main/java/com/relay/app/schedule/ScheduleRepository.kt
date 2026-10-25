@@ -63,11 +63,11 @@ class ScheduleRepository(
 ) {
     private val mutex = Mutex()
 
-    /** Enabled first, sorted by next fire; then the rest by time of day. */
+    /** Enabled first, sorted by next fire; then the rest by time of day. Calendar reminders aren't alarms. */
     fun observeAlarms(): Flow<List<AlarmListItem>> =
         combine(dao.observeAll(), dao.observeAllExceptions()) { schedules, exceptions ->
             val t = now()
-            schedules.map { s ->
+            schedules.filter { it.eventId == null }.map { s ->
                 val own = exceptions.filter { it.scheduleId == s.id }
                 AlarmListItem(s, if (s.enabled) NextFire.next(s, own, t, zone()) else null, own.size)
             }.sortedWith(
@@ -77,15 +77,23 @@ class ScheduleRepository(
             )
         }
 
+    /** Every schedule with every exception, for the calendar. */
+    fun observeWithExceptions(): Flow<Pair<List<ScheduleEntity>, List<ScheduleExceptionEntity>>> =
+        combine(dao.observeAll(), dao.observeAllExceptions()) { schedules, exceptions -> schedules to exceptions }
+
     suspend fun get(id: String): ScheduleEntity? = dao.get(id)
+    suspend fun forEvent(eventId: String): List<ScheduleEntity> = dao.forEvent(eventId)
     suspend fun exceptionsFor(id: String): List<ScheduleExceptionEntity> = dao.exceptionsFor(id)
     suspend fun all(): List<ScheduleEntity> = dao.getAll()
 
-    /** Save from the editor. Clears snooze state; a one-off in the past moves to its next date. */
+    /**
+     * Save from an editor. Clears snooze state; a one-off alarm in the past moves to its next
+     * date. A calendar reminder keeps its date: it belongs to that day, so a past one just won't fire.
+     */
     suspend fun save(schedule: ScheduleEntity): Instant? = mutex.withLock {
         val t = now()
         var s = schedule.copy(snoozedUntilMillis = null, snoozesUsed = 0)
-        if (!s.isRepeating) s = s.copy(oneOffEpochDay = oneOffDay(s, t))
+        if (!s.isRepeating && s.eventId == null) s = s.copy(oneOffEpochDay = oneOffDay(s, t))
         dao.upsert(s)
         rescheduleLocked(s.id)
     }
@@ -93,10 +101,13 @@ class ScheduleRepository(
     suspend fun setEnabled(id: String, enabled: Boolean): Instant? = mutex.withLock {
         val s = dao.get(id) ?: return null
         var updated = s.copy(enabled = enabled, snoozedUntilMillis = null, snoozesUsed = 0)
-        if (enabled && !s.isRepeating) updated = updated.copy(oneOffEpochDay = oneOffDay(updated, now()))
+        if (enabled && !s.isRepeating && s.eventId == null) updated = updated.copy(oneOffEpochDay = oneOffDay(updated, now()))
         dao.upsert(updated)
         rescheduleLocked(id)
     }
+
+    /** A deleted calendar's alarms move to [to] (#34). Only the grouping changes; nothing re-arms. */
+    suspend fun moveCalendar(from: String, to: String) = mutex.withLock { dao.moveCalendar(from, to) }
 
     suspend fun delete(id: String) = mutex.withLock {
         scheduler.cancel(id)
@@ -194,7 +205,8 @@ class ScheduleRepository(
                 return
             }
             val occurrence = NextFire.nextOccurrence(s, dao.exceptionsFor(id), now(), zone()) ?: return
-            val day = occurrence.toLocalDate().toEpochDay()
+            // Exceptions are keyed by the occurrence's day, which a lead time can put after the fire's.
+            val day = occurrence.plusMinutes(s.leadMinutes.toLong()).toLocalDate().toEpochDay()
             dao.upsertException(ScheduleExceptionEntity(UUID.randomUUID().toString(), id, day, day, ExceptionKind.SKIP, null, null))
             rescheduleLocked(id)
         }
@@ -282,7 +294,8 @@ class ScheduleRepository(
         val lead = settings().upcomingLeadMinutes * 60_000L
         scheduler.cancelUpcoming(id)
         notifications.clearUpcoming(id)
-        if (lead > 0 && !isSnooze) {
+        // A notification target is itself the heads-up: no "upcoming" notice before it.
+        if (lead > 0 && !isSnooze && s.target != TargetKind.NOTIFY) {
             val upcomingAt = next.toEpochMilli() - lead
             if (upcomingAt > t.toEpochMilli()) scheduler.armUpcoming(id, upcomingAt)
             else notifications.showUpcoming(s, next)
