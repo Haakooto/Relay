@@ -468,6 +468,12 @@
     <string name="event_calendar">Calendar</string>
     <string name="event_color">Colour</string>
     <string name="event_color_calendar">Calendar\'s</string>
+    <string name="calendars_phone">On this phone</string>
+    <string name="calendars_phone_why">Show your Google and other calendars here, and copy Relay\'s into them. Relay reads them on the phone; nothing goes over the network.</string>
+    <string name="calendars_phone_allow">Allow calendar access</string>
+    <string name="calendars_phone_none">No calendars on this phone</string>
+    <string name="calendar_copy_to_phone">Copy items to a phone calendar</string>
+    <string name="calendar_from_phone">From a phone calendar</string>
     <plurals name="calendar_day_items">
         <item quantity="one">%1$s, %2$d item</item>
         <item quantity="other">%1$s, %2$d items</item>

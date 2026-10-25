@@ -81,6 +81,13 @@ today on), tap the pencil to change a calendar's name, colour and the defaults i
 a calendar asks where its items and alarms should move. In the editor, pick an item's calendar,
 and give it its own colour if it shouldn't take the calendar's.
 
+**Google and other calendars.** Under **On this phone** in the same list, **Allow calendar access**
+lets Relay show the calendars already on your phone (Google, shared and holiday calendars), each
+with its own tick and colour. Their events are read-only here; tapping one opens it in its own
+calendar app. A Relay calendar can also **copy its items** to one of them (in its edit dialog):
+new and changed items are copied, deleted ones removed, and the copies don't show twice. Relay
+reads and writes them on the phone itself; your calendar app syncs them, Relay uses no network.
+
 **An event** is all day or has a start time, and can end later that day or on a later day.
 Under **Reminder**, pick when to be reminded (at the start, minutes or a day before; for an
 all-day event, 09:00 on the day or the day before) and what happens then. **Notify** is the
@@ -239,7 +246,7 @@ Long-press the home screen → Widgets → Relay. Each widget gets its own setup
 - **corners** and a **border**.
 
 Every widget can look different. To change one later, long-press it and pick Widget settings.
-Calendar widgets have their own calendar ticks, separate from the pane's.
+Calendar widgets have their own calendar ticks, separate from the pane's, phone calendars included.
 Tapping a clock widget opens Relay on the pane you used last.
 
 **Calendar widgets.** Two more, each with its own setup: which **calendars** to show, and the

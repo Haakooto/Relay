@@ -34,7 +34,7 @@ fun EntryRow(entry: CalendarEntry, is24h: Boolean, onClick: () -> Unit) {
             when (entry.kind) {
                 EntryKind.ALARM -> R.string.calendar_alarm
                 EntryKind.REMINDER -> R.string.calendar_kind_reminder
-                EntryKind.EVENT -> R.string.calendar_untitled
+                EntryKind.EVENT, EntryKind.PHONE -> R.string.calendar_untitled
             },
         )
     }
@@ -45,6 +45,7 @@ fun EntryRow(entry: CalendarEntry, is24h: Boolean, onClick: () -> Unit) {
         EntryKind.REMINDER -> stringResource(R.string.calendar_kind_reminder)
         EntryKind.ALARM ->
             stringResource(if (entry.target == TargetKind.RING) R.string.calendar_alarm else R.string.calendar_scheduled_start)
+        EntryKind.PHONE -> stringResource(R.string.calendar_from_phone)
     }
     Card(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Row(Modifier.height(IntrinsicSize.Min)) {

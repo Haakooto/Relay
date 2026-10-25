@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -59,6 +60,8 @@ data class AppSettings(
     val calendarShowAll: Boolean = false,
     /** The calendar a new event or reminder goes to: the last one used. Null = the first. */
     val lastCalendarId: String? = null,
+    /** Phone calendars (#16) ticked in the Calendar pane, by CalendarContract id. */
+    val shownPhoneCalendars: Set<Long> = emptySet(),
 
     // Navigation.
     /** Route of the main pane last opened; the app and its widgets open there. Null = Alarms. */
@@ -90,6 +93,7 @@ class SettingsRepository(context: Context) {
             homeZoneId = prefs[HOME_ZONE],
             calendarShowAll = prefs[CALENDAR_SHOW_ALL] ?: false,
             lastCalendarId = prefs[LAST_CALENDAR],
+            shownPhoneCalendars = prefs[SHOWN_PHONE_CALENDARS].orEmpty().mapNotNull { it.toLongOrNull() }.toSet(),
             lastPane = prefs[LAST_PANE],
         )
     }
@@ -121,6 +125,10 @@ class SettingsRepository(context: Context) {
     suspend fun setHomeZoneId(value: String?) = store.edit { if (value == null) it.remove(HOME_ZONE) else it[HOME_ZONE] = value }
     suspend fun clearCalendarShowAll() = store.edit { it.remove(CALENDAR_SHOW_ALL) }
     suspend fun setLastCalendarId(id: String) = store.edit { it[LAST_CALENDAR] = id }
+    suspend fun setPhoneCalendarShown(id: Long, shown: Boolean) = store.edit { prefs ->
+        val now = prefs[SHOWN_PHONE_CALENDARS].orEmpty()
+        prefs[SHOWN_PHONE_CALENDARS] = if (shown) now + id.toString() else now - id.toString()
+    }
     suspend fun setLastPane(route: String) = store.edit { it[LAST_PANE] = route }
 
     private companion object {
@@ -141,6 +149,7 @@ class SettingsRepository(context: Context) {
         val HOME_ZONE = stringPreferencesKey("home_zone_id")
         val CALENDAR_SHOW_ALL = booleanPreferencesKey("calendar_show_all")
         val LAST_CALENDAR = stringPreferencesKey("last_calendar_id")
+        val SHOWN_PHONE_CALENDARS = stringSetPreferencesKey("shown_phone_calendars")
         val LAST_PANE = stringPreferencesKey("last_pane")
         const val MAX_PLAN_CEILING = 1000
     }

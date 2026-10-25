@@ -45,19 +45,25 @@ import com.relay.app.ui.clock.ColorChoice
 import com.relay.app.ui.common.OptionChips
 import java.util.UUID
 
-/** The calendars (#34): tick which the pane shows, tap the pencil to edit one, or add one. */
+/**
+ * The calendars (#34): tick which the pane shows, tap the pencil to edit one, or add one. Below,
+ * the phone's own calendars (#16), read-only, with a button to let Relay see them.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarsSheet(
     calendars: List<CalendarEntity>,
+    phone: PhoneSheetState,
     onDismiss: () -> Unit,
     onShown: (String, Boolean) -> Unit,
+    onPhoneShown: (Long, Boolean) -> Unit,
+    onRequestAccess: () -> Unit,
     onSave: (CalendarEntity) -> Unit,
     onDelete: (id: String, moveTo: String) -> Unit,
 ) {
     var editing by remember { mutableStateOf<CalendarEntity?>(null) }
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             Text(stringResource(R.string.calendars_title), style = MaterialTheme.typography.titleLarge)
             calendars.forEach { calendar ->
                 Row(
@@ -78,17 +84,48 @@ fun CalendarsSheet(
             OutlinedButton(onClick = { editing = newCalendar(calendars) }, modifier = Modifier.padding(top = 8.dp)) {
                 Text(stringResource(R.string.calendars_new))
             }
+            PhoneCalendarList(phone, onPhoneShown, onRequestAccess)
         }
     }
     editing?.let { calendar ->
         CalendarEditDialog(
             calendar = calendar,
             others = calendars.filter { it.id != calendar.id },
+            phone = phone,
+            onRequestAccess = onRequestAccess,
             isNew = calendars.none { it.id == calendar.id },
             onDismiss = { editing = null },
             onSave = { onSave(it); editing = null },
             onDelete = { moveTo -> onDelete(calendar.id, moveTo); editing = null },
         )
+    }
+}
+
+/** The phone's calendars, ticked separately from Relay's; or a button to let Relay read them. */
+@Composable
+private fun PhoneCalendarList(phone: PhoneSheetState, onShown: (Long, Boolean) -> Unit, onRequestAccess: () -> Unit) {
+    Text(
+        stringResource(R.string.calendars_phone), style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    if (!phone.canRead) {
+        Text(stringResource(R.string.calendars_phone_why), style = MaterialTheme.typography.bodyMedium)
+        OutlinedButton(onClick = onRequestAccess, modifier = Modifier.padding(top = 8.dp)) {
+            Text(stringResource(R.string.calendars_phone_allow))
+        }
+        return
+    }
+    if (phone.calendars.isEmpty()) Text(stringResource(R.string.calendars_phone_none), style = MaterialTheme.typography.bodyMedium)
+    phone.calendars.forEach { calendar ->
+        val on = calendar.id in phone.shown
+        Row(Modifier.fillMaxWidth().clickable { onShown(calendar.id, !on) }, verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = on, onCheckedChange = { onShown(calendar.id, it) })
+            Box(Modifier.size(14.dp).background(Color(calendar.color.toInt()), CircleShape))
+            Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                Text(calendar.name, style = MaterialTheme.typography.bodyLarge)
+                Text(calendar.account, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
     }
 }
 
@@ -107,6 +144,8 @@ private fun newCalendar(existing: List<CalendarEntity>): CalendarEntity {
 private fun CalendarEditDialog(
     calendar: CalendarEntity,
     others: List<CalendarEntity>,
+    phone: PhoneSheetState,
+    onRequestAccess: () -> Unit,
     isNew: Boolean,
     onDismiss: () -> Unit,
     onSave: (CalendarEntity) -> Unit,
@@ -132,6 +171,7 @@ private fun CalendarEditDialog(
                     c?.let { draft = draft.copy(color = it) }
                 }
                 CalendarDefaults(draft) { draft = it }
+                ExportChoice(draft, phone, onRequestAccess) { draft = it }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         stringResource(R.string.calendar_default_for_alarms), style = MaterialTheme.typography.bodyLarge,
@@ -179,6 +219,22 @@ private fun CalendarDefaults(draft: CalendarEntity, onChange: (CalendarEntity) -
             )
         },
         onSelect = { onChange(draft.copy(defaultRepeat = it)) },
+    )
+}
+
+/** "Copy to phone calendar" (#16): off, or one of the phone's calendars Relay may write to. */
+@Composable
+private fun ExportChoice(draft: CalendarEntity, phone: PhoneSheetState, onRequestAccess: () -> Unit, onChange: (CalendarEntity) -> Unit) {
+    if (!phone.canRead || !phone.canWrite) {
+        Text(stringResource(R.string.calendar_copy_to_phone), style = MaterialTheme.typography.bodyLarge)
+        TextButton(onClick = onRequestAccess) { Text(stringResource(R.string.calendars_phone_allow)) }
+        return
+    }
+    val writable = phone.calendars.filter { it.writable }
+    OptionChips(
+        stringResource(R.string.calendar_copy_to_phone), listOf<Long?>(null) + writable.map { it.id }, draft.exportCalendarId,
+        label = { id -> writable.firstOrNull { it.id == id }?.name ?: stringResource(R.string.option_off) },
+        onSelect = { onChange(draft.copy(exportCalendarId = it)) },
     )
 }
 

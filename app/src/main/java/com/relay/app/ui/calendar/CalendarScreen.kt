@@ -1,5 +1,8 @@
 package com.relay.app.ui.calendar
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,14 +34,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
 import com.relay.app.data.event.EventKind
+import com.relay.app.event.CalendarEntry
 import com.relay.app.event.EntryKind
 import com.relay.app.guide.GuideSection
+import com.relay.app.phone.PhoneCalendars
 import com.relay.app.ui.common.PaneHeader
 import com.relay.app.util.AppLocale
 import java.time.LocalDate
@@ -59,9 +65,17 @@ fun CalendarScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val s = state ?: return
     var managing by remember { mutableStateOf(false) }
+    // Phone calendars (#16): asked for only from the calendars sheet, when the user wants them.
+    val askAccess = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        viewModel.accessChanged()
+    }
+    val open = rememberEntryOpener(onOpenItem, onOpenAlarm)
     if (managing) {
         CalendarsSheet(
-            s.calendars, onDismiss = { managing = false }, onShown = { id, shown -> viewModel.setShown(id, shown) },
+            s.calendars, PhoneSheetState(s.phoneCalendars, s.shownPhone, s.canReadPhone, viewModel.canWritePhone()),
+            onDismiss = { managing = false }, onShown = { id, shown -> viewModel.setShown(id, shown) },
+            onPhoneShown = { id, shown -> viewModel.setPhoneShown(id, shown) },
+            onRequestAccess = { askAccess.launch(arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR)) },
             onSave = viewModel::saveCalendar, onDelete = { id, moveTo -> viewModel.deleteCalendar(id, moveTo) },
         )
     }
@@ -83,7 +97,7 @@ fun CalendarScreen(
             item {
                 MonthGrid(
                     s, onSelect = viewModel::select, onTurn = { viewModel.showMonth(s.month.plusMonths(it)) },
-                    onOpenItem = onOpenItem,
+                    onOpen = open,
                 )
             }
             item {
@@ -102,10 +116,23 @@ fun CalendarScreen(
                 }
             }
             items(dayEntries, key = { "${it.kind}:${it.id}:${it.spanStart}" }) { entry ->
-                EntryRow(entry, s.is24h) { if (entry.kind == EntryKind.ALARM) onOpenAlarm(entry.id) else onOpenItem(entry.id) }
+                EntryRow(entry, s.is24h) { open(entry) }
             }
         }
         AddButton(Modifier.align(Alignment.BottomEnd)) { kind -> onNewItem(kind, s.selected) }
+    }
+}
+
+/** What tapping an entry does: its editor, the alarm editor, or for a phone event, its calendar app. */
+@Composable
+private fun rememberEntryOpener(onOpenItem: (String) -> Unit, onOpenAlarm: (String) -> Unit): (CalendarEntry) -> Unit {
+    val context = LocalContext.current
+    return { entry ->
+        when (entry.kind) {
+            EntryKind.ALARM -> onOpenAlarm(entry.id)
+            EntryKind.PHONE -> entry.id.toLongOrNull()?.let { runCatching { context.startActivity(PhoneCalendars.viewIntent(it)) } }
+            EntryKind.EVENT, EntryKind.REMINDER -> onOpenItem(entry.id)
+        }
     }
 }
 

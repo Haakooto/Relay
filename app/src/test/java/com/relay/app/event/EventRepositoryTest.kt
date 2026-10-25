@@ -29,6 +29,7 @@ internal class FakeEventDao : EventDao {
     val events = MutableStateFlow<Map<String, EventEntity>>(emptyMap())
     override fun observeAll(): Flow<List<EventEntity>> = events.map { it.values.toList() }
     override suspend fun get(id: String) = events.value[id]
+    override suspend fun inCalendar(calendarId: String) = events.value.values.filter { it.calendarId == calendarId }
     override suspend fun upsert(event: EventEntity) { events.value += event.id to event }
     override suspend fun delete(id: String) { events.value -= id }
     override suspend fun moveCalendar(from: String, to: String) {
@@ -135,5 +136,56 @@ class EventRepositoryTest {
     @Test fun repeatStartsOnTheEventsDay() = runBlocking {
         val next = repo.save(event(date = "2026-11-15", startMinute = 7 * 60, repeat = RepeatKind.YEARLY), reminder(0))
         assertEquals(at("2026-11-15T07:00"), next)
+    }
+
+    // Copies in a phone calendar (#16).
+
+    private class FakeCopies : PhoneCopies {
+        val written = mutableMapOf<Long, Pair<EventEntity, Long>>()
+        var nextId = 100L
+        var canWrite = true
+        override suspend fun write(event: EventEntity, phoneCalendarId: Long): Long? {
+            if (!canWrite) return null
+            val id = event.providerEventId ?: nextId++
+            written[id] = event to phoneCalendarId
+            return id
+        }
+        override suspend fun delete(providerEventId: Long) { written -= providerEventId }
+    }
+
+    private val copies = FakeCopies()
+    private var target: Long? = 5L
+    private val copying = EventRepository(eventDao, schedules, { 0L }, copies) { target }
+
+    @Test fun savingWritesACopyAndRemembersIt() = runBlocking {
+        copying.save(event(), null)
+        val id = eventDao.get("e")?.providerEventId
+        assertEquals(100L, id)
+        assertEquals(5L, copies.written.getValue(100L).second)
+        copying.save(event().copy(title = "Dentist, moved"), null)
+        assertEquals(100L, eventDao.get("e")?.providerEventId) // updated in place, not a second copy
+        assertEquals("Dentist, moved", copies.written.getValue(100L).first.title)
+    }
+
+    @Test fun noTargetRemovesTheCopy() = runBlocking {
+        copying.save(event(), null)
+        target = null
+        copying.syncCalendar(event().calendarId)
+        assertNull(eventDao.get("e")?.providerEventId)
+        assertTrue(copies.written.isEmpty())
+    }
+
+    @Test fun deletingTheItemDeletesTheCopy() = runBlocking {
+        copying.save(event(), null)
+        copying.delete("e")
+        assertTrue(copies.written.isEmpty())
+    }
+
+    @Test fun aCopyThatCantBeWrittenDoesntStopTheSave() = runBlocking {
+        copies.canWrite = false
+        copying.save(event(), reminder())
+        assertEquals("Dentist", eventDao.get("e")?.title)
+        assertNull(eventDao.get("e")?.providerEventId)
+        assertEquals(1, scheduleDao.forEvent("e").size)
     }
 }

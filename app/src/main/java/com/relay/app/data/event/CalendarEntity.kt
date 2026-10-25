@@ -26,6 +26,8 @@ data class CalendarEntity(
     /** What a new item's reminder does. */
     val defaultTarget: TargetKind,
     val defaultRepeat: RepeatKind,
+    /** A phone calendar (CalendarContract id) its items are copied to (#16); null = none. */
+    val exportCalendarId: Long? = null,
 )
 
 const val PERSONAL_CALENDAR = "personal"

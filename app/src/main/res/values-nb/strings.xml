@@ -456,6 +456,12 @@
     <string name="event_calendar">Kalender</string>
     <string name="event_color">Farge</string>
     <string name="event_color_calendar">Kalenderen sin</string>
+    <string name="calendars_phone">På denne telefonen</string>
+    <string name="calendars_phone_why">Vis Google- og andre kalendrar her, og kopier Relay sine inn i dei. Relay les dei på telefonen; ingenting går over nettet.</string>
+    <string name="calendars_phone_allow">Gje tilgang til kalendrar</string>
+    <string name="calendars_phone_none">Ingen kalendrar på denne telefonen</string>
+    <string name="calendar_copy_to_phone">Kopier oppføringar til ein telefonkalender</string>
+    <string name="calendar_from_phone">Frå ein telefonkalender</string>
     <plurals name="calendar_day_items">
         <item quantity="one">%1$s, %2$d oppføring</item>
         <item quantity="other">%1$s, %2$d oppføringar</item>

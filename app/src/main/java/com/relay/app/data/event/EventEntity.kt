@@ -38,6 +38,8 @@ data class EventEntity(
     @ColumnInfo(defaultValue = PERSONAL_CALENDAR) val calendarId: String = PERSONAL_CALENDAR,
     /** ARGB; null = its calendar's colour. */
     val color: Long? = null,
+    /** Its copy in a phone calendar (CalendarContract event id, #16); null = none. */
+    val providerEventId: Long? = null,
 ) {
     val isAllDay: Boolean get() = startMinute == null
 

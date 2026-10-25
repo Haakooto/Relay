@@ -13,6 +13,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.launch
 
 private const val WIDGET_REFRESH_DEBOUNCE_MS = 500L
@@ -59,7 +60,8 @@ class RelayApplication : Application() {
             combine(
                 container.events.observeAll(), container.schedules.observeWithExceptions(),
                 container.calendars.observeAll(), container.settings.settings,
-            ) { a, b, c, d -> listOf(a, b, c, d) }.distinctUntilChanged().debounce(WIDGET_REFRESH_DEBOUNCE_MS).collect {
+                container.phoneCalendars.changes().runningFold(0) { n, _ -> n + 1 },
+            ) { a, b, c, d, e -> listOf(a, b, c, d, e) }.distinctUntilChanged().debounce(WIDGET_REFRESH_DEBOUNCE_MS).collect {
                 runCatching { CalendarWidgets.refreshAll(this@RelayApplication) }
                     .onFailure { Log.e("RelayApplication", "calendar widget refresh failed", it) }
             }

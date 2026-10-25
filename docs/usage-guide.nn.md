@@ -82,6 +82,14 @@ dag og framover), trykk på blyanten for å endre namn, farge og standardvala ny
 hamnar. Slettar du ein kalender, blir du spurd kvar oppføringane og alarmane skal flyttast. I
 redigeringa vel du kalenderen til ei oppføring, og kan gje ho eigen farge.
 
+**Google og andre kalendrar.** Under **På denne telefonen** i same lista lèt **Gje tilgang til
+kalendrar** Relay vise kalendrane som alt er på telefonen (Google, delte kalendrar og
+helgedagskalendrar), kvar med eigen avkryssing og farge. Hendingane deira kan berre lesast her;
+trykk på ei for å opne ho i sin eigen kalenderapp. Ein Relay-kalender kan òg **kopiere
+oppføringane sine** til ein av dei (i redigeringa av kalenderen): nye og endra oppføringar blir
+kopierte, sletta blir fjerna, og kopiane blir ikkje viste to gonger. Relay les og skriv dei på
+sjølve telefonen; kalenderappen din synkroniserer dei, Relay brukar ikkje nettet.
+
 **Ei hending** varer heile dagen eller har eit starttidspunkt, og kan slutte seinare same dagen
 eller ein seinare dag. Under **Påminning** vel du når du vil bli minna på (når ho byrjar,
 minutt eller ein dag før; for ei heildagshending kl. 09:00 same dagen eller dagen før) og kva som

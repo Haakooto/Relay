@@ -71,7 +71,7 @@ object EntryText {
             when (entry.kind) {
                 EntryKind.ALARM -> if (entry.target == TargetKind.RING) R.string.calendar_alarm else R.string.calendar_scheduled_start
                 EntryKind.REMINDER -> R.string.calendar_kind_reminder
-                EntryKind.EVENT -> R.string.calendar_untitled
+                EntryKind.EVENT, EntryKind.PHONE -> R.string.calendar_untitled
             },
         )
     }

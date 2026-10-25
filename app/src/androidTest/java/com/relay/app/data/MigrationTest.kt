@@ -231,8 +231,33 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun migrate9To10KeepsCalendarsAndItemsWithoutCopies() {
+        helper.createDatabase(TEST_DB, 9).apply {
+            execSQL(
+                "INSERT INTO events (id, kind, title, note, startEpochDay, startMinute, endEpochDay, endMinute, repeatKind, " +
+                    "repeatDays, untilEpochDay, createdAtMillis, calendarId, color) " +
+                    "VALUES ('e1', 'EVENT', 'Dentist', '', 20000, 600, NULL, NULL, 'NONE', 0, NULL, 0, 'personal', NULL)",
+            )
+            close()
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 10, true, *RelayDatabase.MIGRATIONS).apply {
+            query("SELECT title, calendarId, providerEventId FROM events WHERE id = 'e1'").use {
+                assertTrue(it.moveToFirst())
+                assertEquals("Dentist", it.getString(0))
+                assertEquals("personal", it.getString(1))
+                assertTrue(it.isNull(2))
+            }
+            query("SELECT COUNT(*) FROM calendars WHERE exportCalendarId IS NULL").use {
+                assertTrue(it.moveToFirst())
+                assertEquals(3L, it.getLong(0))
+            }
+            close()
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test"
-        const val LATEST_VERSION = 9
+        const val LATEST_VERSION = 10
     }
 }

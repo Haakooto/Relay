@@ -9,6 +9,7 @@ import com.relay.app.event.EventRepository
 import com.relay.app.firing.FiringNotifications
 import com.relay.app.firing.ReminderNotifications
 import com.relay.app.library.LibraryRepository
+import com.relay.app.phone.PhoneCalendars
 import com.relay.app.run.RunNotifications
 import com.relay.app.run.RunRepository
 import com.relay.app.run.RunScheduler
@@ -38,8 +39,13 @@ class AppContainer(context: Context) {
     val library: LibraryRepository by lazy {
         LibraryRepository(database.libraryDao(), database.libraryHeaderDao(), runs, settings::current)
     }
-    val events: EventRepository by lazy { EventRepository(database.eventDao(), schedules) }
-    val calendars: CalendarRepository by lazy { CalendarRepository(database.calendarDao(), database.eventDao(), schedules) }
+    val phoneCalendars: PhoneCalendars by lazy { PhoneCalendars(appContext) }
+    val events: EventRepository by lazy {
+        EventRepository(database.eventDao(), schedules, copies = phoneCalendars, exportTarget = { calendars.exportTarget(it) })
+    }
+    val calendars: CalendarRepository by lazy {
+        CalendarRepository(database.calendarDao(), database.eventDao(), schedules, syncCopies = { events.syncCalendar(it) })
+    }
 
     /** A day the Calendar pane should show next, set when a widget opens it; taken once. */
     val calendarJump = MutableStateFlow<LocalDate?>(null)

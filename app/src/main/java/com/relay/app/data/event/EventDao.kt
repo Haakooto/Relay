@@ -13,6 +13,9 @@ interface EventDao {
     @Query("SELECT * FROM events WHERE id = :id")
     suspend fun get(id: String): EventEntity?
 
+    @Query("SELECT * FROM events WHERE calendarId = :calendarId")
+    suspend fun inCalendar(calendarId: String): List<EventEntity>
+
     @Upsert
     suspend fun upsert(event: EventEntity)
 

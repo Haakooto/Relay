@@ -40,7 +40,7 @@ import com.relay.app.data.stopwatch.StopwatchEntity
         StopwatchEntity::class, LapEntity::class, LocationEntity::class, WidgetConfigEntity::class,
         LapCorrectionEntity::class, EventEntity::class, CalendarEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
 )
 abstract class RelayDatabase : RoomDatabase() {
@@ -202,9 +202,18 @@ abstract class RelayDatabase : RoomDatabase() {
             }
         }
 
+        /** v10 (#16): copies of items in a phone calendar. */
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `calendars` ADD COLUMN `exportCalendarId` INTEGER")
+                db.execSQL("ALTER TABLE `events` ADD COLUMN `providerEventId` INTEGER")
+            }
+        }
+
         /** Append each migration here as the schema grows. */
         val MIGRATIONS = arrayOf(
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
+            MIGRATION_9_10,
         )
 
         fun build(context: Context): RelayDatabase =

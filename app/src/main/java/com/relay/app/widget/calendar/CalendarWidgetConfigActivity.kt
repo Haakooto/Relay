@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,6 +48,8 @@ import com.relay.app.R
 import com.relay.app.appContainer
 import com.relay.app.data.clock.WidgetConfigEntity
 import com.relay.app.data.event.CalendarEntity
+import com.relay.app.event.PhoneCalendar
+import com.relay.app.event.phoneCalendarKey
 import com.relay.app.ui.calendar.calendarName
 import com.relay.app.ui.theme.RelayTheme
 import com.relay.app.widget.WidgetFrameEditor
@@ -69,6 +72,8 @@ class CalendarWidgetConfigActivity : ComponentActivity() {
             val settings by container.settings.settings.collectAsStateWithLifecycle(initialValue = null)
             var spec by remember { mutableStateOf<CalendarWidgetSpec?>(null) }
             val calendars by container.calendars.observeAll().collectAsStateWithLifecycle(initialValue = emptyList())
+            // The phone's calendars (#16), when Relay may read them.
+            val phoneCalendars by produceState(emptyList<PhoneCalendar>()) { value = container.phoneCalendars.calendars() }
             LaunchedEffect(Unit) {
                 val stored = CalendarWidgetSpec.decode(container.clocks.widget(appWidgetId)?.spec)
                 // Spell out what an older widget showed, so its checkboxes start right.
@@ -79,7 +84,8 @@ class CalendarWidgetConfigActivity : ComponentActivity() {
                 Surface(Modifier.fillMaxSize()) {
                     spec?.let { current ->
                         CalendarWidgetConfigScreen(
-                            current, calendars, onChange = { spec = it }, onCancel = { finish() }, onSave = { save(appWidgetId, current) },
+                            current, calendars, phoneCalendars, onChange = { spec = it }, onCancel = { finish() },
+                            onSave = { save(appWidgetId, current) },
                         )
                     }
                 }
@@ -100,6 +106,7 @@ class CalendarWidgetConfigActivity : ComponentActivity() {
 private fun CalendarWidgetConfigScreen(
     spec: CalendarWidgetSpec,
     calendars: List<CalendarEntity>,
+    phoneCalendars: List<PhoneCalendar>,
     onChange: (CalendarWidgetSpec) -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
@@ -115,13 +122,15 @@ private fun CalendarWidgetConfigScreen(
         }
         Text(stringResource(R.string.widget_calendar_show), style = MaterialTheme.typography.bodyLarge)
         val shown = spec.calendarIds.orEmpty().toSet()
-        calendars.forEach { calendar ->
-            val on = calendar.id in shown
-            val toggle = { onChange(spec.copy(calendarIds = (if (on) shown - calendar.id else shown + calendar.id).toList())) }
+        val rows = calendars.map { Triple(it.id, it.color, calendarName(it)) } +
+            phoneCalendars.map { Triple(phoneCalendarKey(it.id), it.color, "${it.name} (${it.account})") }
+        rows.forEach { (key, color, name) ->
+            val on = key in shown
+            val toggle = { onChange(spec.copy(calendarIds = (if (on) shown - key else shown + key).toList())) }
             Row(Modifier.fillMaxWidth().clickable(onClick = toggle), verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = on, onCheckedChange = { toggle() })
-                Box(Modifier.size(14.dp).background(Color(calendar.color.toInt()), CircleShape))
-                Text(calendarName(calendar), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 12.dp))
+                Box(Modifier.size(14.dp).background(Color(color.toInt()), CircleShape))
+                Text(name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 12.dp))
             }
         }
         HorizontalDivider()

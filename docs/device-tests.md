@@ -389,3 +389,26 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Untick a calendar in one widget only: that widget hides it, the pane and other widgets don't.
 - [ ] Agenda rows have a colour bar; month labels use each item's colour.
 
+## PR: Google Calendar link (#16)
+
+### Update
+- [ ] Install over the previous Relay Debug: items, alarms and calendars are all still there (database v9 → v10).
+
+### Reading phone calendars
+- [ ] Layers button: "On this phone" explains itself and has "Allow calendar access". Deny: nothing else changes.
+- [ ] Allow: your Google calendars (and holiday calendars, if you have them) are listed with their account and colour.
+- [ ] Tick your main Google calendar: its events show in the grid and the day list in its colour, marked "From a phone calendar".
+- [ ] Tap one: it opens in Google Calendar.
+- [ ] Add an event in Google Calendar, come back: it shows in Relay without restarting.
+- [ ] A multi-day Google event is one bar, as Relay's are.
+- [ ] Widget settings: phone calendars are listed too; tick one and its events show in that widget.
+
+### Copying to a phone calendar
+- [ ] Edit Personal → "Copy items to a phone calendar" → your Google calendar: Personal's items appear in Google Calendar (on the phone, and on the web after it syncs).
+- [ ] With that Google calendar ticked in Relay too, each item shows once, not twice.
+- [ ] Change an item's time in Relay: Google Calendar follows. Delete it: it goes from Google too.
+- [ ] A weekly, a monthly-on-the-31st and a yearly item look right in Google Calendar (same days, same skips).
+- [ ] An all-day item shows as all-day in Google, on the right day.
+- [ ] Set the copy to Off: the copies leave Google Calendar.
+- [ ] Revoke calendar access in system settings: Relay still saves items; the phone-calendar list asks for access again.
+

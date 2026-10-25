@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -19,10 +20,16 @@ import com.relay.app.data.settings.AppSettings
 import com.relay.app.event.CalendarEntry
 import com.relay.app.event.CalendarOccurrences
 import com.relay.app.event.EntryKind
+import com.relay.app.event.PhoneEvents
+import com.relay.app.event.PhoneInstance
+import com.relay.app.event.phoneCalendarIds
+import com.relay.app.phone.PhoneCalendars
 import com.relay.app.widget.WidgetBackground
 import com.relay.app.widget.WidgetFrame
 import com.relay.app.widget.WidgetTheme
+import kotlinx.coroutines.flow.runningFold
 import java.time.LocalDate
+import java.time.ZoneId
 
 /** The colours a calendar widget's text uses: from the theme, or picked to stand out on its background. */
 data class WidgetColors(val text: Int, val muted: Int, val accent: Int, val onAccent: Int) {
@@ -98,8 +105,12 @@ object CalendarWidgets {
         launch(context, "day/${day.toEpochDay()}").putExtra(MainActivity.EXTRA_CALENDAR_DAY, day.toEpochDay())
 
     /** The intent for an entry's row: its editor, or the alarm editor. */
-    fun open(context: Context, entry: CalendarEntry): Intent =
-        if (entry.kind == EntryKind.ALARM) openAlarm(context, entry.id) else openItem(context, entry.id)
+    fun open(context: Context, entry: CalendarEntry): Intent = when (entry.kind) {
+        EntryKind.ALARM -> openAlarm(context, entry.id)
+        // A phone event opens in its own calendar app (#16).
+        EntryKind.PHONE -> entry.id.toLongOrNull()?.let(PhoneCalendars::viewIntent) ?: showDay(context, LocalDate.now())
+        EntryKind.EVENT, EntryKind.REMINDER -> openItem(context, entry.id)
+    }
 
     private fun launch(context: Context, path: String) = Intent(context, MainActivity::class.java)
         .setData(Uri.parse("relay://widget/$path"))
@@ -122,11 +133,21 @@ fun calendarEntries(context: Context, from: LocalDate, to: LocalDate, spec: Cale
     val eventsFlow = remember { container.events.observeAll() }
     val schedulesFlow = remember { container.schedules.observeWithExceptions() }
     val calendarsFlow = remember { container.calendars.observeAll() }
+    // Counts phone-calendar changes (#16), so the instances below are read again on each.
+    val phoneChangesFlow = remember { container.phoneCalendars.changes().runningFold(0) { n, _ -> n + 1 } }
     val events by eventsFlow.collectAsState(initial = null)
     val schedules by schedulesFlow.collectAsState(initial = null)
     val calendars by calendarsFlow.collectAsState(initial = null)
+    val phoneChanges by phoneChangesFlow.collectAsState(initial = 0)
+    val phoneIds = phoneCalendarIds(spec.calendarIds.orEmpty())
+    val instances by produceState(emptyList<PhoneInstance>(), from, to, phoneIds, phoneChanges) {
+        value = container.phoneCalendars.instances(from, to, phoneIds, ZoneId.systemDefault())
+    }
     val e = events ?: return null
     val (list, exceptions) = schedules ?: return null
     val c = calendars ?: return null
-    return CalendarOccurrences.between(e, list, exceptions, spec.selection(c), from, to, LocalDate.now())
+    val relay = CalendarOccurrences.between(e, list, exceptions, spec.selection(c), from, to, LocalDate.now())
+    // Relay's own copies in a phone calendar would show twice: leave them out.
+    val fromPhone = PhoneEvents.entries(instances, e.mapNotNull { it.providerEventId }.toSet(), from, to, ZoneId.systemDefault())
+    return CalendarOccurrences.merge(relay, fromPhone)
 }

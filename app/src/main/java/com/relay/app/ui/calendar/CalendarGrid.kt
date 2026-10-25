@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.relay.app.R
+import com.relay.app.event.CalendarEntry
 import com.relay.app.event.CalendarViews
 import com.relay.app.event.DAYS_PER_WEEK
 import com.relay.app.event.GRID_DAYS
@@ -54,7 +55,7 @@ import java.time.format.TextStyle
  * the month are dimmed but tappable.
  */
 @Composable
-fun MonthGrid(s: CalendarState, onSelect: (LocalDate) -> Unit, onTurn: (Long) -> Unit, onOpenItem: (String) -> Unit) {
+fun MonthGrid(s: CalendarState, onSelect: (LocalDate) -> Unit, onTurn: (Long) -> Unit, onOpen: (CalendarEntry) -> Unit) {
     var drag by remember { mutableFloatStateOf(0f) }
     Column(
         Modifier.fillMaxWidth().pointerInput(s.month) {
@@ -87,14 +88,14 @@ fun MonthGrid(s: CalendarState, onSelect: (LocalDate) -> Unit, onTurn: (Long) ->
             Row {
                 for (d in 0 until DAYS_PER_WEEK) DayCell(s, weekStart.plusDays(d.toLong()), onSelect)
             }
-            CalendarViews.weekLanes(weekStart, s.entries).forEach { lane -> SpanLane(lane, onOpenItem) }
+            CalendarViews.weekLanes(weekStart, s.entries).forEach { lane -> SpanLane(lane, onOpen) }
         }
     }
 }
 
 /** One lane of bars: gaps and bars weighted by the days they cover. */
 @Composable
-private fun SpanLane(lane: List<SpanSegment>, onOpenItem: (String) -> Unit) {
+private fun SpanLane(lane: List<SpanSegment>, onOpen: (CalendarEntry) -> Unit) {
     val context = LocalContext.current
     Row(Modifier.fillMaxWidth().padding(vertical = 1.dp)) {
         var col = 0
@@ -103,7 +104,7 @@ private fun SpanLane(lane: List<SpanSegment>, onOpenItem: (String) -> Unit) {
             Box(
                 Modifier.weight((segment.endCol - segment.startCol + 1).toFloat()).padding(horizontal = 1.dp).heightIn(min = BAR_HEIGHT)
                     .background(Color(segment.entry.color.toInt()), RoundedCornerShape(4.dp))
-                    .clickable { onOpenItem(segment.entry.id) }
+                    .clickable { onOpen(segment.entry) }
                     .padding(horizontal = 4.dp),
                 contentAlignment = Alignment.CenterStart,
             ) {

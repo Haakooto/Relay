@@ -16,6 +16,8 @@ class CalendarRepository(
     private val dao: CalendarDao,
     private val events: EventDao,
     private val schedules: ScheduleRepository,
+    /** Brings a calendar's phone-calendar copies in step (#16); `EventRepository.syncCalendar`. */
+    private val syncCopies: suspend (calendarId: String) -> Unit = {},
 ) {
     private val mutex = Mutex()
 
@@ -32,7 +34,13 @@ class CalendarRepository(
     }
 
     /** Saves [calendar]. Marking it the default for alarms takes that from the others. */
-    suspend fun save(calendar: CalendarEntity) = mutex.withLock {
+    suspend fun save(calendar: CalendarEntity) {
+        val exportChanged = mutex.withLock { saveLocked(calendar) }
+        if (exportChanged) syncCopies(calendar.id)
+    }
+
+    /** Returns whether the phone calendar it copies to changed. */
+    private suspend fun saveLocked(calendar: CalendarEntity): Boolean {
         val all = dao.getAll()
         val sortOrder = all.firstOrNull { it.id == calendar.id }?.sortOrder ?: ((all.maxOfOrNull { it.sortOrder } ?: -1) + 1)
         if (calendar.defaultForAlarms) {
@@ -41,6 +49,7 @@ class CalendarRepository(
         // Never leave no default: unmarking the only one is ignored.
         val keepDefault = !calendar.defaultForAlarms && all.none { it.defaultForAlarms && it.id != calendar.id }
         dao.upsert(calendar.copy(sortOrder = sortOrder, defaultForAlarms = calendar.defaultForAlarms || keepDefault))
+        return all.firstOrNull { it.id == calendar.id }?.exportCalendarId != calendar.exportCalendarId
     }
 
     suspend fun setShown(id: String, shown: Boolean) = mutex.withLock {
@@ -51,13 +60,21 @@ class CalendarRepository(
      * Deletes calendar [id] after moving its items and alarms to [moveTo] (which also inherits
      * "default for alarms"). Refused, returning false, for the last calendar or a bad target.
      */
-    suspend fun delete(id: String, moveTo: String): Boolean = mutex.withLock {
-        val gone = dao.get(id) ?: return false
-        val target = dao.get(moveTo)?.takeIf { it.id != id } ?: return false
-        events.moveCalendar(id, target.id)
-        schedules.moveCalendar(id, target.id)
-        if (gone.defaultForAlarms) dao.upsert(target.copy(defaultForAlarms = true))
-        dao.delete(id)
-        true
+    suspend fun delete(id: String, moveTo: String): Boolean {
+        val moved = mutex.withLock {
+            val gone = dao.get(id) ?: return false
+            val target = dao.get(moveTo)?.takeIf { it.id != id } ?: return false
+            events.moveCalendar(id, target.id)
+            schedules.moveCalendar(id, target.id)
+            if (gone.defaultForAlarms) dao.upsert(target.copy(defaultForAlarms = true))
+            dao.delete(id)
+            true
+        }
+        // The moved items now copy, or don't, as their new calendar does.
+        if (moved) syncCopies(moveTo)
+        return moved
     }
+
+    /** The phone calendar [calendarId]'s items copy to, if any. */
+    suspend fun exportTarget(calendarId: String): Long? = dao.get(calendarId)?.exportCalendarId
 }

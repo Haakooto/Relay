@@ -12,13 +12,13 @@ import com.relay.app.schedule.Recurrence
 import com.relay.app.util.MinuteOfDay
 import java.time.LocalDate
 
-/** What a row in the calendar stands for. */
-enum class EntryKind { EVENT, REMINDER, ALARM }
+/** What a row in the calendar stands for. PHONE: an event from a phone calendar, read-only (#16). */
+enum class EntryKind { EVENT, REMINDER, ALARM, PHONE }
 
 /** One row on one day of the calendar (spec §10b). */
 data class CalendarEntry(
     val kind: EntryKind,
-    /** The event's id, or the alarm's schedule id. */
+    /** The event's id, the alarm's schedule id, or a phone event's CalendarContract id. */
     val id: String,
     val title: String,
     /** Minutes after midnight; null = all day. A multi-day item keeps its first day's start here. */
@@ -112,12 +112,17 @@ object CalendarOccurrences {
                 )
             }
         }
-        return (entries + alarms).groupBy({ it.first }, { it.second }).mapValues { (_, list) ->
-            list.sortedWith(
-                compareBy<CalendarEntry> { !it.isMultiDay && it.startMinute != null }.thenBy { it.startMinute }.thenBy { it.title },
-            )
-        }
+        return (entries + alarms).groupBy({ it.first }, { it.second }).mapValues { (_, list) -> list.sortedWith(ENTRY_ORDER) }
     }
+
+    /** Two days-to-entries maps as one, each day in display order (phone events joining Relay's, #16). */
+    fun merge(a: Map<LocalDate, List<CalendarEntry>>, b: Map<LocalDate, List<CalendarEntry>>): Map<LocalDate, List<CalendarEntry>> =
+        (a.keys + b.keys).associateWith { day -> (a[day].orEmpty() + b[day].orEmpty()).sortedWith(ENTRY_ORDER) }
+
+    /** Multi-day and all-day entries first, then by time, then by title. */
+    private val ENTRY_ORDER = compareBy<CalendarEntry> { !it.isMultiDay && it.startMinute != null }
+        .thenBy { it.startMinute }
+        .thenBy { it.title }
 
     /** One entry per day [event] covers in [from]..[to]; a multi-day one is "continued" after its first day. */
     private fun eventEntries(

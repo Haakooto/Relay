@@ -186,7 +186,7 @@ class MonthWidget : GlanceAppWidget() {
             lane.forEach { segment ->
                 if (segment.startCol > col) Spacer(GlanceModifier.width(cellWidth * (segment.startCol - col)))
                 Box(GlanceModifier.width(cellWidth * (segment.endCol - segment.startCol + 1)).padding(horizontal = 1.dp)) {
-                    val open = actionStartActivity(CalendarWidgets.openItem(context, segment.entry.id))
+                    val open = actionStartActivity(CalendarWidgets.open(context, segment.entry))
                     ItemLabel(context, segment.entry, GlanceModifier.clickable(open))
                 }
                 col = segment.endCol + 1
