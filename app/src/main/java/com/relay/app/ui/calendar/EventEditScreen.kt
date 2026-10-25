@@ -98,6 +98,7 @@ fun EventEditScreen(eventId: String?, kind: EventKind, day: LocalDate?, onDone: 
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
+        EventCalendarSection(state, viewModel)
         EventWhenSection(state, viewModel) { picking = it }
         EventRepeatSection(state, viewModel) { picking = it }
         OutlinedTextField(

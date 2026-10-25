@@ -22,11 +22,21 @@ import androidx.compose.ui.unit.dp
 import com.relay.app.R
 import com.relay.app.data.event.EventKind
 import com.relay.app.data.event.RepeatKind
+import com.relay.app.ui.clock.ColorChoice
 import com.relay.app.ui.common.OptionChips
 import com.relay.app.util.AppLocale
 import com.relay.app.util.RelativeText
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
+
+/** Which calendar it's in (#34), and its own colour if it shouldn't take the calendar's. */
+@Composable
+internal fun EventCalendarSection(state: EventEditState, viewModel: EventEditViewModel) {
+    CalendarPicker(state.calendars, state.calendarId, viewModel::setCalendar)
+    ColorChoice(
+        stringResource(R.string.event_color), state.color, CALENDAR_PALETTE, noneLabel = stringResource(R.string.event_color_calendar),
+    ) { c -> viewModel.update { it.copy(color = c) } }
+}
 
 /** Date, all-day, start, and (events only) end time and last day. */
 @Composable

@@ -70,11 +70,17 @@ ein morgon utan slumreknapp.
 Kalender-ruta er for planlegging: **hendingar** (med start, valfri slutt og eit notat) og
 **påminningar** (eitt tidspunkt). Trykk **+** for kva du vil; det byrjar på dagen du har valt.
 
-**Månaden.** Dagar med noko på har prikkar. Trykk på ein dag for å sjå han under rutenettet; dra
-sidelengs eller bruk pilene for å byte månad, og **I dag** for å kome tilbake. Trykk på namnet på
-månaden for å hoppe til kva månad og år som helst. Vala øvst byter
-mellom **Hendingar og påminningar** og **Alt som er planlagt**, som òg viser alarmane dine og
-alarmar som startar tidtakarar, relé eller stoppeklokker (frå i dag og framover).
+**Månaden.** Dagar med noko på har ein prikk i fargen til oppføringa; noko som varer fleire dagar,
+er éin strek over dei. Trykk på ein dag for å sjå han under rutenettet; dra sidelengs eller bruk
+pilene for å byte månad, og **I dag** for å kome tilbake. Trykk på namnet på månaden for å hoppe
+til kva månad og år som helst.
+
+**Kalendrar.** Kvar oppføring, og kvar alarm, høyrer til ein kalender: Personleg, Bursdagar og
+Alarmar til å byrje med. Lag-knappen øvst viser dei: kryss av dei som skal visast (alarmar frå i
+dag og framover), trykk på blyanten for å endre namn, farge og standardvala nye oppføringar får
+(påminning, kva ho gjer, gjentaking), eller legg til ein ny. Éin kalender er der nye alarmar
+hamnar. Slettar du ein kalender, blir du spurd kvar oppføringane og alarmane skal flyttast. I
+redigeringa vel du kalenderen til ei oppføring, og kan gje ho eigen farge.
 
 **Ei hending** varer heile dagen eller har eit starttidspunkt, og kan slutte seinare same dagen
 eller ein seinare dag. Under **Påminning** vel du når du vil bli minna på (når ho byrjar,
@@ -238,14 +244,15 @@ Hald inne på heimeskjermen → Moduler → Relay. Kvar modul får sitt eige opp
 Kvar modul kan sjå ulik ut. Vil du endre ein seinare, hald inne på han og vel innstillingar for
 modulen. Trykk på ein modul opnar Relay på ruta du brukte sist.
 
-**Kalendermodular.** To til, kvar med sitt eige oppsett: kva dei skal **vise** (hendingar og
-påminningar, eller alt som er planlagt) og den same bakgrunnen, hjørna og kanten som klokka.
+**Kalendermodular.** To til, kvar med sitt eige oppsett: kva **kalendrar** dei skal vise, og den
+same bakgrunnen, hjørna og kanten som klokka.
 
-- **Kalender: neste 7 dagar** viser det som kjem, dag for dag. Trykk på ei rad for å opne ho, på
+- **Kalender: neste 7 dagar** viser det som kjem, dag for dag, i fargen til kvar oppføring; noko
+  som varer fleire dagar, står éin gong, med datoane. Trykk på ei rad for å opne ho, på
   ein dag for å opne Kalender-ruta der, og **+** for ei ny hending.
-- **Kalender: månad** viser månaden med planane for kvar dag som små merke, farga etter slag
-  (hendingar, påminningar, alarmar), og «+n» når ikkje alle får plass; ein høgare modul får plass
-  til fleire. **‹** og **›** byter månad rett på heimeskjermen; trykk på ein dag eller namnet på
+- **Kalender: månad** viser månaden med planane for kvar dag som små merke i fargane deira,
+  strekar over dagane for det som varer lenger, og «+n» når ikkje alle får plass; ein høgare modul
+  får plass til fleire. **‹** og **›** byter månad rett på heimeskjermen; trykk på ein dag eller namnet på
   månaden opnar Kalender-ruta der.
 
 Dei blir oppdaterte når du endrar noko i Relay, og ved midnatt.

@@ -1,7 +1,10 @@
 package com.relay.app.event
 
+import com.relay.app.data.event.ALARMS_CALENDAR
+import com.relay.app.data.event.CalendarEntity
 import com.relay.app.data.event.EventEntity
 import com.relay.app.data.event.EventKind
+import com.relay.app.data.event.PERSONAL_CALENDAR
 import com.relay.app.data.event.RepeatKind
 import com.relay.app.data.schedule.AfterFire
 import com.relay.app.data.schedule.RingOptions
@@ -9,7 +12,6 @@ import com.relay.app.data.schedule.ScheduleEntity
 import com.relay.app.data.schedule.TargetKind
 import com.relay.app.data.schedule.WeekdayMask
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.DayOfWeek
@@ -46,7 +48,18 @@ class CalendarOccurrencesTest {
         to: String,
         schedules: List<ScheduleEntity> = emptyList(),
         all: Boolean = false,
-    ) = CalendarOccurrences.between(events, schedules, emptyList(), d(from), d(to), today, all)
+    ) = CalendarOccurrences.between(events, schedules, emptyList(), if (all) everything else noAlarms, d(from), d(to), today)
+
+    private fun calendar(id: String, color: Long, alarms: Boolean = false) = CalendarEntity(
+        id, "", color, 0, shown = true, defaultForAlarms = alarms, defaultLeadMinutes = null,
+        defaultTarget = TargetKind.NOTIFY, defaultRepeat = RepeatKind.NONE,
+    )
+    private val calendars = listOf(
+        calendar(PERSONAL_CALENDAR, 0xFF1F6FB0),
+        calendar(ALARMS_CALENDAR, 0xFF7A6A4F, alarms = true),
+    )
+    private val everything = CalendarSelection(calendars, setOf(PERSONAL_CALENDAR, ALARMS_CALENDAR))
+    private val noAlarms = CalendarSelection(calendars, setOf(PERSONAL_CALENDAR))
 
     @Test fun monthlyOn31stSkipsMonthsWithoutIt() {
         val days = between(listOf(event(repeat = RepeatKind.MONTHLY)), "2026-02-01", "2026-05-31").keys
@@ -65,7 +78,8 @@ class CalendarOccurrencesTest {
         assertEquals(setOf(d("2026-10-01"), d("2026-10-02")), byDay.keys)
         val last = byDay.getValue(d("2026-10-02")).single()
         assertTrue(last.continued)
-        assertNull(last.startMinute)
+        assertEquals(d("2026-09-29"), last.spanStart)
+        assertEquals(d("2026-10-02"), last.spanEnd)
         assertEquals(12 * 60, last.endMinute)
     }
 
@@ -99,5 +113,21 @@ class CalendarOccurrencesTest {
             .getValue(d("2026-10-01")).single()
         assertEquals(15, entry.reminderLead)
         assertEquals(EntryKind.EVENT, entry.kind)
+    }
+
+    @Test fun hiddenCalendarsAreLeftOutAndColoursFollowTheCalendar() {
+        val work = event("work", start = "2026-10-01").copy(calendarId = "work")
+        val mine = event("mine", start = "2026-10-01")
+        val own = event("own", start = "2026-10-01").copy(color = 0xFF2F7A3A)
+        val day = between(listOf(work, mine, own), "2026-10-01", "2026-10-01").getValue(d("2026-10-01"))
+        assertEquals(listOf("mine", "own"), day.map { it.id })
+        assertEquals(listOf(0xFF1F6FB0, 0xFF2F7A3A), day.map { it.color })
+    }
+
+    @Test fun anAlarmWithoutACalendarIsInTheDefaultForAlarms() {
+        val day = between(emptyList(), "2026-09-30", "2026-09-30", listOf(alarm(setOf(DayOfWeek.WEDNESDAY))), all = true)
+            .getValue(d("2026-09-30")).single()
+        assertEquals(ALARMS_CALENDAR, day.calendarId)
+        assertEquals(0xFF7A6A4F, day.color)
     }
 }

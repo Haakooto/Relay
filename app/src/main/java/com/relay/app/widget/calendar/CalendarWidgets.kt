@@ -115,15 +115,18 @@ fun widgetSettings(context: Context): AppSettings? {
     return settings
 }
 
-/** The entries from [from] to [to], kept current while the widget is showing; null until first read. */
+/** The entries from [from] to [to] in [spec]'s calendars, kept current while the widget shows; null until first read. */
 @Composable
-fun calendarEntries(context: Context, from: LocalDate, to: LocalDate, showAll: Boolean): Map<LocalDate, List<CalendarEntry>>? {
+fun calendarEntries(context: Context, from: LocalDate, to: LocalDate, spec: CalendarWidgetSpec): Map<LocalDate, List<CalendarEntry>>? {
     val container = context.appContainer
     val eventsFlow = remember { container.events.observeAll() }
     val schedulesFlow = remember { container.schedules.observeWithExceptions() }
+    val calendarsFlow = remember { container.calendars.observeAll() }
     val events by eventsFlow.collectAsState(initial = null)
     val schedules by schedulesFlow.collectAsState(initial = null)
+    val calendars by calendarsFlow.collectAsState(initial = null)
     val e = events ?: return null
     val (list, exceptions) = schedules ?: return null
-    return CalendarOccurrences.between(e, list, exceptions, from, to, LocalDate.now(), showAll)
+    val c = calendars ?: return null
+    return CalendarOccurrences.between(e, list, exceptions, spec.selection(c), from, to, LocalDate.now())
 }

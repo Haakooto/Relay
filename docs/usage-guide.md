@@ -69,11 +69,17 @@ snooze-less wake-up routine.
 The Calendar pane is for planning: **events** (with a start, an optional end and a note) and
 **reminders** (a single moment). Tap **+** for either; it starts on the day you have selected.
 
-**The month.** Days with something on have dots. Tap a day to list it below the grid; swipe
-sideways or use the arrows to change month, and **Today** to come back. Tap the month's name to
-jump to any month and year. The chips at the top
-switch between **Events and reminders** and **Everything scheduled**, which also shows your
-alarms and alarms that start timers, relays or stopwatches (from today on).
+**The month.** Days with something on have a dot in the item's colour; something that lasts
+several days is one bar across them. Tap a day to list it below the grid; swipe sideways or use
+the arrows to change month, and **Today** to come back. Tap the month's name to jump to any month
+and year.
+
+**Calendars.** Every item, and every alarm, belongs to a calendar: Personal, Birthdays and Alarms
+to start with. The layers button at the top lists them: tick the ones to show (alarms show from
+today on), tap the pencil to change a calendar's name, colour and the defaults its new items get
+(reminder, what it does, repeat), or add a new one. One calendar is where new alarms go. Deleting
+a calendar asks where its items and alarms should move. In the editor, pick an item's calendar,
+and give it its own colour if it shouldn't take the calendar's.
 
 **An event** is all day or has a start time, and can end later that day or on a later day.
 Under **Reminder**, pick when to be reminded (at the start, minutes or a day before; for an
@@ -233,15 +239,18 @@ Long-press the home screen → Widgets → Relay. Each widget gets its own setup
 - **corners** and a **border**.
 
 Every widget can look different. To change one later, long-press it and pick Widget settings.
+Calendar widgets have their own calendar ticks, separate from the pane's.
 Tapping a clock widget opens Relay on the pane you used last.
 
-**Calendar widgets.** Two more, each with its own setup: what to **show** (events and reminders,
-or everything scheduled) and the same background, corners and border as the clock.
+**Calendar widgets.** Two more, each with its own setup: which **calendars** to show, and the
+same background, corners and border as the clock.
 
-- **Calendar: next 7 days** lists what's coming, day by day. Tap a row to open it, a day to open
+- **Calendar: next 7 days** lists what's coming, day by day, with each item's colour; something
+  lasting several days is listed once, with its dates. Tap a row to open it, a day to open
   the Calendar pane there, and **+** for a new event.
-- **Calendar: month** shows the month with each day's plans as small labels, coloured by kind
-  (events, reminders, alarms), and "+n" when they don't all fit; a taller widget fits more.
+- **Calendar: month** shows the month with each day's plans as small labels in their colours,
+  bars across the days for things that last longer, and "+n" when they don't all fit; a taller
+  widget fits more.
   **‹** and **›** change month right on the home screen; tapping a day or the month's name opens
   the Calendar pane there.
 

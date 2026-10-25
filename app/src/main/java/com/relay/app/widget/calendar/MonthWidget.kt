@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -28,12 +29,15 @@ import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.ColumnScope
 import androidx.glance.layout.Row
 import androidx.glance.layout.RowScope
+import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
+import androidx.glance.layout.width
 import androidx.glance.semantics.contentDescription
 import androidx.glance.semantics.semantics
 import androidx.glance.state.GlanceStateDefinition
@@ -43,12 +47,10 @@ import androidx.glance.unit.ColorProvider
 import com.relay.app.R
 import com.relay.app.event.CalendarEntry
 import com.relay.app.event.CalendarViews
-import com.relay.app.event.EntryKind
+import com.relay.app.event.DAYS_PER_WEEK
 import com.relay.app.event.GRID_DAYS
+import com.relay.app.event.SpanSegment
 import com.relay.app.ui.calendar.CalendarText
-import com.relay.app.ui.theme.Accent
-import com.relay.app.ui.theme.Brass
-import com.relay.app.ui.theme.Teal
 import com.relay.app.util.AppLocale
 import com.relay.app.util.RelativeText
 import com.relay.app.widget.WidgetTheme
@@ -80,15 +82,15 @@ class MonthWidget : GlanceAppWidget() {
         val today = LocalDate.now()
         val month = prefs[KEY_MONTH]?.let { runCatching { YearMonth.parse(it) }.getOrNull() } ?: YearMonth.from(today)
         val gridStart = CalendarViews.gridStart(month, widgetSettings(context)?.firstDayOfWeek ?: DayOfWeek.MONDAY)
-        val entries = calendarEntries(context, gridStart, gridStart.plusDays(GRID_DAYS - 1), spec.showAll).orEmpty()
-        // How many labels a day cell has room for, from the widget's height.
-        val cellHeight = (LocalSize.current.height - CHROME_HEIGHT) / WEEKS
-        val labels = ((cellHeight - DAY_NUMBER_HEIGHT) / LABEL_HEIGHT).toInt().coerceIn(0, MAX_LABELS)
-        val grid = MonthGridState(month, today, entries, labels)
+        val entries = calendarEntries(context, gridStart, gridStart.plusDays(GRID_DAYS - 1), spec).orEmpty()
+        // Glance has no spanning cells, so bars are sized from the widget's own width.
+        val size = LocalSize.current
+        val cellWidth = (size.width - PADDING * 2) / DAYS_PER_WEEK
+        val grid = MonthGridState(month, today, entries, cellWidth, (size.height - CHROME_HEIGHT) / WEEKS)
 
         Box(GlanceModifier.fillMaxSize()) {
             FrameBackground(context, spec.frame)
-            Column(GlanceModifier.fillMaxSize().padding(6.dp)) {
+            Column(GlanceModifier.fillMaxSize().padding(PADDING)) {
                 MonthHeader(context, month, colors)
                 Row(GlanceModifier.fillMaxWidth()) {
                     for (d in 0 until DAYS_PER_WEEK) {
@@ -98,13 +100,7 @@ class MonthWidget : GlanceAppWidget() {
                         )
                     }
                 }
-                for (week in 0 until WEEKS) {
-                    Row(GlanceModifier.fillMaxWidth().defaultWeight()) {
-                        for (d in 0 until DAYS_PER_WEEK) {
-                            DayCell(context, grid, gridStart.plusDays(week * DAYS_PER_WEEK + d.toLong()), colors)
-                        }
-                    }
-                }
+                for (week in 0 until WEEKS) Week(context, grid, gridStart.plusDays(week * DAYS_PER_WEEK.toLong()), colors)
             }
         }
     }
@@ -132,85 +128,137 @@ class MonthWidget : GlanceAppWidget() {
     }
 
     /**
-     * One day: its number (in a filled pill when today), then a label per item, as many as fit.
-     * Weight, not fill: a cell that fills its row's width would push the other six out.
+     * One week: the day numbers, then up to [MAX_LANES] lanes of multi-day bars (#35), then each
+     * day's other items as labels, as many as the height leaves room for. Four children, well
+     * within Glance's ten per column.
      */
     @Composable
-    private fun RowScope.DayCell(context: Context, grid: MonthGridState, day: LocalDate, colors: WidgetColors) {
-        val items = grid.entries[day].orEmpty()
-        val isToday = day == grid.today
-        val description = context.resources.getQuantityString(
-            R.plurals.calendar_day_items, items.size, RelativeText.date(context, day, grid.today), items.size,
-        )
-        Column(
-            GlanceModifier.defaultWeight().fillMaxHeight().padding(horizontal = 1.dp)
-                .clickable(actionStartActivity(CalendarWidgets.showDay(context, day)))
-                .semantics { contentDescription = description },
-        ) {
-            Box(GlanceModifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Box(
-                    GlanceModifier.padding(horizontal = 4.dp).cornerRadius(8.dp)
-                        .then(if (isToday) GlanceModifier.background(ColorProvider(Color(colors.accent))) else GlanceModifier),
-                ) {
-                    val numberColor = when {
-                        isToday -> colors.onAccent
-                        day.month == grid.month.month -> colors.text
-                        else -> colors.muted
-                    }
-                    WidgetText(day.dayOfMonth.toString(), numberColor, 11.sp, bold = isToday, align = TextAlign.Center)
+    private fun ColumnScope.Week(context: Context, grid: MonthGridState, weekStart: LocalDate, colors: WidgetColors) {
+        val lanes = CalendarViews.weekLanes(weekStart, grid.entries, MAX_BARS_PER_LANE)
+        val shown = lanes.take(MAX_LANES)
+        // Bars that don't fit still count, in their days' "+n".
+        val hidden = lanes.drop(MAX_LANES).flatten()
+        val labels = ((grid.weekHeight - DAY_NUMBER_HEIGHT - LANE_HEIGHT * shown.size) / LABEL_HEIGHT).toInt().coerceIn(0, MAX_LABELS)
+        val days = (0 until DAYS_PER_WEEK).map { weekStart.plusDays(it.toLong()) }
+        Column(GlanceModifier.fillMaxWidth().defaultWeight()) {
+            Row(GlanceModifier.fillMaxWidth()) { days.forEach { DayNumber(context, grid, it, colors) } }
+            shown.forEach { Lane(context, it, grid.cellWidth) }
+            Row(GlanceModifier.fillMaxWidth().defaultWeight()) {
+                days.forEachIndexed { col, day ->
+                    DayLabels(context, grid, day, labels, hidden.count { col in it.startCol..it.endCol }, colors)
                 }
-            }
-            // With too many to show, the last slot says how many more there are.
-            val shown = if (items.size > grid.labels) (grid.labels - 1).coerceAtLeast(0) else items.size
-            items.take(shown).forEach { ItemLabel(context, it) }
-            if (items.size > shown && grid.labels > 0) {
-                WidgetText("+${items.size - shown}", colors.muted, 9.sp, GlanceModifier.fillMaxWidth(), align = TextAlign.Center)
             }
         }
     }
 
-    /** A day's item: its title on its kind's colour. The title says what it is, not the colour alone. */
+    /** A day's number, in a filled pill when it's today. Weight, not fill: filling would push the other six out. */
     @Composable
-    private fun ItemLabel(context: Context, entry: CalendarEntry) {
-        Box(GlanceModifier.fillMaxWidth().padding(top = 1.dp)) {
-            WidgetText(
-                EntryText.title(context, entry), LABEL_TEXT, 9.sp,
-                GlanceModifier.fillMaxWidth().cornerRadius(3.dp).background(ColorProvider(Color(labelColor(entry.kind))))
-                    .padding(horizontal = 2.dp),
-            )
+    private fun RowScope.DayNumber(context: Context, grid: MonthGridState, day: LocalDate, colors: WidgetColors) {
+        val count = grid.entries[day]?.size ?: 0
+        val isToday = day == grid.today
+        val description = context.resources.getQuantityString(
+            R.plurals.calendar_day_items, count, RelativeText.date(context, day, grid.today), count,
+        )
+        Box(
+            GlanceModifier.defaultWeight().clickable(actionStartActivity(CalendarWidgets.showDay(context, day)))
+                .semantics { contentDescription = description },
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                GlanceModifier.padding(horizontal = 4.dp).cornerRadius(8.dp)
+                    .then(if (isToday) GlanceModifier.background(ColorProvider(Color(colors.accent))) else GlanceModifier),
+            ) {
+                val numberColor = when {
+                    isToday -> colors.onAccent
+                    day.month == grid.month.month -> colors.text
+                    else -> colors.muted
+                }
+                WidgetText(day.dayOfMonth.toString(), numberColor, 11.sp, bold = isToday, align = TextAlign.Center)
+            }
         }
+    }
+
+    /** One lane of multi-day bars, each as wide as the days it covers. */
+    @Composable
+    private fun Lane(context: Context, lane: List<SpanSegment>, cellWidth: Dp) {
+        Row(GlanceModifier.fillMaxWidth().padding(top = 1.dp)) {
+            var col = 0
+            lane.forEach { segment ->
+                if (segment.startCol > col) Spacer(GlanceModifier.width(cellWidth * (segment.startCol - col)))
+                Box(GlanceModifier.width(cellWidth * (segment.endCol - segment.startCol + 1)).padding(horizontal = 1.dp)) {
+                    val open = actionStartActivity(CalendarWidgets.openItem(context, segment.entry.id))
+                    ItemLabel(context, segment.entry, GlanceModifier.clickable(open))
+                }
+                col = segment.endCol + 1
+            }
+        }
+    }
+
+    /** A day's single-day items as labels; with too many, the last slot says how many more. */
+    @Composable
+    private fun RowScope.DayLabels(
+        context: Context,
+        grid: MonthGridState,
+        day: LocalDate,
+        room: Int,
+        hiddenBars: Int,
+        colors: WidgetColors,
+    ) {
+        val items = grid.entries[day].orEmpty().filter { !it.isMultiDay }
+        val total = items.size + hiddenBars
+        val shown = if (total > room) (room - 1).coerceAtLeast(0).coerceAtMost(items.size) else items.size
+        Column(
+            GlanceModifier.defaultWeight().fillMaxHeight().padding(horizontal = 1.dp)
+                .clickable(actionStartActivity(CalendarWidgets.showDay(context, day))),
+        ) {
+            items.take(shown).forEach { Box(GlanceModifier.fillMaxWidth().padding(top = 1.dp)) { ItemLabel(context, it) } }
+            if (total > shown && room > 0) {
+                WidgetText("+${total - shown}", colors.muted, 9.sp, GlanceModifier.fillMaxWidth(), align = TextAlign.Center)
+            }
+        }
+    }
+
+    /** An item's title on its colour (#34). The title says what it is, not the colour alone. */
+    @Composable
+    private fun ItemLabel(context: Context, entry: CalendarEntry, modifier: GlanceModifier = GlanceModifier) {
+        WidgetText(
+            EntryText.title(context, entry), LABEL_TEXT, 9.sp,
+            modifier.fillMaxWidth().cornerRadius(3.dp).background(ColorProvider(Color(entry.color.toInt()))).padding(horizontal = 2.dp),
+        )
     }
 
     companion object {
         val KEY_MONTH = stringPreferencesKey("calendar_month")
         private const val WEEKS = 6
-        private const val DAYS_PER_WEEK = 7
 
         /** Most labels in one day, however tall the widget. */
         private const val MAX_LABELS = 5
 
+        /** Lanes of multi-day bars per week; more go into "+n". */
+        private const val MAX_LANES = 2
+
+        /** Bars in one lane: each takes a spacer and a box, and a Glance row holds ten. */
+        private const val MAX_BARS_PER_LANE = 4
+        private val PADDING = 6.dp
+
         /** Header, weekday names and padding, which the six weeks share the rest with. */
         private val CHROME_HEIGHT = 56.dp
         private val DAY_NUMBER_HEIGHT = 16.dp
+        private val LANE_HEIGHT = 14.dp
         private val LABEL_HEIGHT = 14.dp
 
-        /** All three label colours take white text at 4.5:1 or better. */
+        /** The calendar palette takes white text at 4.5:1 or better. */
         private val LABEL_TEXT = Color.White.toArgb()
-
-        fun labelColor(kind: EntryKind): Int = when (kind) {
-            EntryKind.EVENT -> Accent
-            EntryKind.REMINDER -> Teal
-            EntryKind.ALARM -> Brass
-        }.toArgb()
     }
 }
 
-/** What the grid draws from. [labels]: how many item labels fit in a day cell. */
+/** What the grid draws from, with one day column's width and one week's height. */
 private data class MonthGridState(
     val month: YearMonth,
     val today: LocalDate,
     val entries: Map<LocalDate, List<CalendarEntry>>,
-    val labels: Int,
+    val cellWidth: Dp,
+    val weekHeight: Dp,
 )
 
 /** ‹ and ›: turn the widget's month, without opening the app. */

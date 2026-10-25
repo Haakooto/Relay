@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.relay.app.appContainer
+import com.relay.app.data.event.CalendarEntity
 import com.relay.app.data.schedule.AfterFire
 import com.relay.app.data.schedule.ExceptionKind
 import com.relay.app.data.schedule.RingOptions
@@ -51,6 +52,9 @@ data class AlarmEditState(
     val others: List<OtherAlarm> = emptyList(),
     val firstDay: DayOfWeek = DayOfWeek.MONDAY,
     val is24h: Boolean = true,
+    /** Its calendar (#34); null until loaded. */
+    val calendarId: String? = null,
+    val calendars: List<CalendarEntity> = emptyList(),
     /** Preserved from the loaded row, so an edit doesn't reset them. */
     val createdAtMillis: Long = System.currentTimeMillis(),
     val createdBy: String = "user",
@@ -69,6 +73,8 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
         viewModelScope.launch {
             val settings = container.settings.current()
             val existing = scheduleId?.let { container.schedules.get(it) }
+            val calendars = container.calendars.all()
+            val alarmDefault = container.calendars.defaultForAlarms()?.id
             val base = AlarmEditState(
                 loaded = true,
                 firstDay = settings.firstDayOfWeek,
@@ -76,6 +82,8 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
                 snoozeMinutes = settings.defaultSnoozeMinutes,
                 soundUri = settings.defaultAlarmSoundUri,
                 rampSeconds = settings.defaultRampSeconds,
+                calendarId = alarmDefault,
+                calendars = calendars,
             )
             _state.value = if (existing == null) base else base.copy(
                 isNew = false,
@@ -100,6 +108,7 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
                 maxSnoozes = existing.ring.maxSnoozes,
                 createdAtMillis = existing.createdAtMillis,
                 createdBy = existing.createdBy,
+                calendarId = existing.calendarId ?: alarmDefault,
             )
             if (existing == null) fires.load(TargetKind.RING, null, TargetSpec())
             else fires.load(existing.target, existing.targetDefId, TargetSpec.decode(existing.targetSpec))
@@ -113,7 +122,7 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
     private var baseline: List<Any?>? = null
     private fun AlarmEditState.editable() = listOf(
         hour, minute, label, repeatDays, oneOffDate, afterFire, endRule, endDate, endCount,
-        soundUri, vibrate, rampSeconds, snoozeMinutes, maxSnoozes,
+        soundUri, vibrate, rampSeconds, snoozeMinutes, maxSnoozes, calendarId,
     )
 
     /** Unsaved edits? Exceptions don't count: they're saved the moment they're added. */
@@ -145,6 +154,7 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
             nextFireAtMillis = null,
             targetDefId = fires.storedDefId(f),
             targetSpec = TargetSpec.encode(f.spec),
+            calendarId = s.calendarId,
         )
         val next = container.schedules.save(entity)
         onSaved(next?.toEpochMilli())

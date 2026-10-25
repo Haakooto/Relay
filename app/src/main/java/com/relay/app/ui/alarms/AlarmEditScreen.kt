@@ -54,16 +54,17 @@ import com.relay.app.R
 import com.relay.app.data.schedule.AfterFire
 import com.relay.app.data.schedule.ExceptionKind
 import com.relay.app.data.schedule.TargetKind
+import com.relay.app.ui.calendar.CalendarPicker
 import com.relay.app.ui.common.NumberOptionChips
-import com.relay.app.ui.common.rememberDiscardGuard
 import com.relay.app.ui.common.OptionChips
 import com.relay.app.ui.common.SoundPickerRow
+import com.relay.app.ui.common.rememberDiscardGuard
+import com.relay.app.util.AppLocale
 import com.relay.app.util.RelativeText
 import com.relay.app.util.TimeText
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.TextStyle
-import com.relay.app.util.AppLocale
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -149,6 +150,8 @@ fun AlarmEditScreen(scheduleId: String?, onDone: () -> Unit) {
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
+
+        CalendarPicker(state.calendars, state.calendarId) { id -> viewModel.update { it.copy(calendarId = id) } }
 
         Text(stringResource(R.string.alarm_repeat), style = MaterialTheme.typography.bodyLarge)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

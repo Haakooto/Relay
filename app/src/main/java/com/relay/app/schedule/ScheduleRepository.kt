@@ -106,6 +106,9 @@ class ScheduleRepository(
         rescheduleLocked(id)
     }
 
+    /** A deleted calendar's alarms move to [to] (#34). Only the grouping changes; nothing re-arms. */
+    suspend fun moveCalendar(from: String, to: String) = mutex.withLock { dao.moveCalendar(from, to) }
+
     suspend fun delete(id: String) = mutex.withLock {
         scheduler.cancel(id)
         scheduler.cancelUpcoming(id)

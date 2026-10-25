@@ -376,8 +376,6 @@
     <string name="action_back">Tilbake</string>
     <!-- Calendar (spec §10b) -->
     <string name="pane_calendar">Kalender</string>
-    <string name="calendar_filter_mine">Hendingar og påminningar</string>
-    <string name="calendar_filter_all">Alt som er planlagt</string>
     <string name="calendar_prev_month">Førre månad</string>
     <string name="calendar_next_month">Neste månad</string>
     <string name="calendar_go_today">I dag</string>
@@ -440,6 +438,24 @@
     <string name="widget_month_description">Månaden, med planane for dagen</string>
     <string name="widget_agenda_empty">Ingenting dei neste 7 dagane</string>
     <string name="widget_calendar_show">Vis</string>
+    <string name="calendars_title">Kalendrar</string>
+    <string name="calendars_new">Ny kalender</string>
+    <string name="calendar_edit">Endre kalender</string>
+    <string name="calendar_edit_named">Endre %1$s</string>
+    <string name="calendar_name">Namn</string>
+    <string name="calendar_color">Farge</string>
+    <string name="calendar_default_for_alarms">Nye alarmar hamnar her</string>
+    <string name="calendar_default_reminder">Nye oppføringar: påminning</string>
+    <string name="calendar_default_target">Nye oppføringar: påminninga</string>
+    <string name="calendar_default_repeat">Nye oppføringar: gjentaking</string>
+    <string name="calendar_delete_title">Slette denne kalenderen?</string>
+    <string name="calendar_delete_move_to">Flytt oppføringane og alarmane til:</string>
+    <string name="calendar_personal">Personleg</string>
+    <string name="calendar_birthdays">Bursdagar</string>
+    <string name="calendar_alarms">Alarmar</string>
+    <string name="event_calendar">Kalender</string>
+    <string name="event_color">Farge</string>
+    <string name="event_color_calendar">Kalenderen sin</string>
     <plurals name="calendar_day_items">
         <item quantity="one">%1$s, %2$d oppføring</item>
         <item quantity="other">%1$s, %2$d oppføringar</item>

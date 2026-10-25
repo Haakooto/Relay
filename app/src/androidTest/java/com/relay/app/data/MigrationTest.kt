@@ -189,8 +189,50 @@ class MigrationTest {
         }
     }
 
+    @Test
+    fun migrate8To9PutsItemsInPersonalAndAlarmsInAlarms() {
+        helper.createDatabase(TEST_DB, 8).apply {
+            execSQL(
+                "INSERT INTO schedules (id, label, hour, minute, oneOffEpochDay, repeatDays, endEpochDay, remainingCount, " +
+                    "afterFire, enabled, target, createdAtMillis, createdBy, snoozedUntilMillis, snoozesUsed, nextFireAtMillis, " +
+                    "ring_soundUri, ring_vibrate, ring_rampSeconds, ring_snoozeMinutes, ring_maxSnoozes, targetDefId, targetSpec, " +
+                    "eventId, startEpochDay, repeatMonthDay, repeatMonth, leadMinutes) " +
+                    "VALUES ('wake', 'Wake', 7, 0, NULL, 31, NULL, NULL, 'DISABLE', 1, 'RING', 0, 'user', NULL, 0, NULL, NULL, " +
+                    "1, 0, 10, NULL, NULL, '{}', NULL, NULL, NULL, NULL, 0), " +
+                    "('rem', 'Dentist', 10, 0, 20000, 0, NULL, NULL, 'DISABLE', 1, 'NOTIFY', 0, 'user', NULL, 0, NULL, NULL, " +
+                    "1, 0, 10, NULL, NULL, '{}', 'e1', NULL, NULL, NULL, 15)",
+            )
+            execSQL(
+                "INSERT INTO events (id, kind, title, note, startEpochDay, startMinute, endEpochDay, endMinute, repeatKind, " +
+                    "repeatDays, untilEpochDay, createdAtMillis) " +
+                    "VALUES ('e1', 'EVENT', 'Dentist', '', 20000, 600, NULL, NULL, 'NONE', 0, NULL, 0)",
+            )
+            close()
+        }
+        helper.runMigrationsAndValidate(TEST_DB, 9, true, *RelayDatabase.MIGRATIONS).apply {
+            query("SELECT id, calendarId FROM schedules ORDER BY id").use {
+                assertTrue(it.moveToFirst())
+                assertEquals("rem", it.getString(0))
+                assertTrue(it.isNull(1)) // a reminder goes with its item
+                assertTrue(it.moveToNext())
+                assertEquals("alarms", it.getString(1))
+            }
+            query("SELECT calendarId, color FROM events WHERE id = 'e1'").use {
+                assertTrue(it.moveToFirst())
+                assertEquals("personal", it.getString(0))
+                assertTrue(it.isNull(1))
+            }
+            query("SELECT id, defaultForAlarms FROM calendars ORDER BY sortOrder").use {
+                val ids = mutableListOf<String>()
+                while (it.moveToNext()) ids += it.getString(0) + ":" + it.getInt(1)
+                assertEquals(listOf("personal:0", "birthdays:0", "alarms:1"), ids)
+            }
+            close()
+        }
+    }
+
     private companion object {
         const val TEST_DB = "migration-test"
-        const val LATEST_VERSION = 8
+        const val LATEST_VERSION = 9
     }
 }

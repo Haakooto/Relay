@@ -6,8 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.relay.app.appContainer
+import com.relay.app.data.event.CalendarEntity
 import com.relay.app.data.event.EventEntity
 import com.relay.app.data.event.EventKind
+import com.relay.app.data.event.PERSONAL_CALENDAR
 import com.relay.app.data.event.RepeatKind
 import com.relay.app.data.schedule.RingOptions
 import com.relay.app.data.schedule.TargetKind
@@ -60,6 +62,10 @@ data class EventEditState(
     val firstDay: DayOfWeek = DayOfWeek.MONDAY,
     val is24h: Boolean = true,
     val createdAtMillis: Long = System.currentTimeMillis(),
+    /** Its calendar (#34), and its own colour (null = the calendar's). */
+    val calendarId: String = PERSONAL_CALENDAR,
+    val color: Long? = null,
+    val calendars: List<CalendarEntity> = emptyList(),
 ) {
     /** The lead times offered for this item: a reminder rings at its time, an event picks. */
     val leads: List<Int> get() = when {
@@ -101,15 +107,22 @@ class EventEditViewModel(
             )
             // A new item starts on the next full hour, as most planned things do.
             val nextHour = MinuteOfDay.of(LocalTime.now().truncatedTo(ChronoUnit.HOURS).plusHours(1))
-            val base = EventEditState(
-                loaded = true,
-                kind = kind,
-                date = day ?: LocalDate.now(),
-                startMinute = nextHour,
-                lead = if (kind == EventKind.REMINDER) 0 else 15,
-                ring = defaults,
-                firstDay = settings.firstDayOfWeek,
-                is24h = settings.clockFormat24h,
+            val calendars = container.calendars.all()
+            // A new item goes to the calendar used last, with that calendar's defaults.
+            val calendar = calendars.firstOrNull { it.id == settings.lastCalendarId } ?: calendars.firstOrNull()
+            val base = withDefaults(
+                EventEditState(
+                    loaded = true,
+                    kind = kind,
+                    date = day ?: LocalDate.now(),
+                    startMinute = nextHour,
+                    lead = if (kind == EventKind.REMINDER) 0 else 15,
+                    ring = defaults,
+                    firstDay = settings.firstDayOfWeek,
+                    is24h = settings.clockFormat24h,
+                    calendars = calendars,
+                ),
+                calendar,
             )
             _state.value = if (existing == null) base else base.copy(
                 isNew = false,
@@ -128,14 +141,42 @@ class EventEditViewModel(
                 lead = reminder?.leadMinutes ?: if (existing.kind == EventKind.REMINDER) 0 else null,
                 ring = reminder?.ring ?: defaults,
                 createdAtMillis = existing.createdAtMillis,
+                calendarId = existing.calendarId,
+                color = existing.color,
             )
-            if (reminder == null) fires.load(TargetKind.NOTIFY, null, TargetSpec())
-            else fires.load(reminder.target, reminder.targetDefId, TargetSpec.decode(reminder.targetSpec))
+            when {
+                reminder != null -> fires.load(reminder.target, reminder.targetDefId, TargetSpec.decode(reminder.targetSpec))
+                existing == null -> fires.load(calendar?.defaultTarget ?: TargetKind.NOTIFY, null, TargetSpec())
+                else -> fires.load(TargetKind.NOTIFY, null, TargetSpec())
+            }
             baseline = _state.value.editable() + fires.editable()
         }
     }
 
     fun update(transform: (EventEditState) -> EventEditState) = _state.update(transform)
+
+    /** Moving a new item to another calendar also gives it that calendar's defaults. */
+    fun setCalendar(id: String) {
+        val s = _state.value
+        val calendar = s.calendars.firstOrNull { it.id == id } ?: return
+        if (!s.isNew) {
+            _state.value = s.copy(calendarId = id)
+            return
+        }
+        _state.value = withDefaults(s, calendar)
+        fires.setTarget(calendar.defaultTarget)
+    }
+
+    /** [s] in [calendar], with its default reminder and repeat. A reminder kind always reminds. */
+    private fun withDefaults(s: EventEditState, calendar: CalendarEntity?): EventEditState {
+        calendar ?: return s
+        val default = calendar.defaultLeadMinutes
+        // A lead this kind of item doesn't offer (a 15-minute lead on an all-day item) becomes its first.
+        val lead = if (s.kind == EventKind.REMINDER) 0 else default?.let { if (it in s.leads) it else s.leads.first() }
+        val repeat = calendar.defaultRepeat
+        val days = if (repeat == RepeatKind.WEEKLY) setOf(s.date.dayOfWeek) else s.repeatDays
+        return s.copy(calendarId = calendar.id, lead = lead, repeatKind = repeat, repeatDays = days)
+    }
 
     /** All-day changes which leads make sense; keep the pick if it still does. */
     fun setAllDay(allDay: Boolean) = _state.update {
@@ -151,7 +192,7 @@ class EventEditViewModel(
 
     private var baseline: List<Any?>? = null
     private fun EventEditState.editable() = listOf(
-        title, note, date, allDay, startMinute, endMinute, endDate, repeatKind, repeatDays, until, lead,
+        title, note, date, allDay, startMinute, endMinute, endDate, repeatKind, repeatDays, until, lead, calendarId, color,
     )
 
     fun isDirty(): Boolean = baseline != null && baseline != _state.value.editable() + fires.editable()
@@ -176,7 +217,10 @@ class EventEditViewModel(
             repeatDays = if (s.repeatKind == RepeatKind.WEEKLY) WeekdayMask.of(s.repeatDays) else 0,
             untilEpochDay = if (repeating) s.until?.toEpochDay() else null,
             createdAtMillis = s.createdAtMillis,
+            calendarId = s.calendarId,
+            color = s.color,
         )
+        container.settings.setLastCalendarId(s.calendarId)
         val reminder = s.lead?.let { lead ->
             ReminderDraft(lead, f.target, fires.storedDefId(f), TargetSpec.encode(f.spec), s.ring)
         }

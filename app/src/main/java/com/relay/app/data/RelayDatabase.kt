@@ -9,6 +9,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.relay.app.data.clock.ClockDao
 import com.relay.app.data.clock.LocationEntity
 import com.relay.app.data.clock.WidgetConfigEntity
+import com.relay.app.data.event.CalendarDao
+import com.relay.app.data.event.CalendarEntity
 import com.relay.app.data.event.EventDao
 import com.relay.app.data.event.EventEntity
 import com.relay.app.data.library.LibraryDao
@@ -36,9 +38,9 @@ import com.relay.app.data.stopwatch.StopwatchEntity
         LibraryHeaderEntity::class, ScheduleEntity::class, ScheduleExceptionEntity::class,
         TimerDefEntity::class, RelayDefEntity::class, RunEntity::class,
         StopwatchEntity::class, LapEntity::class, LocationEntity::class, WidgetConfigEntity::class,
-        LapCorrectionEntity::class, EventEntity::class,
+        LapCorrectionEntity::class, EventEntity::class, CalendarEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
 )
 abstract class RelayDatabase : RoomDatabase() {
@@ -49,6 +51,7 @@ abstract class RelayDatabase : RoomDatabase() {
     abstract fun stopwatchDao(): StopwatchDao
     abstract fun clockDao(): ClockDao
     abstract fun eventDao(): EventDao
+    abstract fun calendarDao(): CalendarDao
 
     companion object {
         const val FILE_NAME = "relay.db"
@@ -175,9 +178,33 @@ abstract class RelayDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v9 (#34): calendars. Three to start with; calendar items go to Personal, alarms to
+         * Alarms. Blank names show translated in the app. Colours are the first palette entries.
+         */
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `calendars` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `color` INTEGER NOT NULL, " +
+                        "`sortOrder` INTEGER NOT NULL, `shown` INTEGER NOT NULL, `defaultForAlarms` INTEGER NOT NULL, " +
+                        "`defaultLeadMinutes` INTEGER, `defaultTarget` TEXT NOT NULL, `defaultRepeat` TEXT NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL(
+                    "INSERT INTO `calendars` VALUES " +
+                        "('personal', '', ${0xFF1F6FB0}, 0, 1, 0, 15, 'NOTIFY', 'NONE'), " +
+                        "('birthdays', '', ${0xFFA0306B}, 1, 1, 0, 0, 'NOTIFY', 'YEARLY'), " +
+                        "('alarms', '', ${0xFF7A6A4F}, 2, 0, 1, NULL, 'RING', 'NONE')",
+                )
+                db.execSQL("ALTER TABLE `events` ADD COLUMN `calendarId` TEXT NOT NULL DEFAULT 'personal'")
+                db.execSQL("ALTER TABLE `events` ADD COLUMN `color` INTEGER")
+                db.execSQL("ALTER TABLE `schedules` ADD COLUMN `calendarId` TEXT")
+                db.execSQL("UPDATE `schedules` SET `calendarId` = 'alarms' WHERE `eventId` IS NULL")
+            }
+        }
+
         /** Append each migration here as the schema grows. */
         val MIGRATIONS = arrayOf(
-            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8,
+            MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
         )
 
         fun build(context: Context): RelayDatabase =

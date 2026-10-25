@@ -1,5 +1,6 @@
 package com.relay.app.event
 
+import com.relay.app.data.event.CalendarEntity
 import com.relay.app.data.event.EventEntity
 import com.relay.app.data.event.EventKind
 import com.relay.app.data.event.RepeatKind
@@ -11,7 +12,7 @@ import com.relay.app.schedule.Recurrence
 import com.relay.app.util.MinuteOfDay
 import java.time.LocalDate
 
-/** What a row in the calendar stands for. Alarms show only under "Everything scheduled". */
+/** What a row in the calendar stands for. */
 enum class EntryKind { EVENT, REMINDER, ALARM }
 
 /** One row on one day of the calendar (spec §10b). */
@@ -20,19 +21,49 @@ data class CalendarEntry(
     /** The event's id, or the alarm's schedule id. */
     val id: String,
     val title: String,
-    /** Minutes after midnight; null = all day. */
+    /** Minutes after midnight; null = all day. A multi-day item keeps its first day's start here. */
     val startMinute: Int?,
+    /** A multi-day item keeps its last day's end here. */
     val endMinute: Int?,
-    /** A multi-day event on a day after its first. */
+    /** A multi-day item on a day after its first. */
     val continued: Boolean = false,
     /** The reminder's lead time, null = no reminder. Alarms: always null. */
     val reminderLead: Int? = null,
     /** What the reminder or alarm fires; null = nothing. */
     val target: TargetKind? = null,
-)
+    val calendarId: String = "",
+    /** ARGB: the item's own colour, else its calendar's. */
+    val color: Long = FALLBACK_COLOR,
+    /** A multi-day item's first and last day (#35); null for a single day. */
+    val spanStart: LocalDate? = null,
+    val spanEnd: LocalDate? = null,
+) {
+    val isMultiDay: Boolean get() = spanStart != null
+}
+
+/** For an item whose calendar has gone missing; never expected. */
+const val FALLBACK_COLOR = 0xFF5C5C5CL
+
+/** Which calendars to show (#34), and every calendar for colours and the alarms default. */
+data class CalendarSelection(val calendars: List<CalendarEntity>, val shown: Set<String>) {
+    private val byId = calendars.associateBy { it.id }
+    private val alarmsDefault = calendars.firstOrNull { it.defaultForAlarms }?.id ?: calendars.firstOrNull()?.id
+
+    /** An alarm without a calendar is in the default for alarms. */
+    fun alarmCalendar(s: ScheduleEntity): String? = s.calendarId ?: alarmsDefault
+
+    fun isShown(calendarId: String?): Boolean = calendarId != null && calendarId in shown
+
+    fun color(calendarId: String?, own: Long? = null): Long = own ?: calendarId?.let { byId[it]?.color } ?: FALLBACK_COLOR
+
+    companion object {
+        /** The calendars ticked in the pane. */
+        fun shownInPane(calendars: List<CalendarEntity>) = CalendarSelection(calendars, calendars.filter { it.shown }.map { it.id }.toSet())
+    }
+}
 
 /**
- * Pure expansion of calendar items, and optionally alarms, into days. The same [Recurrence] rule
+ * Pure expansion of calendar items and alarms, in the selected calendars, into days. The same [Recurrence] rule
  * decides the days as decides when a reminder fires, so the grid and the reminders agree.
  */
 object CalendarOccurrences {
@@ -52,28 +83,39 @@ object CalendarOccurrences {
     }
 
     /**
-     * Every entry from [from] to [to], inclusive, by day. Each day's list has all-day entries
-     * first, then by time. Alarms ([showAlarms]) are shown from [today] on only, since what they
-     * did in the past isn't recorded here; a count-limited alarm stops after its remaining count.
+     * Every entry from [from] to [to], inclusive, by day, in the [selection]'s shown calendars.
+     * Each day lists multi-day and all-day entries first, then by time. Alarms are shown from
+     * [today] on only, since what they did in the past isn't recorded here; a count-limited alarm
+     * stops after its remaining count.
      */
     fun between(
         events: List<EventEntity>,
         schedules: List<ScheduleEntity>,
         exceptions: List<ScheduleExceptionEntity>,
+        selection: CalendarSelection,
         from: LocalDate,
         to: LocalDate,
         today: LocalDate,
-        showAlarms: Boolean,
     ): Map<LocalDate, List<CalendarEntry>> {
         val reminders = schedules.filter { it.eventId != null }.associateBy { it.eventId }
-        val entries = events.flatMap { eventEntries(it, reminders[it.id], from, to) }
-        val alarms = if (!showAlarms) emptyList() else schedules.filter { it.eventId == null && it.enabled }.flatMap { s ->
+        val entries = events.filter { selection.isShown(it.calendarId) }.flatMap { event ->
+            eventEntries(event, reminders[event.id], from, to).map { (day, entry) ->
+                day to entry.copy(calendarId = event.calendarId, color = selection.color(event.calendarId, event.color))
+            }
+        }
+        val alarms = schedules.filter { it.eventId == null && it.enabled && selection.isShown(selection.alarmCalendar(it)) }.flatMap { s ->
+            val calendarId = selection.alarmCalendar(s)
             alarmDays(s, exceptions, today, maxOf(from, today), to).map { (day, minute) ->
-                day to CalendarEntry(EntryKind.ALARM, s.id, s.label, minute, null, target = s.target)
+                day to CalendarEntry(
+                    EntryKind.ALARM, s.id, s.label, minute, null, target = s.target,
+                    calendarId = calendarId.orEmpty(), color = selection.color(calendarId),
+                )
             }
         }
         return (entries + alarms).groupBy({ it.first }, { it.second }).mapValues { (_, list) ->
-            list.sortedWith(compareBy<CalendarEntry> { it.startMinute != null }.thenBy { it.startMinute }.thenBy { it.title })
+            list.sortedWith(
+                compareBy<CalendarEntry> { !it.isMultiDay && it.startMinute != null }.thenBy { it.startMinute }.thenBy { it.title },
+            )
         }
     }
 
@@ -95,9 +137,11 @@ object CalendarOccurrences {
                     kind = if (event.kind == EventKind.REMINDER) EntryKind.REMINDER else EntryKind.EVENT,
                     id = event.id,
                     title = event.title,
-                    startMinute = if (offset == 0L) event.startMinute else null,
-                    endMinute = if (offset == span) event.endMinute else null,
+                    startMinute = event.startMinute,
+                    endMinute = event.endMinute,
                     continued = offset > 0,
+                    spanStart = if (span > 0) day.minusDays(offset) else null,
+                    spanEnd = if (span > 0) day.minusDays(offset).plusDays(span) else null,
                     reminderLead = reminder?.leadMinutes,
                     target = reminder?.target,
                 )

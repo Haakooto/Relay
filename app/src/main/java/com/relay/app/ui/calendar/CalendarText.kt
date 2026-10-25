@@ -1,9 +1,11 @@
 package com.relay.app.ui.calendar
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.relay.app.R
 import com.relay.app.event.ALL_DAY_REMINDER_MINUTE
+import com.relay.app.event.CalendarEntry
 import com.relay.app.util.AppLocale
 import com.relay.app.util.MinuteOfDay
 import com.relay.app.util.TimeText
@@ -17,6 +19,23 @@ object CalendarText {
         m.format(DateTimeFormatter.ofPattern("LLLL yyyy", AppLocale.formatting)).replaceFirstChar { it.uppercase(AppLocale.formatting) }
 
     fun time(minute: Int, is24h: Boolean): String = TimeText.of(MinuteOfDay.toTime(minute), is24h)
+
+    /**
+     * An entry's when: "10:00", "10:00–11:00" or "All day"; a multi-day one (#35) as its whole
+     * range, "Mon 10 – Wed 12" or "Mon 10 10:00 – Wed 12 12:00". Shared by the pane and widgets.
+     */
+    fun entryTime(context: Context, entry: CalendarEntry, is24h: Boolean): String {
+        val start = entry.spanStart
+        val end = entry.spanEnd
+        if (start == null || end == null) {
+            return entry.startMinute?.let { time(it, is24h) + (entry.endMinute?.let { e -> "–" + time(e, is24h) } ?: "") }
+                ?: context.getString(R.string.calendar_all_day)
+        }
+        val day = DateTimeFormatter.ofPattern("EEE d", AppLocale.formatting)
+        val from = start.format(day) + (entry.startMinute?.let { " " + time(it, is24h) } ?: "")
+        val to = end.format(day) + (entry.endMinute?.let { " " + time(it, is24h) } ?: "")
+        return "$from – $to"
+    }
 
     /** "10:00", "10:00–11:00"; null start = all day. */
     @Composable

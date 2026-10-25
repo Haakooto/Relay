@@ -1,5 +1,6 @@
 package com.relay.app.data.event
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -33,6 +34,10 @@ data class EventEntity(
     /** Repeating only: last day an occurrence may start, inclusive. */
     val untilEpochDay: Long?,
     val createdAtMillis: Long,
+    /** The calendar it belongs to (#34). */
+    @ColumnInfo(defaultValue = PERSONAL_CALENDAR) val calendarId: String = PERSONAL_CALENDAR,
+    /** ARGB; null = its calendar's colour. */
+    val color: Long? = null,
 ) {
     val isAllDay: Boolean get() = startMinute == null
 

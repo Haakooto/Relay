@@ -388,8 +388,6 @@
     <string name="action_back">Back</string>
     <!-- Calendar (spec §10b) -->
     <string name="pane_calendar">Calendar</string>
-    <string name="calendar_filter_mine">Events and reminders</string>
-    <string name="calendar_filter_all">Everything scheduled</string>
     <string name="calendar_prev_month">Previous month</string>
     <string name="calendar_next_month">Next month</string>
     <string name="calendar_go_today">Today</string>
@@ -452,6 +450,24 @@
     <string name="widget_month_description">The month, with the day\'s plans</string>
     <string name="widget_agenda_empty">Nothing in the next 7 days</string>
     <string name="widget_calendar_show">Show</string>
+    <string name="calendars_title">Calendars</string>
+    <string name="calendars_new">New calendar</string>
+    <string name="calendar_edit">Edit calendar</string>
+    <string name="calendar_edit_named">Edit %1$s</string>
+    <string name="calendar_name">Name</string>
+    <string name="calendar_color">Colour</string>
+    <string name="calendar_default_for_alarms">New alarms go here</string>
+    <string name="calendar_default_reminder">New items: reminder</string>
+    <string name="calendar_default_target">New items: the reminder</string>
+    <string name="calendar_default_repeat">New items: repeat</string>
+    <string name="calendar_delete_title">Delete this calendar?</string>
+    <string name="calendar_delete_move_to">Move its items and alarms to:</string>
+    <string name="calendar_personal">Personal</string>
+    <string name="calendar_birthdays">Birthdays</string>
+    <string name="calendar_alarms">Alarms</string>
+    <string name="event_calendar">Calendar</string>
+    <string name="event_color">Colour</string>
+    <string name="event_color_calendar">Calendar\'s</string>
     <plurals name="calendar_day_items">
         <item quantity="one">%1$s, %2$d item</item>
         <item quantity="other">%1$s, %2$d items</item>

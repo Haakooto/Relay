@@ -352,3 +352,34 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Reboot: the widgets still show and update.
 - [ ] Widget settings from the launcher: changes apply when you save.
 - [ ] A clock widget placed before this build looks exactly as before.
+
+## PR: Calendars and multi-day items (#34, #35)
+
+### Update
+- [ ] Install over the previous Relay Debug: every alarm and calendar item is still there (database v8 → v9).
+- [ ] Calendar pane → layers button: Personal, Birthdays and Alarms are listed. Your items are in Personal, your alarms in Alarms.
+- [ ] If you had "Everything scheduled" on before, Alarms is ticked; otherwise it isn't.
+
+### Calendars
+- [ ] Untick Personal: its items disappear from the grid and the list. Tick it again: they're back.
+- [ ] Pencil on Birthdays: change the colour; its items' dots and rows change colour.
+- [ ] + New calendar "Work", pick a colour, default reminder 1 hour: a new event in Work starts with "1 hour before".
+- [ ] New event: it starts in the calendar used last. Switching calendar in the editor applies that calendar's defaults.
+- [ ] Give one event its own colour: only that event changes colour.
+- [ ] Birthdays: a new item there defaults to yearly.
+- [ ] Mark Work as "New alarms go here": a new alarm's editor shows Work picked.
+- [ ] Alarm editor: move an alarm to Personal; the Alarms list shows Personal's colour on its row.
+- [ ] Delete Work: asked where to move its items and alarms; after picking Personal they're all there.
+- [ ] Names show in Nynorsk with the app in Norsk (Personleg, Bursdagar, Alarmar), until you rename one.
+
+### Multi-day items
+- [ ] An event Friday to Monday: one bar across Fri–Sun, continued on Monday's row of the next week.
+- [ ] Tap the bar: its editor opens. Select Saturday: the list shows it once as "Fri 30 – Mon 2".
+- [ ] Agenda widget: it's listed once, under the first day it's on in the coming week.
+- [ ] Month widget: a bar across its days; several at once stack, and any beyond two show in "+n".
+
+### Widgets
+- [ ] Widget settings: calendar checkboxes instead of Show. A widget made before keeps showing what it did.
+- [ ] Untick a calendar in one widget only: that widget hides it, the pane and other widgets don't.
+- [ ] Agenda rows have a colour bar; month labels use each item's colour.
+

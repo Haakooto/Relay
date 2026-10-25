@@ -40,20 +40,29 @@ import com.relay.app.ui.theme.Teal
 /** The brand palette (spec §15) plus white and black; "Theme" (null) follows light/dark. */
 private val SWATCHES = listOf(Ink, Paper, Accent, Teal, Brass, Color.White, Color.Black)
 
-/** Pick a colour for one clock element: theme, a palette swatch, or any custom colour. */
+/**
+ * Pick a colour: "none" (null, labelled [noneLabel]; left out when that's null), a [palette]
+ * swatch, or any custom colour. Defaults to a clock element's choices: theme or the brand palette.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ColorChoice(title: String, value: Long?, onChange: (Long?) -> Unit) {
+fun ColorChoice(
+    title: String,
+    value: Long?,
+    palette: List<Color> = SWATCHES,
+    noneLabel: String? = stringResource(R.string.color_theme),
+    onChange: (Long?) -> Unit,
+) {
     var custom by remember { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(title, style = MaterialTheme.typography.bodyLarge)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Swatch(null, selected = value == null, label = stringResource(R.string.color_theme)) { onChange(null) }
-            SWATCHES.forEach { c ->
+            if (noneLabel != null) Swatch(null, selected = value == null, label = noneLabel) { onChange(null) }
+            palette.forEach { c ->
                 val argb = c.toArgb().toLong()
                 Swatch(c, selected = value == argb) { onChange(argb) }
             }
-            val isCustom = value != null && SWATCHES.none { it.toArgb().toLong() == value }
+            val isCustom = value != null && palette.none { it.toArgb().toLong() == value }
             Swatch(if (isCustom) Color(value!!.toInt()) else null, selected = isCustom, label = "+") { custom = true }
         }
     }

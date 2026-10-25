@@ -25,12 +25,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-private class FakeEventDao : EventDao {
+internal class FakeEventDao : EventDao {
     val events = MutableStateFlow<Map<String, EventEntity>>(emptyMap())
     override fun observeAll(): Flow<List<EventEntity>> = events.map { it.values.toList() }
     override suspend fun get(id: String) = events.value[id]
     override suspend fun upsert(event: EventEntity) { events.value += event.id to event }
     override suspend fun delete(id: String) { events.value -= id }
+    override suspend fun moveCalendar(from: String, to: String) {
+        events.value = events.value.mapValues { (_, e) -> if (e.calendarId == from) e.copy(calendarId = to) else e }
+    }
 }
 
 class EventRepositoryTest {

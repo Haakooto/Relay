@@ -55,8 +55,10 @@ data class AppSettings(
     val homeZoneId: String? = null,
 
     // Calendar (spec §10b).
-    /** Show alarms and scheduled starts too, not just events and reminders. */
+    /** Before calendars (#34): show alarms too. Read once to tick the alarms calendar, then cleared. */
     val calendarShowAll: Boolean = false,
+    /** The calendar a new event or reminder goes to: the last one used. Null = the first. */
+    val lastCalendarId: String? = null,
 
     // Navigation.
     /** Route of the main pane last opened; the app and its widgets open there. Null = Alarms. */
@@ -87,6 +89,7 @@ class SettingsRepository(context: Context) {
             mainClockStyle = prefs[MAIN_CLOCK_STYLE],
             homeZoneId = prefs[HOME_ZONE],
             calendarShowAll = prefs[CALENDAR_SHOW_ALL] ?: false,
+            lastCalendarId = prefs[LAST_CALENDAR],
             lastPane = prefs[LAST_PANE],
         )
     }
@@ -116,7 +119,8 @@ class SettingsRepository(context: Context) {
     suspend fun setLongRelayWarningHours(value: Int) = store.edit { it[LONG_RELAY_HOURS] = value }
     suspend fun setMainClockStyle(json: String) = store.edit { it[MAIN_CLOCK_STYLE] = json }
     suspend fun setHomeZoneId(value: String?) = store.edit { if (value == null) it.remove(HOME_ZONE) else it[HOME_ZONE] = value }
-    suspend fun setCalendarShowAll(value: Boolean) = store.edit { it[CALENDAR_SHOW_ALL] = value }
+    suspend fun clearCalendarShowAll() = store.edit { it.remove(CALENDAR_SHOW_ALL) }
+    suspend fun setLastCalendarId(id: String) = store.edit { it[LAST_CALENDAR] = id }
     suspend fun setLastPane(route: String) = store.edit { it[LAST_PANE] = route }
 
     private companion object {
@@ -136,6 +140,7 @@ class SettingsRepository(context: Context) {
         val MAIN_CLOCK_STYLE = stringPreferencesKey("main_clock_style")
         val HOME_ZONE = stringPreferencesKey("home_zone_id")
         val CALENDAR_SHOW_ALL = booleanPreferencesKey("calendar_show_all")
+        val LAST_CALENDAR = stringPreferencesKey("last_calendar_id")
         val LAST_PANE = stringPreferencesKey("last_pane")
         const val MAX_PLAN_CEILING = 1000
     }

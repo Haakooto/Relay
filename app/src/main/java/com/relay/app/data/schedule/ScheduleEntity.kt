@@ -79,6 +79,8 @@ data class ScheduleEntity(
     val repeatMonth: Int? = null,
     /** Fires this long before each occurrence: a reminder's lead time. */
     @ColumnInfo(defaultValue = "0") val leadMinutes: Int = 0,
+    /** An alarm's calendar (#34); null = the default for alarms. A reminder uses its item's. */
+    val calendarId: String? = null,
 ) {
     val isRepeating: Boolean get() = repeatDays != 0 || repeatMonthDay != null
 }

@@ -18,6 +18,9 @@ internal class FakeScheduleDao : ScheduleDao {
     override suspend fun getAll() = schedules.value.values.toList()
     override suspend fun get(id: String) = schedules.value[id]
     override suspend fun forEvent(eventId: String) = schedules.value.values.filter { it.eventId == eventId }
+    override suspend fun moveCalendar(from: String, to: String) {
+        schedules.value = schedules.value.mapValues { (_, s) -> if (s.calendarId == from) s.copy(calendarId = to) else s }
+    }
     override suspend fun upsert(schedule: ScheduleEntity) { schedules.value += schedule.id to schedule }
     override suspend fun delete(id: String) {
         schedules.value -= id

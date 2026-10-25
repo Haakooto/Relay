@@ -4,8 +4,10 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.relay.app.appContainer
+import com.relay.app.data.event.CalendarEntity
 import com.relay.app.event.CalendarEntry
 import com.relay.app.event.CalendarOccurrences
+import com.relay.app.event.CalendarSelection
 import com.relay.app.event.CalendarViews
 import com.relay.app.event.GRID_DAYS
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +29,7 @@ data class CalendarState(
     val gridStart: LocalDate,
     val firstDay: DayOfWeek,
     val is24h: Boolean,
-    val showAll: Boolean,
+    val calendars: List<CalendarEntity>,
     val entries: Map<LocalDate, List<CalendarEntry>>,
 )
 
@@ -36,13 +38,12 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     private val month = MutableStateFlow(YearMonth.now())
     private val selected = MutableStateFlow(LocalDate.now())
 
-    val state: StateFlow<CalendarState?> = combine(
-        container.events.observeAll(),
-        container.schedules.observeWithExceptions(),
-        container.settings.settings,
-        month,
-        selected,
-    ) { events, (schedules, exceptions), settings, m, sel ->
+    private val data = combine(
+        container.events.observeAll(), container.schedules.observeWithExceptions(), container.calendars.observeAll(),
+    ) { events, schedules, calendars -> Triple(events, schedules, calendars) }
+
+    val state: StateFlow<CalendarState?> = combine(data, container.settings.settings, month, selected) { d, settings, m, sel ->
+        val (events, schedules, calendars) = d
         val today = LocalDate.now()
         val gridStart = CalendarViews.gridStart(m, settings.firstDayOfWeek)
         CalendarState(
@@ -52,9 +53,10 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
             gridStart = gridStart,
             firstDay = settings.firstDayOfWeek,
             is24h = settings.clockFormat24h,
-            showAll = settings.calendarShowAll,
+            calendars = calendars,
             entries = CalendarOccurrences.between(
-                events, schedules, exceptions, gridStart, gridStart.plusDays(GRID_DAYS - 1), today, settings.calendarShowAll,
+                events, schedules.first, schedules.second, CalendarSelection.shownInPane(calendars),
+                gridStart, gridStart.plusDays(GRID_DAYS - 1), today,
             ),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000), null)
@@ -83,5 +85,9 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
         month.value = YearMonth.from(day)
     }
 
-    fun setShowAll(value: Boolean) = viewModelScope.launch { container.settings.setCalendarShowAll(value) }
+    fun setShown(id: String, shown: Boolean) = viewModelScope.launch { container.calendars.setShown(id, shown) }
+
+    fun saveCalendar(calendar: CalendarEntity) = viewModelScope.launch { container.calendars.save(calendar) }
+
+    fun deleteCalendar(id: String, moveTo: String) = viewModelScope.launch { container.calendars.delete(id, moveTo) }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import com.relay.app.clock.ClockRepository
 import com.relay.app.data.RelayDatabase
 import com.relay.app.data.settings.SettingsRepository
+import com.relay.app.event.CalendarRepository
 import com.relay.app.event.EventRepository
 import com.relay.app.firing.FiringNotifications
 import com.relay.app.firing.ReminderNotifications
@@ -38,6 +39,7 @@ class AppContainer(context: Context) {
         LibraryRepository(database.libraryDao(), database.libraryHeaderDao(), runs, settings::current)
     }
     val events: EventRepository by lazy { EventRepository(database.eventDao(), schedules) }
+    val calendars: CalendarRepository by lazy { CalendarRepository(database.calendarDao(), database.eventDao(), schedules) }
 
     /** A day the Calendar pane should show next, set when a widget opens it; taken once. */
     val calendarJump = MutableStateFlow<LocalDate?>(null)

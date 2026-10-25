@@ -19,8 +19,7 @@ import com.relay.app.R
 import com.relay.app.data.schedule.TargetKind
 import com.relay.app.event.CalendarEntry
 import com.relay.app.event.EntryKind
-import com.relay.app.util.MinuteOfDay
-import com.relay.app.util.TimeText
+import com.relay.app.ui.calendar.CalendarText
 import com.relay.app.widget.WidgetFrame
 import com.relay.app.widget.WidgetFrameRenderer
 
@@ -63,14 +62,9 @@ fun WidgetText(
     )
 }
 
-/** Text for an entry's row: "10:00–11:00" / "All day" / "Continues", and its title or a stand-in. */
+/** Text for an entry's row: its time or range, and its title or a stand-in. */
 object EntryText {
-    fun time(context: Context, entry: CalendarEntry, is24h: Boolean): String = when {
-        entry.continued -> context.getString(R.string.calendar_continues)
-        entry.startMinute == null -> context.getString(R.string.calendar_all_day)
-        else -> TimeText.of(MinuteOfDay.toTime(entry.startMinute), is24h) +
-            (entry.endMinute?.let { "–" + TimeText.of(MinuteOfDay.toTime(it), is24h) } ?: "")
-    }
+    fun time(context: Context, entry: CalendarEntry, is24h: Boolean): String = CalendarText.entryTime(context, entry, is24h)
 
     fun title(context: Context, entry: CalendarEntry): String = entry.title.ifBlank {
         context.getString(

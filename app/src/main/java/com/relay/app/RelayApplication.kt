@@ -45,13 +45,21 @@ class RelayApplication : Application() {
                 .onFailure { Log.e("RelayApplication", "widget refresh failed", it) }
             runCatching { CalendarWidgetTicker.schedule(this@RelayApplication) }
                 .onFailure { Log.e("RelayApplication", "calendar tick failed", it) }
+            // Once, after the v9 update: "Everything scheduled" was on, so tick the alarms calendar.
+            runCatching {
+                if (container.settings.current().calendarShowAll) {
+                    container.calendars.defaultForAlarms()?.let { container.calendars.setShown(it.id, true) }
+                    container.settings.clearCalendarShowAll()
+                }
+            }.onFailure { Log.e("RelayApplication", "calendar setting carry-over failed", it) }
         }
         // Changes only happen while the app's process runs, so the calendar widgets follow them
         // from here: one place, instead of a hook in every repository.
         appScope.launch {
-            combine(container.events.observeAll(), container.schedules.observeWithExceptions(), container.settings.settings) { a, b, c ->
-                Triple(a, b, c)
-            }.distinctUntilChanged().debounce(WIDGET_REFRESH_DEBOUNCE_MS).collect {
+            combine(
+                container.events.observeAll(), container.schedules.observeWithExceptions(),
+                container.calendars.observeAll(), container.settings.settings,
+            ) { a, b, c, d -> listOf(a, b, c, d) }.distinctUntilChanged().debounce(WIDGET_REFRESH_DEBOUNCE_MS).collect {
                 runCatching { CalendarWidgets.refreshAll(this@RelayApplication) }
                     .onFailure { Log.e("RelayApplication", "calendar widget refresh failed", it) }
             }
