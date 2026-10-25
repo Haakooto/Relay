@@ -416,39 +416,39 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 
 ## PR: Richer repeats (#43)
 
-- [ ] Install over the previous Relay Debug: all items, alarms and calendars are still there (database v10 → v11), and existing repeating items repeat as before.
-- [ ] New event on the 2nd Tuesday of a month → Monthly → On: "The second Tuesday": it shows on the 2nd Tuesday of the next months.
-- [ ] An event on the last Friday of a month → "The last Friday" is offered; pick it: it lands on each month's last Friday.
-- [ ] An event on the 31st → "The last day" is offered: it lands on 30 November and 28 February.
-- [ ] Weekly, every 2 weeks on Mon and Thu: dots every other week only.
-- [ ] Daily, ends after 5 times: exactly five days in the grid.
-- [ ] A reminder on "the second Tuesday" notifies on the right days, and again the next month.
-- [ ] Reopen each of these: the editor shows the same choices you saved.
-- [ ] Copy one to Google (calendar copying on): Google Calendar shows the same days.
-- [ ] Yearly on "the fourth Thursday of November": lands on 26 Nov 2026 and 25 Nov 2027.
+- [x] Install over the previous Relay Debug: all items, alarms and calendars are still there (database v10 → v11), and existing repeating items repeat as before.
+- [x] New event on the 2nd Tuesday of a month → Monthly → On: "The second Tuesday": it shows on the 2nd Tuesday of the next months.
+- [x] An event on the last Friday of a month → "The last Friday" is offered; pick it: it lands on each month's last Friday.
+- [x] An event on the 31st → "The last day" is offered: it lands on 30 November and 28 February.
+- [x] Weekly, every 2 weeks on Mon and Thu: dots every other week only.
+- [x] Daily, ends after 5 times: exactly five days in the grid.
+- [x] A reminder on "the second Tuesday" notifies on the right days, and again the next month.
+- [x] Reopen each of these: the editor shows the same choices you saved.
+- [x] Copy one to Google (calendar copying on): Google Calendar shows the same days.
+- [x] Yearly on "the fourth Thursday of November": lands on 26 Nov 2026 and 25 Nov 2027.
 
 ## PR: Calendar files (#33, import and export)
 
 - [x] Calendars list → Import file → pick an .ics (e.g. exported from Google Calendar): the import screen lists how many events it found and the first few titles.
 - [x] Pick a calendar and Import: a toast says how many were added; they show in that calendar on the right days and times.
-- [ ] Import the same file again: the toast says they were updated, and nothing shows twice.
-- [ ] Open an .ics attachment from an email (or Files → Open with Relay Debug): the same import screen opens.
-- [ ] An event with a reminder in the file gets a reminder in Relay (it notifies).
+- [x] Import the same file again: the toast says they were updated, and nothing shows twice.
+- [x] Open an .ics attachment from an email (or Files → Open with Relay Debug): the same import screen opens.
+- [x] An event with a reminder in the file gets a reminder in Relay (it notifies).
 - [ ] A file with an odd repeat (e.g. hourly): the event comes in on its first date, and its note says the repeat couldn't be kept.
 - [ ] A huge or non-calendar file: the screen says it can't be read; nothing is added.
 - [x] Edit a calendar → Export: the share sheet offers a .ics file; open it in Google Calendar and the items look right.
-- [ ] An item's editor → share button: the share sheet offers just that item.
+- [x] An item's editor → share button: the share sheet offers just that item.
 
 ## PR: Subscribed calendars (#33, subscription)
 
-- [ ] Calendars list → Subscribe: the dialog says when Relay goes online; Subscribe stays greyed out until there's a name and an https/webcal address.
-- [ ] Type an http:// address: the field says to use https or webcal.
-- [ ] Subscribe to a public calendar (e.g. a holiday .ics): a toast says how many items were fetched, and they show on the right days.
-- [ ] Tap one of its items: a toast says it's read-only; no editor opens.
-- [ ] Tap one of its items in a calendar widget: Relay opens the Calendar pane on that day, not an editor.
-- [ ] Edit the calendar: the address and "Refreshed ... ago" show; Refresh now fetches again without doubling anything.
-- [ ] A new item or alarm can't pick the subscribed calendar.
-- [ ] Rename it and change its colour: both stick after the next refresh.
-- [ ] Turn on airplane mode, Refresh now: a toast says it couldn't fetch; the items already there stay.
-- [ ] Edit → Delete → confirm: the calendar and its items go.
+- [x] Calendars list → Subscribe: the dialog says when Relay goes online; Subscribe stays greyed out until there's a name and an https/webcal address.
+- [x] Type an http:// address: the field says to use https or webcal.
+- [x] Subscribe to a public calendar (e.g. a holiday .ics): a toast says how many items were fetched, and they show on the right days.
+- [x] Tap one of its items: a toast says it's read-only; no editor opens.
+- [x] Tap one of its items in a calendar widget: Relay opens the Calendar pane on that day, not an editor.
+- [x] Edit the calendar: the address and "Refreshed ... ago" show; Refresh now fetches again without doubling anything.
+- [x] A new item or alarm can't pick the subscribed calendar.
+- [x] Rename it and change its colour: both stick after the next refresh.
+- [x] Turn on airplane mode, Refresh now: a toast says it couldn't fetch; the items already there stay.
+- [x] Edit → Delete → confirm: the calendar and its items go.
 
