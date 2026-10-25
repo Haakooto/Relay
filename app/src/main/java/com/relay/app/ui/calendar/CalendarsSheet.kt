@@ -112,7 +112,9 @@ private fun CalendarEditDialog(
     onSave: (CalendarEntity) -> Unit,
     onDelete: (moveTo: String) -> Unit,
 ) {
-    var draft by remember { mutableStateOf(calendar.copy(name = if (isNew) "" else calendarName(calendar))) }
+    // A starting calendar's blank name is shown, and saved, as its translated one.
+    val shownName = calendarName(calendar)
+    var draft by remember { mutableStateOf(calendar.copy(name = if (isNew) "" else shownName)) }
     var deleting by remember { mutableStateOf(false) }
     if (deleting && others.isNotEmpty()) {
         MoveItemsDialog(others, onDismiss = { deleting = false }, onMove = { onDelete(it) })
