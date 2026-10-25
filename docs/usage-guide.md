@@ -95,6 +95,12 @@ adding it twice. A repeat Relay can't follow comes in as its first date, with a 
 saying so. To send items elsewhere, **Export** in a calendar's edit dialog shares the whole
 calendar, and the share button in an item's editor shares just that item.
 
+**Subscribed calendars.** **Subscribe** in the calendars list takes a calendar's address
+(https:// or webcal://, such as a public holiday calendar or a sports fixture list). Relay fetches
+it then, when you tap **Refresh now** in its edit dialog, and when you open Relay if it's more
+than six hours old; this is the only thing Relay ever goes online for. A subscribed calendar is
+read-only: tapping an item only says so, and deleting the subscription removes its items.
+
 **An event** is all day or has a start time, and can end later that day or on a later day.
 Under **Reminder**, pick when to be reminded (at the start, minutes or a day before; for an
 all-day event, 09:00 on the day or the day before) and what happens then. **Notify** is the

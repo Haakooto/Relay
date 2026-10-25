@@ -34,10 +34,14 @@ sealed interface LaunchTarget {
                     ?.let(::ShowPane)
         }
 
-        private suspend fun item(intent: Intent, container: AppContainer): LaunchTarget? =
-            intent.getStringExtra(MainActivity.EXTRA_OPEN_ITEM)
-                ?.takeIf { it.length <= MAX_ID_LENGTH && container.events.get(it) != null }
-                ?.let(::OpenItem)
+        /** An item to open; one from a subscribed calendar (#33) is read-only, so its day opens instead. */
+        private suspend fun item(intent: Intent, container: AppContainer): LaunchTarget? {
+            val id = intent.getStringExtra(MainActivity.EXTRA_OPEN_ITEM)?.takeIf { it.length <= MAX_ID_LENGTH } ?: return null
+            val event = container.events.get(id) ?: return null
+            if (container.calendars.get(event.calendarId)?.isSubscribed != true) return OpenItem(id)
+            container.calendarJump.value = LocalDate.ofEpochDay(event.startEpochDay)
+            return ShowPane(Pane.CALENDAR.route)
+        }
 
         private suspend fun alarm(intent: Intent, container: AppContainer): LaunchTarget? =
             intent.getStringExtra(MainActivity.EXTRA_OPEN_ALARM)

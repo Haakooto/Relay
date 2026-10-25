@@ -23,7 +23,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         // Only on a fresh start: after a rotation the screen is already where it was sent.
-        if (savedInstanceState == null) resolveLaunch(intent)
+        if (savedInstanceState == null) {
+            resolveLaunch(intent)
+            // Subscribed calendars (#33) are fetched when Relay is opened, never for an alarm going
+            // off, and at most every few hours. In the app's scope, so leaving doesn't cut it short.
+            (application as RelayApplication).appScope.launch { appContainer.subscriptions.refreshStale() }
+        }
         val settingsRepository = appContainer.settings
         setContent {
             // Null until DataStore's first read (a few ms), so a dark-theme user never sees a

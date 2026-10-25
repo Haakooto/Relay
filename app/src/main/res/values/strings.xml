@@ -530,4 +530,21 @@
         <item quantity="one">%1$s, %2$d item</item>
         <item quantity="other">%1$s, %2$d items</item>
     </plurals>
+    <!-- Subscribed calendars (#33) -->
+    <string name="calendars_subscribe">Subscribe</string>
+    <string name="subscribe_title">Subscribe to a calendar</string>
+    <string name="subscribe_url">Calendar address (https or webcal)</string>
+    <string name="subscribe_why">Relay fetches this address when you subscribe, when you tap Refresh, and when you open Relay if it\'s more than six hours since the last fetch. Nothing else goes online. The calendar is read-only: its items come from the address.</string>
+    <string name="subscribe_bad_url">Use an https:// or webcal:// address</string>
+    <string name="subscribe_refresh">Refresh now</string>
+    <string name="subscribe_refreshed">Refreshed %1$s ago</string>
+    <string name="subscribe_never">Not fetched yet</string>
+    <string name="subscribe_failed">Couldn\'t fetch the calendar. Check the address and your connection.</string>
+    <string name="subscription_read_only">This item comes from a subscribed calendar and can\'t be changed here</string>
+    <string name="unsubscribe_title">Delete subscription?</string>
+    <string name="unsubscribe_body">The calendar and all its items go from Relay. The calendar at the address is untouched.</string>
+    <plurals name="subscribe_fetched">
+        <item quantity="one">Fetched %1$d item</item>
+        <item quantity="other">Fetched %1$d items</item>
+    </plurals>
 </resources>

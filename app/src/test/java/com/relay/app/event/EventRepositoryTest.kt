@@ -230,4 +230,29 @@ class EventRepositoryTest {
         import(ics("a", "Dentist"))
         assertEquals(30, scheduleDao.forEvent(id).single().leadMinutes)
     }
+
+    private suspend fun refresh(vararg events: IcsEvent) = repo.replaceSubscribed(
+        "subscribed", events.toList(),
+    ) { e, id, created -> Ics.toEntity(e, "subscribed", id, created, zone) { it } }
+
+    @Test fun aSubscriptionRefreshUpdatesByUidAndDropsWhatsGone() = runBlocking {
+        assertEquals(ImportResult(added = 2, updated = 0), refresh(ics("a", "Dentist"), ics("b", "Lunch")))
+        val id = eventDao.events.value.values.single { it.icsUid == "a" }.id
+        assertEquals(ImportResult(added = 0, updated = 1), refresh(ics("a", "Dentist, moved")))
+        val left = eventDao.events.value.values.single()
+        assertEquals(id, left.id)
+        assertEquals("Dentist, moved", left.title)
+    }
+
+    @Test fun aSubscriptionKeepsNoReminders() = runBlocking {
+        refresh(ics("a", "Dentist", lead = 30))
+        val id = eventDao.events.value.values.single().id
+        assertTrue(scheduleDao.forEvent(id).isEmpty())
+    }
+
+    @Test fun aRefreshLeavesOtherCalendarsAlone() = runBlocking {
+        import(ics("a", "Dentist"))
+        refresh()
+        assertEquals(1, eventDao.events.value.size)
+    }
 }

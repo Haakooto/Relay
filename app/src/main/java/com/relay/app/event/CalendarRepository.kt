@@ -75,6 +75,32 @@ class CalendarRepository(
         return moved
     }
 
+    /**
+     * A new subscribed calendar (#33) for [url] (already checked by `SubscriptionUrl`), shown, in
+     * [color], with no reminders: its items are read-only.
+     */
+    suspend fun subscribe(name: String, url: String, color: Long): CalendarEntity {
+        val calendar = CalendarEntity(
+            java.util.UUID.randomUUID().toString(), name, color, sortOrder = 0, shown = true, defaultForAlarms = false,
+            defaultLeadMinutes = null, defaultTarget = com.relay.app.data.schedule.TargetKind.NOTIFY,
+            defaultRepeat = com.relay.app.data.event.RepeatKind.NONE, subscriptionUrl = url,
+        )
+        save(calendar)
+        return calendar
+    }
+
+    suspend fun markRefreshed(id: String, atMillis: Long) = mutex.withLock {
+        dao.get(id)?.let { dao.upsert(it.copy(refreshedAtMillis = atMillis)) }
+    }
+
+    /** Deletes a subscribed calendar and its items; refused for one that isn't. */
+    suspend fun unsubscribe(id: String, deleteItems: suspend (String) -> Unit): Boolean {
+        val calendar = dao.get(id)?.takeIf { it.isSubscribed && !it.defaultForAlarms } ?: return false
+        deleteItems(calendar.id)
+        mutex.withLock { dao.delete(calendar.id) }
+        return true
+    }
+
     /** The phone calendar [calendarId]'s items copy to, if any. */
     suspend fun exportTarget(calendarId: String): Long? = dao.get(calendarId)?.exportCalendarId
 }

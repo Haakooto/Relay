@@ -18,6 +18,7 @@ import com.relay.app.schedule.ScheduleRepository
 import com.relay.app.schedule.ScheduledStarter
 import com.relay.app.stopwatch.StopwatchNotifications
 import com.relay.app.stopwatch.StopwatchRepository
+import com.relay.app.subscription.CalendarSubscriptions
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
 
@@ -43,6 +44,7 @@ class AppContainer(context: Context) {
     val events: EventRepository by lazy {
         EventRepository(database.eventDao(), schedules, copies = phoneCalendars, exportTarget = { calendars.exportTarget(it) })
     }
+    val subscriptions: CalendarSubscriptions by lazy { CalendarSubscriptions(calendars, events) }
     val calendars: CalendarRepository by lazy {
         CalendarRepository(database.calendarDao(), database.eventDao(), schedules, syncCopies = { events.syncCalendar(it) })
     }

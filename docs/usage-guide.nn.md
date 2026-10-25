@@ -98,6 +98,13 @@ med ei linje i notatet som seier det. For å sende oppføringar vidare deler **E
 redigeringa av ein kalender heile kalenderen, og del-knappen i redigeringa av ei oppføring deler
 berre henne.
 
+**Abonnerte kalendrar.** **Abonner** i kalenderlista tek adressa til ein kalender (https:// eller
+webcal://, til dømes ein kalender med heilagdagar eller ein kampkalender). Relay hentar han då, når
+du trykkjer **Oppdater no** i redigeringa hans, og når du opnar Relay om han er meir enn seks
+timar gammal; dette er det einaste Relay nokon gong går på nettet for. Ein abonnert kalender er
+skriveverna: trykkjer du på ei oppføring, seier Relay berre det, og slettar du abonnementet,
+forsvinn oppføringane hans.
+
 **Ei hending** varer heile dagen eller har eit starttidspunkt, og kan slutte seinare same dagen
 eller ein seinare dag. Under **Påminning** vel du når du vil bli minna på (når ho byrjar,
 minutt eller ein dag før; for ei heildagshending kl. 09:00 same dagen eller dagen før) og kva som

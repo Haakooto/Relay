@@ -73,7 +73,7 @@ class AlarmEditViewModel(application: Application, private val scheduleId: Strin
         viewModelScope.launch {
             val settings = container.settings.current()
             val existing = scheduleId?.let { container.schedules.get(it) }
-            val calendars = container.calendars.all()
+            val calendars = container.calendars.all().filter { !it.isSubscribed }
             val alarmDefault = container.calendars.defaultForAlarms()?.id
             val base = AlarmEditState(
                 loaded = true,

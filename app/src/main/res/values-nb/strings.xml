@@ -518,4 +518,21 @@
         <item quantity="one">%1$s, %2$d oppføring</item>
         <item quantity="other">%1$s, %2$d oppføringar</item>
     </plurals>
+    <!-- Abonnerte kalendrar (#33) -->
+    <string name="calendars_subscribe">Abonner</string>
+    <string name="subscribe_title">Abonner på ein kalender</string>
+    <string name="subscribe_url">Kalenderadresse (https eller webcal)</string>
+    <string name="subscribe_why">Relay hentar denne adressa når du abonnerer, når du trykkjer Oppdater, og når du opnar Relay om det er meir enn seks timar sidan sist. Ingenting anna går på nettet. Kalenderen er skriveverna: elementa kjem frå adressa.</string>
+    <string name="subscribe_bad_url">Bruk ei https://- eller webcal://-adresse</string>
+    <string name="subscribe_refresh">Oppdater no</string>
+    <string name="subscribe_refreshed">Oppdatert for %1$s sidan</string>
+    <string name="subscribe_never">Ikkje henta enno</string>
+    <string name="subscribe_failed">Fekk ikkje henta kalenderen. Sjekk adressa og tilkoplinga.</string>
+    <string name="subscription_read_only">Dette elementet kjem frå ein abonnert kalender og kan ikkje endrast her</string>
+    <string name="unsubscribe_title">Slette abonnementet?</string>
+    <string name="unsubscribe_body">Kalenderen og alle elementa i han forsvinn frå Relay. Kalenderen på adressa vert ikkje rørt.</string>
+    <plurals name="subscribe_fetched">
+        <item quantity="one">Henta %1$d element</item>
+        <item quantity="other">Henta %1$d element</item>
+    </plurals>
 </resources>

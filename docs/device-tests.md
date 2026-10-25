@@ -439,3 +439,16 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Edit a calendar → Export: the share sheet offers a .ics file; open it in Google Calendar and the items look right.
 - [ ] An item's editor → share button: the share sheet offers just that item.
 
+## PR: Subscribed calendars (#33, subscription)
+
+- [ ] Calendars list → Subscribe: the dialog says when Relay goes online; Subscribe stays greyed out until there's a name and an https/webcal address.
+- [ ] Type an http:// address: the field says to use https or webcal.
+- [ ] Subscribe to a public calendar (e.g. a holiday .ics): a toast says how many items were fetched, and they show on the right days.
+- [ ] Tap one of its items: a toast says it's read-only; no editor opens.
+- [ ] Tap one of its items in a calendar widget: Relay opens the Calendar pane on that day, not an editor.
+- [ ] Edit the calendar: the address and "Refreshed ... ago" show; Refresh now fetches again without doubling anything.
+- [ ] A new item or alarm can't pick the subscribed calendar.
+- [ ] Rename it and change its colour: both stick after the next refresh.
+- [ ] Turn on airplane mode, Refresh now: a toast says it couldn't fetch; the items already there stay.
+- [ ] Edit → Delete → confirm: the calendar and its items go.
+

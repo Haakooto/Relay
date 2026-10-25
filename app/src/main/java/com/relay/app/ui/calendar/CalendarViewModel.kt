@@ -147,6 +147,20 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
 
     fun canWritePhone(): Boolean = phone.canWrite()
 
+    /** A new subscribed calendar (#33), fetched at once; [onDone] gets how many events came, or null if it failed. */
+    fun subscribe(name: String, url: String, color: Long, onDone: (Int?) -> Unit) = viewModelScope.launch {
+        val calendar = container.calendars.subscribe(name, url, color)
+        onDone(container.subscriptions.refresh(calendar).getOrNull()?.let { it.added + it.updated })
+    }
+
+    fun refreshSubscription(calendar: CalendarEntity, onDone: (Int?) -> Unit) = viewModelScope.launch {
+        onDone(container.subscriptions.refresh(calendar).getOrNull()?.let { it.added + it.updated })
+    }
+
+    fun unsubscribe(calendar: CalendarEntity) = viewModelScope.launch {
+        container.calendars.unsubscribe(calendar.id) { container.events.deleteInCalendar(it) }
+    }
+
     /** Calendar [calendar]'s items as a calendar file, through the share sheet (#33). */
     fun exportCalendar(context: Context, calendar: CalendarEntity, name: String) = viewModelScope.launch {
         IcsShare.share(context, container, container.events.inCalendar(calendar.id), name)

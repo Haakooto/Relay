@@ -1,7 +1,9 @@
 package com.relay.app.ui.calendar
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.relay.app.R
+import com.relay.app.data.event.CalendarEntity
 import com.relay.app.data.event.EventKind
 import com.relay.app.event.CalendarEntry
 import com.relay.app.event.EntryKind
@@ -66,7 +69,7 @@ fun CalendarScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val s = state ?: return
     var managing by remember { mutableStateOf(false) }
-    val open = rememberEntryOpener(onOpenItem, onOpenAlarm)
+    val open = rememberEntryOpener(s.calendars, onOpenItem, onOpenAlarm)
     if (managing) CalendarsSheetFor(s, viewModel, onDismiss = { managing = false })
     val dayEntries = s.entries[s.selected].orEmpty()
 
@@ -133,18 +136,38 @@ private fun CalendarsSheetFor(s: CalendarState, viewModel: CalendarViewModel, on
         onSave = viewModel::saveCalendar, onDelete = { id, moveTo -> viewModel.deleteCalendar(id, moveTo) },
         onImport = { pickFile.launch(arrayOf("text/calendar", "application/ics", "application/octet-stream", "text/plain")) },
         onExport = { calendar -> viewModel.exportCalendar(context, calendar, calendarName(context, calendar)) },
+        subscriptions = SubscriptionActions(
+            subscribe = { name, url, color -> viewModel.subscribe(name, url, color) { n -> fetchedToast(context, n) } },
+            refresh = { calendar -> viewModel.refreshSubscription(calendar) { n -> fetchedToast(context, n) } },
+            unsubscribe = viewModel::unsubscribe,
+        ),
     )
+}
+
+/** "Fetched 12 events", or that it couldn't be fetched. */
+private fun fetchedToast(context: Context, count: Int?) {
+    val text = count?.let { context.resources.getQuantityString(R.plurals.subscribe_fetched, it, it) }
+        ?: context.getString(R.string.subscribe_failed)
+    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
 }
 
 /** What tapping an entry does: its editor, the alarm editor, or for a phone event, its calendar app. */
 @Composable
-private fun rememberEntryOpener(onOpenItem: (String) -> Unit, onOpenAlarm: (String) -> Unit): (CalendarEntry) -> Unit {
+private fun rememberEntryOpener(
+    calendars: List<CalendarEntity>,
+    onOpenItem: (String) -> Unit,
+    onOpenAlarm: (String) -> Unit,
+): (CalendarEntry) -> Unit {
     val context = LocalContext.current
+    val subscribed = calendars.filter { it.isSubscribed }.map { it.id }.toSet()
     return { entry ->
-        when (entry.kind) {
-            EntryKind.ALARM -> onOpenAlarm(entry.id)
-            EntryKind.PHONE -> entry.id.toLongOrNull()?.let { runCatching { context.startActivity(PhoneCalendars.viewIntent(it)) } }
-            EntryKind.EVENT, EntryKind.REMINDER -> onOpenItem(entry.id)
+        when {
+            entry.kind == EntryKind.ALARM -> onOpenAlarm(entry.id)
+            entry.kind == EntryKind.PHONE ->
+                entry.id.toLongOrNull()?.let { runCatching { context.startActivity(PhoneCalendars.viewIntent(it)) } }
+            // A subscribed calendar's items come from its address (#33): there's nothing to edit.
+            entry.calendarId in subscribed -> Toast.makeText(context, R.string.subscription_read_only, Toast.LENGTH_SHORT).show()
+            else -> onOpenItem(entry.id)
         }
     }
 }

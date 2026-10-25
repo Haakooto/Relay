@@ -112,7 +112,8 @@ class EventEditViewModel(
             )
             // A new item starts on the next full hour, as most planned things do.
             val nextHour = MinuteOfDay.of(LocalTime.now().truncatedTo(ChronoUnit.HOURS).plusHours(1))
-            val calendars = container.calendars.all()
+            // A subscribed calendar (#33) is read-only: nothing can be put in it.
+            val calendars = container.calendars.all().filter { !it.isSubscribed }
             // A new item goes to the calendar used last, with that calendar's defaults.
             val calendar = calendars.firstOrNull { it.id == settings.lastCalendarId } ?: calendars.firstOrNull()
             val base = withDefaults(

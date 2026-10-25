@@ -94,11 +94,39 @@ class EventRepository(
         ImportResult(added, updated)
     }
 
+    /**
+     * A subscribed calendar's refresh (#33): [events] become its items. Ones it had are updated by
+     * UID; ones the file no longer has (or had no UID to match) go. Subscribed items have no reminders.
+     */
+    suspend fun replaceSubscribed(
+        calendarId: String,
+        events: List<IcsEvent>,
+        toEntity: (IcsEvent, id: String, createdAtMillis: Long) -> EventEntity,
+    ): ImportResult = mutex.withLock {
+        val uids = events.mapNotNull { it.uid }.toSet()
+        dao.inCalendar(calendarId).filter { it.icsUid == null || it.icsUid !in uids }.forEach { deleteLocked(it.id) }
+        var added = 0
+        var updated = 0
+        for (e in events) {
+            val existing = e.uid?.let { dao.byIcsUid(calendarId, it) }
+            saveLocked(toEntity(e, existing?.id ?: UUID.randomUUID().toString(), existing?.createdAtMillis ?: nowMillis()), null)
+            if (existing == null) added++ else updated++
+        }
+        ImportResult(added, updated)
+    }
+
     /** Deletes item [id]. Its reminders go first, so a deleted item can never fire; then its copy. */
-    suspend fun delete(id: String) = mutex.withLock {
+    suspend fun delete(id: String) = mutex.withLock { deleteLocked(id) }
+
+    private suspend fun deleteLocked(id: String) {
         schedules.forEvent(id).forEach { schedules.delete(it.id) }
         dao.get(id)?.providerEventId?.let { copies?.delete(it) }
         dao.delete(id)
+    }
+
+    /** A subscribed calendar going: all its items with it (#33). */
+    suspend fun deleteInCalendar(calendarId: String) = mutex.withLock {
+        dao.inCalendar(calendarId).forEach { deleteLocked(it.id) }
     }
 
     /** After a calendar's copy target changed, or it took another's items: brings every copy in step. */

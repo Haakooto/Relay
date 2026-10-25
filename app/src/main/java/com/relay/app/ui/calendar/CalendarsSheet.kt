@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -49,7 +51,7 @@ import java.util.UUID
  * The calendars (#34): tick which the pane shows, tap the pencil to edit one, or add one. Below,
  * the phone's own calendars (#16), read-only, with a button to let Relay see them.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CalendarsSheet(
     calendars: List<CalendarEntity>,
@@ -62,8 +64,16 @@ fun CalendarsSheet(
     onDelete: (id: String, moveTo: String) -> Unit,
     onImport: () -> Unit,
     onExport: (CalendarEntity) -> Unit,
+    subscriptions: SubscriptionActions,
 ) {
     var editing by remember { mutableStateOf<CalendarEntity?>(null) }
+    var subscribing by remember { mutableStateOf(false) }
+    if (subscribing) {
+        SubscribeDialog(onDismiss = { subscribing = false }) { name, url ->
+            subscribing = false
+            subscriptions.subscribe(name, url, nextColor(calendars))
+        }
+    }
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             Text(stringResource(R.string.calendars_title), style = MaterialTheme.typography.titleLarge)
@@ -83,18 +93,29 @@ fun CalendarsSheet(
                     }
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
                 OutlinedButton(onClick = { editing = newCalendar(calendars) }) { Text(stringResource(R.string.calendars_new)) }
-                // Calendar files (#33): pick one to import.
+                // Calendar files (#33): pick one to import, or subscribe to an address.
                 OutlinedButton(onClick = onImport) { Text(stringResource(R.string.ics_import_file)) }
+                OutlinedButton(onClick = { subscribing = true }) { Text(stringResource(R.string.calendars_subscribe)) }
             }
             PhoneCalendarList(phone, onPhoneShown, onRequestAccess)
         }
     }
-    editing?.let { calendar ->
+    editing?.takeIf { it.isSubscribed }?.let { calendar ->
+        SubscriptionEditDialog(
+            calendar,
+            onDismiss = { editing = null },
+            onSave = { onSave(it); editing = null },
+            onRefresh = { subscriptions.refresh(calendar) },
+            onUnsubscribe = { subscriptions.unsubscribe(calendar); editing = null },
+        )
+    }
+    editing?.takeIf { !it.isSubscribed }?.let { calendar ->
         CalendarEditDialog(
             calendar = calendar,
-            others = calendars.filter { it.id != calendar.id },
+            // Items can't move into a subscribed calendar: its contents come from its address.
+            others = calendars.filter { it.id != calendar.id && !it.isSubscribed },
             phone = phone,
             onRequestAccess = onRequestAccess,
             isNew = calendars.none { it.id == calendar.id },
@@ -134,10 +155,22 @@ private fun PhoneCalendarList(phone: PhoneSheetState, onShown: (Long, Boolean) -
     }
 }
 
+/** What the sheet can do with subscribed calendars (#33). */
+class SubscriptionActions(
+    val subscribe: (name: String, url: String, color: Long) -> Unit,
+    val refresh: (CalendarEntity) -> Unit,
+    val unsubscribe: (CalendarEntity) -> Unit,
+)
+
+/** The next palette colour no calendar uses yet. */
+private fun nextColor(existing: List<CalendarEntity>): Long {
+    val used = existing.map { it.color }.toSet()
+    return CALENDAR_PALETTE.map { it.toArgb().toLong() }.firstOrNull { it !in used } ?: CALENDAR_PALETTE.first().toArgb().toLong()
+}
+
 /** A new calendar: the next unused palette colour, shown, a 15-minute notifying reminder. */
 private fun newCalendar(existing: List<CalendarEntity>): CalendarEntity {
-    val used = existing.map { it.color }.toSet()
-    val color = CALENDAR_PALETTE.map { it.toArgb().toLong() }.firstOrNull { it !in used } ?: CALENDAR_PALETTE.first().toArgb().toLong()
+    val color = nextColor(existing)
     return CalendarEntity(
         UUID.randomUUID().toString(), "", color, sortOrder = 0, shown = true, defaultForAlarms = false,
         defaultLeadMinutes = NEW_CALENDAR_LEAD, defaultTarget = TargetKind.NOTIFY, defaultRepeat = RepeatKind.NONE,
