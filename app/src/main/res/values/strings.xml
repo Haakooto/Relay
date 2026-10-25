@@ -393,7 +393,6 @@
     <string name="calendar_go_today">Today</string>
     <string name="calendar_day_empty">Nothing on this day</string>
     <string name="calendar_all_day">All day</string>
-    <string name="calendar_continues">Continues</string>
     <string name="calendar_add">Add to the calendar</string>
     <string name="calendar_new_event">New event</string>
     <string name="calendar_new_reminder">New reminder</string>

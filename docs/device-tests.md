@@ -279,7 +279,7 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 
 ## PR: Calendar pane, events and reminders (#14)
 
-> 2026-10-25: the user liked the build; lines not ticked one by one.
+> 2026-10-25: the user liked the build; lines not ticked one by one. Reminders notify (Notify target confirmed).
 
 ### Navigation and Settings
 - [ ] The bottom bar shows Alarms, Calendar, Timers, Stopwatch, Clock; Settings is gone from it.
@@ -390,6 +390,8 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Agenda rows have a colour bar; month labels use each item's colour.
 
 ## PR: Google Calendar link (#16)
+
+> 2026-10-25: reading Google calendars into Relay and copying out both work; data survived v10. Going to the next month in the month widget takes 1 to 2 s (being looked at).
 
 ### Update
 - [ ] Install over the previous Relay Debug: items, alarms and calendars are all still there (database v9 → v10).

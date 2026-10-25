@@ -381,7 +381,6 @@
     <string name="calendar_go_today">I dag</string>
     <string name="calendar_day_empty">Ingenting denne dagen</string>
     <string name="calendar_all_day">Heile dagen</string>
-    <string name="calendar_continues">Held fram</string>
     <string name="calendar_add">Legg til i kalenderen</string>
     <string name="calendar_new_event">Ny hending</string>
     <string name="calendar_new_reminder">Ny påminning</string>

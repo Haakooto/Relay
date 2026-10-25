@@ -49,17 +49,19 @@ data class WidgetTheme(val surface: Int, val onSurface: Int, val muted: Int, val
 object WidgetFrameRenderer {
     /** Keeps memory and the RemoteViews bitmap budget in check on big widgets. */
     const val MAX_SIDE_PX = 1200
-    private const val ROUNDED_DP = 20f
 
-    /** Pixels per dp for a widget of this size, scaled down so the bitmap stays within [MAX_SIDE_PX]. */
-    fun pxPerDp(context: Context, widthDp: Float, heightDp: Float): Float {
+    /** The corner radius of a ROUNDED widget, in dp. */
+    const val ROUNDED_DP = 20f
+
+    /** Pixels per dp for a widget of this size, scaled down so the bitmap stays within [maxSidePx]. */
+    fun pxPerDp(context: Context, widthDp: Float, heightDp: Float, maxSidePx: Int = MAX_SIDE_PX): Float {
         val density = context.resources.displayMetrics.density
-        return density * min(1f, MAX_SIDE_PX / (maxOf(widthDp, heightDp) * density))
+        return density * min(1f, maxSidePx / (maxOf(widthDp, heightDp) * density))
     }
 
     /** Just the frame, for a widget whose content is native Glance views drawn on top. */
-    fun render(context: Context, frame: WidgetFrame, widthDp: Float, heightDp: Float): Bitmap {
-        val px = pxPerDp(context, widthDp, heightDp)
+    fun render(context: Context, frame: WidgetFrame, widthDp: Float, heightDp: Float, maxSidePx: Int = MAX_SIDE_PX): Bitmap {
+        val px = pxPerDp(context, widthDp, heightDp, maxSidePx)
         val w = (widthDp * px).toInt().coerceAtLeast(1)
         val bitmap = Bitmap.createBitmap(w, (heightDp * px).toInt().coerceAtLeast(1), Bitmap.Config.ARGB_8888)
         draw(Canvas(bitmap), frame, bitmap.width, bitmap.height, px, WidgetTheme.of(context))

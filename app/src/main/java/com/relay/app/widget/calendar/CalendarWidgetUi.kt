@@ -2,12 +2,17 @@ package com.relay.app.widget.calendar
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalSize
+import androidx.glance.appwidget.cornerRadius
+import androidx.glance.background
+import androidx.glance.layout.Box
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.text.FontWeight
@@ -20,24 +25,46 @@ import com.relay.app.data.schedule.TargetKind
 import com.relay.app.event.CalendarEntry
 import com.relay.app.event.EntryKind
 import com.relay.app.ui.calendar.CalendarText
+import com.relay.app.widget.WidgetBackground
+import com.relay.app.widget.WidgetCorners
 import com.relay.app.widget.WidgetFrame
 import com.relay.app.widget.WidgetFrameRenderer
+import com.relay.app.widget.WidgetTheme
 
 /**
- * The widget's background, shape and border, stretched over the whole widget; content goes on
- * top. Stretched, not fitted: Glance's default (fit) can leave the frame narrower than the widget
- * and centred, with the content spilling past its edges.
+ * The widget's background, shape and border, behind its content. A plain colour is drawn natively,
+ * which keeps each update small and quick (every month turn re-sends the whole widget). Only a
+ * gradient or a border needs a bitmap: a small one, remembered while the widget shows, stretched
+ * (not fitted, which could leave it narrower than the widget with content spilling past it).
  */
 @Composable
 fun FrameBackground(context: Context, frame: WidgetFrame) {
     val size = LocalSize.current
+    if (frame.background != WidgetBackground.GRADIENT && frame.borderWidthDp == 0) {
+        if (frame.background == WidgetBackground.TRANSPARENT) return
+        val theme = WidgetTheme.of(context)
+        val color = if (frame.background == WidgetBackground.SOLID) frame.backgroundColor?.toInt() ?: theme.surface else theme.surface
+        val radius = when (frame.corners) {
+            WidgetCorners.SHARP -> 0.dp
+            WidgetCorners.ROUNDED -> WidgetFrameRenderer.ROUNDED_DP.dp
+            WidgetCorners.PILL -> minOf(size.width, size.height) / 2
+        }
+        Box(GlanceModifier.fillMaxSize().cornerRadius(radius).background(ColorProvider(Color(color)))) {}
+        return
+    }
+    val bitmap = remember(frame, size) {
+        WidgetFrameRenderer.render(context, frame, size.width.value, size.height.value, FRAME_MAX_SIDE_PX)
+    }
     Image(
-        provider = ImageProvider(WidgetFrameRenderer.render(context, frame, size.width.value, size.height.value)),
+        provider = ImageProvider(bitmap),
         contentDescription = null,
         contentScale = ContentScale.FillBounds,
         modifier = GlanceModifier.fillMaxSize(),
     )
 }
+
+/** A gradient or border survives a small bitmap, stretched; a small one keeps updates quick. */
+private const val FRAME_MAX_SIDE_PX = 480
 
 /** Single-line widget text in one of the [WidgetColors]. */
 @Composable
