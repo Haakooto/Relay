@@ -1,6 +1,7 @@
 package com.relay.app.ui.calendar
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -243,6 +244,11 @@ class EventEditViewModel(
         }
         val next = container.events.save(event, reminder)
         onSaved(next?.toEpochMilli(), reminder != null)
+    }
+
+    /** The saved item as a calendar file, through the share sheet (#33). */
+    fun share(context: Context) = viewModelScope.launch {
+        container.events.get(_state.value.id)?.let { IcsShare.share(context, container, listOf(it), it.title) }
     }
 
     fun delete(onDeleted: () -> Unit) = viewModelScope.launch {

@@ -509,6 +509,23 @@
         <item quantity="one">After %1$d time</item>
         <item quantity="other">After %1$d times</item>
     </plurals>
+    <string name="ics_import_title">Import a calendar file</string>
+    <string name="ics_import_file">Import file</string>
+    <string name="ics_import">Import</string>
+    <string name="ics_reading">Reading the file…</string>
+    <string name="ics_unreadable">This file couldn\'t be read as a calendar file (.ics), or it\'s larger than 2 MB.</string>
+    <string name="ics_imported">Added %1$d, updated %2$d</string>
+    <string name="ics_rule_not_kept">Repeat from the calendar file that Relay can\'t follow: %1$s</string>
+    <string name="ics_export">Export</string>
+    <string name="ics_share_item">Share as a calendar file</string>
+    <plurals name="ics_found">
+        <item quantity="one">%1$d event in the file</item>
+        <item quantity="other">%1$d events in the file</item>
+    </plurals>
+    <plurals name="ics_skipped">
+        <item quantity="one">%1$d left out (cancelled or unreadable)</item>
+        <item quantity="other">%1$d left out (cancelled or unreadable)</item>
+    </plurals>
     <plurals name="calendar_day_items">
         <item quantity="one">%1$s, %2$d item</item>
         <item quantity="other">%1$s, %2$d items</item>

@@ -90,6 +90,14 @@ oppføringane sine** til ein av dei (i redigeringa av kalenderen): nye og endra 
 kopierte, sletta blir fjerna, og kopiane blir ikkje viste to gonger. Relay les og skriv dei på
 sjølve telefonen; kalenderappen din synkroniserer dei, Relay brukar ikkje nettet.
 
+**Kalenderfiler (.ics).** Opne eller del ei .ics-fil til Relay (frå Filer, ein e-post eller ein
+nettlesar), eller bruk **Importer fil** i kalenderlista: Relay viser kva det fann, og spør kva
+kalender det skal i. Importerer du same fila igjen, blir det som kom inn førre gongen oppdatert i
+staden for lagt til to gonger. Ei gjentaking Relay ikkje kan følgje, kjem inn som første datoen,
+med ei linje i notatet som seier det. For å sende oppføringar vidare deler **Eksporter** i
+redigeringa av ein kalender heile kalenderen, og del-knappen i redigeringa av ei oppføring deler
+berre henne.
+
 **Ei hending** varer heile dagen eller har eit starttidspunkt, og kan slutte seinare same dagen
 eller ein seinare dag. Under **Påminning** vel du når du vil bli minna på (når ho byrjar,
 minutt eller ein dag før; for ei heildagshending kl. 09:00 same dagen eller dagen før) og kva som

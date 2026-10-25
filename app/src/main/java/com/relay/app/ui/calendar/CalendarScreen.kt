@@ -1,6 +1,7 @@
 package com.relay.app.ui.calendar
 
 import android.Manifest
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -65,20 +66,8 @@ fun CalendarScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val s = state ?: return
     var managing by remember { mutableStateOf(false) }
-    // Phone calendars (#16): asked for only from the calendars sheet, when the user wants them.
-    val askAccess = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-        viewModel.accessChanged()
-    }
     val open = rememberEntryOpener(onOpenItem, onOpenAlarm)
-    if (managing) {
-        CalendarsSheet(
-            s.calendars, PhoneSheetState(s.phoneCalendars, s.shownPhone, s.canReadPhone, viewModel.canWritePhone()),
-            onDismiss = { managing = false }, onShown = { id, shown -> viewModel.setShown(id, shown) },
-            onPhoneShown = { id, shown -> viewModel.setPhoneShown(id, shown) },
-            onRequestAccess = { askAccess.launch(arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR)) },
-            onSave = viewModel::saveCalendar, onDelete = { id, moveTo -> viewModel.deleteCalendar(id, moveTo) },
-        )
-    }
+    if (managing) CalendarsSheetFor(s, viewModel, onDismiss = { managing = false })
     val dayEntries = s.entries[s.selected].orEmpty()
 
     Box(Modifier.fillMaxSize()) {
@@ -121,6 +110,30 @@ fun CalendarScreen(
         }
         AddButton(Modifier.align(Alignment.BottomEnd)) { kind -> onNewItem(kind, s.selected) }
     }
+}
+
+/** The calendars sheet with what it needs: calendar access for phone calendars (#16), and a file picker for import (#33). */
+@Composable
+private fun CalendarsSheetFor(s: CalendarState, viewModel: CalendarViewModel, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    // Phone calendars (#16): asked for only from here, when the user wants them.
+    val askAccess = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        viewModel.accessChanged()
+    }
+    // Calendar files (#33): the picked file goes to the import screen, which checks it.
+    val pickFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        context.startActivity(Intent(context, IcsImportActivity::class.java).setData(uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
+    }
+    CalendarsSheet(
+        s.calendars, PhoneSheetState(s.phoneCalendars, s.shownPhone, s.canReadPhone, viewModel.canWritePhone()),
+        onDismiss = onDismiss, onShown = { id, shown -> viewModel.setShown(id, shown) },
+        onPhoneShown = { id, shown -> viewModel.setPhoneShown(id, shown) },
+        onRequestAccess = { askAccess.launch(arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR)) },
+        onSave = viewModel::saveCalendar, onDelete = { id, moveTo -> viewModel.deleteCalendar(id, moveTo) },
+        onImport = { pickFile.launch(arrayOf("text/calendar", "application/ics", "application/octet-stream", "text/plain")) },
+        onExport = { calendar -> viewModel.exportCalendar(context, calendar, calendarName(context, calendar)) },
+    )
 }
 
 /** What tapping an entry does: its editor, the alarm editor, or for a phone event, its calendar app. */

@@ -88,6 +88,13 @@ calendar app. A Relay calendar can also **copy its items** to one of them (in it
 new and changed items are copied, deleted ones removed, and the copies don't show twice. Relay
 reads and writes them on the phone itself; your calendar app syncs them, Relay uses no network.
 
+**Calendar files (.ics).** Open or share an .ics file into Relay (from Files, an email or a
+browser), or use **Import file** in the calendars list: Relay shows what it found and asks which
+calendar to put it in. Importing the same file again updates what it imported before instead of
+adding it twice. A repeat Relay can't follow comes in as its first date, with a line in the note
+saying so. To send items elsewhere, **Export** in a calendar's edit dialog shares the whole
+calendar, and the share button in an item's editor shares just that item.
+
 **An event** is all day or has a start time, and can end later that day or on a later day.
 Under **Reminder**, pick when to be reminded (at the start, minutes or a day before; for an
 all-day event, 09:00 on the day or the day before) and what happens then. **Notify** is the

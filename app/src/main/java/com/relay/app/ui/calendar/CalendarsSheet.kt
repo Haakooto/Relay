@@ -60,6 +60,8 @@ fun CalendarsSheet(
     onRequestAccess: () -> Unit,
     onSave: (CalendarEntity) -> Unit,
     onDelete: (id: String, moveTo: String) -> Unit,
+    onImport: () -> Unit,
+    onExport: (CalendarEntity) -> Unit,
 ) {
     var editing by remember { mutableStateOf<CalendarEntity?>(null) }
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -81,8 +83,10 @@ fun CalendarsSheet(
                     }
                 }
             }
-            OutlinedButton(onClick = { editing = newCalendar(calendars) }, modifier = Modifier.padding(top = 8.dp)) {
-                Text(stringResource(R.string.calendars_new))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+                OutlinedButton(onClick = { editing = newCalendar(calendars) }) { Text(stringResource(R.string.calendars_new)) }
+                // Calendar files (#33): pick one to import.
+                OutlinedButton(onClick = onImport) { Text(stringResource(R.string.ics_import_file)) }
             }
             PhoneCalendarList(phone, onPhoneShown, onRequestAccess)
         }
@@ -97,6 +101,7 @@ fun CalendarsSheet(
             onDismiss = { editing = null },
             onSave = { onSave(it); editing = null },
             onDelete = { moveTo -> onDelete(calendar.id, moveTo); editing = null },
+            onExport = { onExport(calendar) },
         )
     }
 }
@@ -150,6 +155,7 @@ private fun CalendarEditDialog(
     onDismiss: () -> Unit,
     onSave: (CalendarEntity) -> Unit,
     onDelete: (moveTo: String) -> Unit,
+    onExport: () -> Unit,
 ) {
     // A starting calendar's blank name is shown, and saved, as its translated one.
     val shownName = calendarName(calendar)
@@ -179,8 +185,12 @@ private fun CalendarEditDialog(
                     )
                     Switch(checked = draft.defaultForAlarms, onCheckedChange = { draft = draft.copy(defaultForAlarms = it) })
                 }
-                if (!isNew && others.isNotEmpty()) {
-                    TextButton(onClick = { deleting = true }) { Text(stringResource(R.string.action_delete)) }
+                if (!isNew) {
+                    Row {
+                        // Its items as a calendar file, through the share sheet (#33).
+                        TextButton(onClick = onExport) { Text(stringResource(R.string.ics_export)) }
+                        if (others.isNotEmpty()) TextButton(onClick = { deleting = true }) { Text(stringResource(R.string.action_delete)) }
+                    }
                 }
             }
         },

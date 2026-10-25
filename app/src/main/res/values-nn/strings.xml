@@ -497,6 +497,23 @@
         <item quantity="one">Etter %1$d gong</item>
         <item quantity="other">Etter %1$d gonger</item>
     </plurals>
+    <string name="ics_import_title">Importer ei kalenderfil</string>
+    <string name="ics_import_file">Importer fil</string>
+    <string name="ics_import">Importer</string>
+    <string name="ics_reading">Les fila …</string>
+    <string name="ics_unreadable">Denne fila kunne ikkje lesast som ei kalenderfil (.ics), eller ho er større enn 2 MB.</string>
+    <string name="ics_imported">La til %1$d, oppdaterte %2$d</string>
+    <string name="ics_rule_not_kept">Gjentaking frå kalenderfila som Relay ikkje kan følgje: %1$s</string>
+    <string name="ics_export">Eksporter</string>
+    <string name="ics_share_item">Del som kalenderfil</string>
+    <plurals name="ics_found">
+        <item quantity="one">%1$d hending i fila</item>
+        <item quantity="other">%1$d hendingar i fila</item>
+    </plurals>
+    <plurals name="ics_skipped">
+        <item quantity="one">%1$d utelaten (avlyst eller uleseleg)</item>
+        <item quantity="other">%1$d utelatne (avlyste eller uleselege)</item>
+    </plurals>
     <plurals name="calendar_day_items">
         <item quantity="one">%1$s, %2$d oppføring</item>
         <item quantity="other">%1$s, %2$d oppføringar</item>

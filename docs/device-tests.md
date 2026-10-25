@@ -427,3 +427,15 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] Copy one to Google (calendar copying on): Google Calendar shows the same days.
 - [ ] Yearly on "the fourth Thursday of November": lands on 26 Nov 2026 and 25 Nov 2027.
 
+## PR: Calendar files (#33, import and export)
+
+- [ ] Calendars list → Import file → pick an .ics (e.g. exported from Google Calendar): the import screen lists how many events it found and the first few titles.
+- [ ] Pick a calendar and Import: a toast says how many were added; they show in that calendar on the right days and times.
+- [ ] Import the same file again: the toast says they were updated, and nothing shows twice.
+- [ ] Open an .ics attachment from an email (or Files → Open with Relay Debug): the same import screen opens.
+- [ ] An event with a reminder in the file gets a reminder in Relay (it notifies).
+- [ ] A file with an odd repeat (e.g. hourly): the event comes in on its first date, and its note says the repeat couldn't be kept.
+- [ ] A huge or non-calendar file: the screen says it can't be read; nothing is added.
+- [ ] Edit a calendar → Export: the share sheet offers a .ics file; open it in Google Calendar and the items look right.
+- [ ] An item's editor → share button: the share sheet offers just that item.
+

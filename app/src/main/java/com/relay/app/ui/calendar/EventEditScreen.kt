@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
@@ -91,7 +92,7 @@ fun EventEditScreen(eventId: String?, kind: EventKind, day: LocalDate?, onDone: 
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        EditorTitle(state, canSave = viewModel.canSave(state), onClose = close, onSave = onSave)
+        EditorTitle(state, canSave = viewModel.canSave(state), onClose = close, onSave = onSave, onShare = { viewModel.share(context) })
         OutlinedTextField(
             value = state.title,
             onValueChange = { v -> viewModel.update { it.copy(title = v) } },
@@ -144,7 +145,7 @@ private fun savedText(context: Context, next: Long?, reminds: Boolean): String =
 }
 
 @Composable
-private fun EditorTitle(state: EventEditState, canSave: Boolean, onClose: () -> Unit, onSave: () -> Unit) {
+private fun EditorTitle(state: EventEditState, canSave: Boolean, onClose: () -> Unit, onSave: () -> Unit, onShare: () -> Unit) {
     val isEvent = state.kind == EventKind.EVENT
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onClose) { Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.action_cancel)) }
@@ -160,6 +161,10 @@ private fun EditorTitle(state: EventEditState, canSave: Boolean, onClose: () -> 
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.weight(1f),
         )
+        // As a calendar file (#33): the saved item, so save first to share changes.
+        if (!state.isNew) {
+            IconButton(onClick = onShare) { Icon(Icons.Outlined.Share, contentDescription = stringResource(R.string.ics_share_item)) }
+        }
         Button(onClick = onSave, enabled = canSave) { Text(stringResource(R.string.action_save)) }
     }
 }

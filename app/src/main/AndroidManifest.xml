@@ -116,6 +116,38 @@
             android:name=".widget.calendar.CalendarWidgetTickReceiver"
             android:exported="false" />
 
+        <!-- #33: calendar files opened or shared from other apps. Exported, so it checks what it's given. -->
+        <activity
+            android:name=".ui.calendar.IcsImportActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:label="@string/ics_import_title"
+            android:taskAffinity="${applicationId}.icsimport">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="text/calendar" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/calendar" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <activity
             android:name=".widget.calendar.CalendarWidgetConfigActivity"
             android:exported="true"

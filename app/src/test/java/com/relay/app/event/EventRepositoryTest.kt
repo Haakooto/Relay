@@ -30,6 +30,8 @@ internal class FakeEventDao : EventDao {
     override fun observeAll(): Flow<List<EventEntity>> = events.map { it.values.toList() }
     override suspend fun get(id: String) = events.value[id]
     override suspend fun inCalendar(calendarId: String) = events.value.values.filter { it.calendarId == calendarId }
+    override suspend fun byIcsUid(calendarId: String, uid: String) =
+        events.value.values.firstOrNull { it.calendarId == calendarId && it.icsUid == uid }
     override suspend fun upsert(event: EventEntity) { events.value += event.id to event }
     override suspend fun delete(id: String) { events.value -= id }
     override suspend fun moveCalendar(from: String, to: String) {
@@ -199,5 +201,33 @@ class EventRepositoryTest {
         clock = at("2026-10-13T07:00")
         schedules.onFired(s.id, ms("2026-10-13T07:00"), isSnooze = false)
         assertEquals(ms("2026-11-10T07:00"), arming.armed[s.id]?.triggerAt)
+    }
+
+    // Calendar files (#33).
+
+    private fun ics(uid: String, title: String, lead: Int? = null) =
+        IcsEvent(uid, title, "", LocalDate.parse("2026-10-13"), 10 * 60, null, null, null, lead)
+
+    private suspend fun import(vararg events: IcsEvent) = repo.import(
+        events.toList(), "personal",
+        toEntity = { e, id, created -> Ics.toEntity(e, "personal", id, created, zone) { it } },
+        reminder = { lead -> reminder(lead) },
+    )
+
+    @Test fun importingTheSameFileAgainUpdatesInPlace() = runBlocking {
+        assertEquals(ImportResult(added = 2, updated = 0), import(ics("a", "Dentist"), ics("b", "Lunch")))
+        val id = eventDao.events.value.values.single { it.icsUid == "a" }.id
+        assertEquals(ImportResult(added = 0, updated = 1), import(ics("a", "Dentist, moved")))
+        val updated = eventDao.get(id)!!
+        assertEquals("Dentist, moved", updated.title)
+        assertEquals(2, eventDao.events.value.size)
+    }
+
+    @Test fun aFilesAlarmBecomesTheReminderAndOneWithoutKeepsTheItems() = runBlocking {
+        import(ics("a", "Dentist", lead = 30))
+        val id = eventDao.events.value.values.single().id
+        assertEquals(30, scheduleDao.forEvent(id).single().leadMinutes)
+        import(ics("a", "Dentist"))
+        assertEquals(30, scheduleDao.forEvent(id).single().leadMinutes)
     }
 }

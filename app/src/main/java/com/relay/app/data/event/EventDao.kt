@@ -16,6 +16,10 @@ interface EventDao {
     @Query("SELECT * FROM events WHERE calendarId = :calendarId")
     suspend fun inCalendar(calendarId: String): List<EventEntity>
 
+    /** An item imported earlier from a calendar file into [calendarId] (#33). */
+    @Query("SELECT * FROM events WHERE calendarId = :calendarId AND icsUid = :uid LIMIT 1")
+    suspend fun byIcsUid(calendarId: String, uid: String): EventEntity?
+
     @Upsert
     suspend fun upsert(event: EventEntity)
 

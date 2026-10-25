@@ -17,6 +17,9 @@ interface PhoneCopies {
     suspend fun delete(providerEventId: Long)
 }
 
+/** How an import went (#33). */
+data class ImportResult(val added: Int, val updated: Int)
+
 /**
  * The command layer for calendar items (spec §10b). An item's reminder is an ordinary schedule,
  * written through [ScheduleRepository] so arming stays in one place. One mutex serialises item
@@ -37,6 +40,8 @@ class EventRepository(
 
     suspend fun get(id: String): EventEntity? = dao.get(id)
 
+    suspend fun inCalendar(calendarId: String): List<EventEntity> = dao.inCalendar(calendarId)
+
     /** The schedule that reminds of item [id], if it has one. */
     suspend fun reminderFor(id: String): ScheduleEntity? = schedules.forEvent(id).firstOrNull()
 
@@ -44,7 +49,9 @@ class EventRepository(
      * Saves [event] and its reminder; a null [reminder] removes it. Returns when the reminder
      * fires next, or null when there is none or its time has passed.
      */
-    suspend fun save(event: EventEntity, reminder: ReminderDraft?): Instant? = mutex.withLock {
+    suspend fun save(event: EventEntity, reminder: ReminderDraft?): Instant? = mutex.withLock { saveLocked(event, reminder) }
+
+    private suspend fun saveLocked(event: EventEntity, reminder: ReminderDraft?): Instant? {
         // The editor doesn't know about the copy; keep it from the stored row.
         dao.upsert(syncCopy(event.copy(providerEventId = dao.get(event.id)?.providerEventId)))
         val existing = schedules.forEvent(event.id)
@@ -55,9 +62,36 @@ class EventRepository(
         // One reminder per item for now; edit it in place so its id stays stable.
         val keep = existing.firstOrNull()
         existing.drop(1).forEach { schedules.delete(it.id) }
-        schedules.save(
+        return schedules.save(
             EventReminders.scheduleFor(event, reminder, keep?.id ?: UUID.randomUUID().toString(), keep?.createdAtMillis ?: nowMillis()),
         )
+    }
+
+    /**
+     * Imports calendar-file events into [calendarId] (#33). One already imported there (same UID)
+     * is updated in place, keeping its id, colour and copy; the rest are added. A file's reminder
+     * ([IcsEvent.alarmLead], through [reminder]) replaces the item's; without one, an updated item
+     * keeps the reminder it had. [toEntity] builds each item for its id and creation time.
+     */
+    suspend fun import(
+        events: List<IcsEvent>,
+        calendarId: String,
+        toEntity: (IcsEvent, id: String, createdAtMillis: Long) -> EventEntity,
+        reminder: (lead: Int) -> ReminderDraft,
+    ): ImportResult = mutex.withLock {
+        var added = 0
+        var updated = 0
+        for (e in events) {
+            val existing = e.uid?.let { dao.byIcsUid(calendarId, it) }
+            val item = toEntity(e, existing?.id ?: UUID.randomUUID().toString(), existing?.createdAtMillis ?: nowMillis())
+                .copy(color = existing?.color)
+            val kept = schedules.forEvent(item.id).firstOrNull()?.let { s ->
+                ReminderDraft(s.leadMinutes, s.target, s.targetDefId, s.targetSpec, s.ring)
+            }
+            saveLocked(item, e.alarmLead?.let(reminder) ?: kept)
+            if (existing == null) added++ else updated++
+        }
+        ImportResult(added, updated)
     }
 
     /** Deletes item [id]. Its reminders go first, so a deleted item can never fire; then its copy. */

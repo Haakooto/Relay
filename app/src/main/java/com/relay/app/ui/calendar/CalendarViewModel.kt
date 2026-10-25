@@ -1,6 +1,7 @@
 package com.relay.app.ui.calendar
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.relay.app.appContainer
@@ -145,4 +146,9 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     fun accessChanged() = phone.accessChanged()
 
     fun canWritePhone(): Boolean = phone.canWrite()
+
+    /** Calendar [calendar]'s items as a calendar file, through the share sheet (#33). */
+    fun exportCalendar(context: Context, calendar: CalendarEntity, name: String) = viewModelScope.launch {
+        IcsShare.share(context, container, container.events.inCalendar(calendar.id), name)
+    }
 }
