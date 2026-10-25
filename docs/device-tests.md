@@ -279,6 +279,8 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 
 ## PR: Calendar pane, events and reminders (#14)
 
+> 2026-10-25: the user liked the build; lines not ticked one by one.
+
 ### Navigation and Settings
 - [ ] The bottom bar shows Alarms, Calendar, Timers, Stopwatch, Clock; Settings is gone from it.
 - [ ] The gear at the top right of every pane opens Settings; its back arrow returns to that pane.
@@ -320,6 +322,8 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 
 ## PR: Calendar widgets and month picker (#15)
 
+> 2026-10-25: after the layout fixes, both widgets "look right now".
+
 ### Month picker (app)
 - [ ] Calendar pane: tap "October 2026": a dialog with the year and twelve months opens.
 - [ ] Arrows change the year; pick a month two years ahead: the grid shows it, on its first day.
@@ -354,6 +358,8 @@ Legend: `[x]` works · `[ ]` not tried yet · `[!]` tried, broken (add a note)
 - [ ] A clock widget placed before this build looks exactly as before.
 
 ## PR: Calendars and multi-day items (#34, #35)
+
+> 2026-10-25: the user reports it all works, update included.
 
 ### Update
 - [ ] Install over the previous Relay Debug: every alarm and calendar item is still there (database v8 → v9).
